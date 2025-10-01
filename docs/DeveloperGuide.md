@@ -4,7 +4,7 @@
   pageNav: 3
 ---
 
-# AB-3 Developer Guide
+# Developer Guide
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -270,70 +270,156 @@ _{Explain here how the data archiving feature will be implemented}_
 
 ## **Appendix: Requirements**
 
-### Product scope
+### Product Scope
 
-**Target user profile**:
+**Target User Profile**: This is primarily for **technologically-inclined asset managers for high-net-worth individuals (HWNIs)** that require managing **complex** relationships and hierarchies between large groups of people.
 
-* has a need to manage a significant number of contacts
-* prefer desktop apps over other types
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+In addition, they:
+- prefer desktop apps over other types
+- can type fast
+- prefers typing to mouse interactions
+- is reasonably comfortable using CLI apps
 
-**Value proposition**: manage contacts faster than a typical mouse/GUI driven app
+**Value Proposition**: **AssetSphere** strives in streamlining contact tracking, and managing complex networks with business partners and critical contacts within and outside the company. This application is valuable for asset managers of multinational companies, improving reliability, navigability and efficiency of their contact chain, one contact at a time.
+
+### User Stories
+
+**User type/role**<br />_As a_ | **Function**<br />_I can_                                               | **Benefit**<br />_so that_ | Priority
+-|-------------------------------------------------------------------------| - | -
+Asset manager | save data between sessions                                              | I don’t have to re-enter information after relaunching | Must-have (✓✓)
+Organised asset manager | categorise contacts based on asset classes                              | I can quickly identify relevant people per portfolio | Must-have (✓✓)
+Detailed asset manager | customise client profiles with custom fields                            | I can track unique client details/needs | Must-have (✓✓)
+Asset manager | define links between clients and their contacts                         | I can navigate complex relationship networks | Must-have (✓✓)
+Asset manager | view all clients linked to a specific asset class                       | I can understand dependencies within each asset | Must-have (✓✓)
+Tech-savvy asset manager | save my data in a portable, human-readable format                       | I can edit/process data in other apps and move between devices | Must-have (✓✓)
+Asset manager | have tiers/priority flags in my client list                             | I can track who the big players are | Must-have (✓✓)
+Asset manager | have custom notes for each contact                                      | I can attach longer pieces of information to contacts | Must-have (✓✓)
+Tech-savvy asset manager | make custom aliases for commands                                        | I can use shortcuts that match my preferences | Nice-to-have (✓)
+Clumsy asset manager | have my commands be inferred (string matching, autocorrect, fuzzy find) | I don’t have to retype or I can use shorter variants | Nice-to-have (✓)
+Considerate asset manager | see the time zone for a contact                                         | I can schedule sensibly | Nice-to-have (✓)
+Asset manager | delete contacts                                                         | the app remains clean and easy to find things | Nice-to-have (✓)
+Asset manager | have my address book flag important dates (e.g., birthdays)             | I can remember important dates and maintain relationships | Nice-to-have (✓)
+Clumsy asset manager | merge/handle duplicate records                                          | the network remains clean and accurate | Nice-to-have (✓)
+Asset manager | view my command history                                                 | I can redo regularly used commands | Nice-to-have (✓)
+Tech-savvy asset manager | save custom workflows (sequences of commands)                           | I can quickly execute common workflows | Nice-to-have (✓)
+Tech-savvy asset manager | have my commands be tab-completable                                     | I can quickly fill in command information | Nice-to-have (✓)
+Asset manager | have syntax highlighting and diagnostics for commands                   | I can more easily spot mistakes as I type | Nice-to-have (✓)
+Asset manager | see detailed, decorated error messages                                  | I can quickly understand and fix mistyped commands | Nice-to-have (✓)
+Asset manager | have command syntax hints show up as I type                             | I can see what I need to fill in | Nice-to-have (✓)
+Busy asset manager | segment users via predefined metrics (e.g., geography, sector)          | I can find useful contacts faster for different scenarios | Nice-to-have (✓)
+Tech-savvy asset manager | use shell-like expansion for commands                                   | I can batch-run commands | Nice-to-have (✓)
+Tech-savvy asset manager | use command pipes (\|) to chain commands                                | I can create complex workflows | Nice-to-have (✓)
+Asset manager | recursively delete contacts                                             | related links/notes are cleaned up safely | Nice-to-have (✓)
+Asset manager | set (scoped) default values for common command flags/inputs             | I can type shorter commands by omitting defaults | Nice-to-have (✓)
+Asset manager | have the system flag potential conflicts                                | I can proactively see clashes in notes/tags/tiers | Rejected (✗)
+Asset manager | navigate past commands quickly                                          | I can scroll through previous commands | Rejected (✗)
+Asset manager | hide or expire old contacts automatically                               | I can keep my list tidy without manual effort | Rejected (✗)
+Tech-savvy asset manager | use a custom search syntax                                              | I can craft advanced queries beyond basic filters | Rejected (✗)
+Asset manager | store key files (e.g., NDAs, letters) with contacts                     | I can keep documents alongside records | Rejected (✗)
+Asset manager | assign follow-ups to team members                                       | I can distribute work across the team from the app | Rejected (✗)
 
 
-### User stories
+### Use Cases
 
-Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
+(For all use cases below, the **System** is `AssetSphere` and the **Actor** is the `user`, unless specified otherwise)
 
-| Priority | As a …​                                    | I want to …​                 | So that I can…​                                                        |
-|----------|--------------------------------------------|------------------------------|------------------------------------------------------------------------|
-| `* * *`  | new user                                   | see usage instructions       | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person             |                                                                        |
-| `* * *`  | user                                       | delete a person              | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name        | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name         | locate a person easily                                                 |
-
-*{More to be added}*
-
-### Use cases
-
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
-
-**Use case: Delete a person**
+**Use case: Add set of contacts**
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1. User keys command for adding a contact and specifies all necessary data fields for that contact.
+2. System validates command and input data fields.
+3. System adds contact with populated data fields to records.
+4. System displays to the user information about the most recently added contact.
 
-    Use case ends.
+   Steps 1-4 are repeated until all contacts have been added.
+
+   Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 2a. System is unable to parse or decode command.
+    * 2a1. System informs user of exact error and hints at how to fix the error.
+    * 2a2. User corrects and reenters the command.
+
+  Steps 2a1-2a2 are repeated until a valid command is entered.
+
+* 4a. User realises that they added an invalid contact or a contact with invalid data fields.
+    * 4a1. User keys command for deleting that contact.
 
   Use case ends.
 
-* 3a. The given index is invalid.
+**Use case: Find set of contacts that fit a specific filter**
 
-    * 3a1. AddressBook shows an error message.
+**MSS**
 
-      Use case resumes at step 2.
+1. User keys command to specify criteria on which to match contacts/records.
+2. System searches for records that match the provided criteria.
+3. System displays to user the records found.
 
-*{More to be added}*
+   Steps 1-3 are repeated with the user refining their criteria until they are satisfied with    the located records.
+
+   Use case ends.
+
+**Use case: Add links between contacts**
+
+**MSS**
+
+1. User keys command to specify a named link between contacts saved.
+2. System searches for the contacts specified by index number and adds a named link between them.
+3. System displays to the user the link formed.
+
+   Steps 1-3 are repeated for all links that are to be added.
+
+   Use case ends.
+
+**Extensions**
+
+* 3a. User releases that they made an incorrect link with invalid fields.
+    * 3a1. User keys command for deleting the affected contacts.
+    * 3a2. User adds the deleted contacts in 3a1.
+    * 3a3. User keys in link command with the correct fields.
+
+**Use case: Mass import data from external source**
+
+**MSS**
+
+1. User locates local data file containing all existing records.
+2. User converts their external source into the same format as that expected by the system.
+3. User injects their formatted external data into the local data file.
+4. User starts the system.
+5. System validates the data file.
+
+   Use case ends.
+
+**Extensions**
+
+* 5a. Data file format is invalid after manual user addition.
+    * 5a1. System informs user that the data file may have been corrupted.
+    * 5a2. User closes the system and fixes the error in the data file.
+
+  Use case resumes from step 4.
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `17` or above installed.
-2.  Should be able to hold up to 1000 persons without a noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+**Performance**:
+- The system should respond within **1 second** for each command.
 
-*{More to be added}*
+**Portability**:
+- The product should work on all machines (**Windows, Linux, Mac**).
+- The system should only require Java 17 or higher.
+
+**Security**:
+- All data must be stored **locally inside a save file**.
+
+**Scalability**:
+- The system should remain usable with up to **1000 contacts**, with command execution time not exceeding **3 seconds**.
+
+**Usability**:
+- Error messages must pinpoint exact error and suggest fixes
+
+**Speed**:
+- A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
 
 ### Glossary
 
