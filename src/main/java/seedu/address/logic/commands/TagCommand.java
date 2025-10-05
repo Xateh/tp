@@ -5,6 +5,7 @@ import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
@@ -98,6 +99,11 @@ public class TagCommand extends Command {
         TagCommand otherTagCommand = (TagCommand) other;
         return index.equals(otherTagCommand.index)
                 && tagsToAdd.equals(otherTagCommand.tagsToAdd);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(index, tagsToAdd);
     }
 
     @Override
