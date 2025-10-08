@@ -104,19 +104,19 @@ public abstract class AstNode {
      * Parameter AST node.
      */
     public static class Parameter extends AstNode {
-        private final Word word;
+        private final Text text;
 
         /**
          * Constructs a new Parameter node.
          *
-         * @param word Word node.
+         * @param text Text node.
          */
-        public Parameter(Word word) {
-            this.word = word;
+        public Parameter(Text text) {
+            this.text = text;
         }
 
-        public Word getWord() {
-            return word;
+        public Text getText() {
+            return text;
         }
 
         @Override
@@ -174,6 +174,10 @@ public abstract class AstNode {
 
         public OptionValue getOptionValue() {
             return optionValue;
+        }
+
+        public boolean hasOptionValue() {
+            return optionValue != null;
         }
 
         @Override

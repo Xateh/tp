@@ -25,12 +25,8 @@ public class AstPrinter implements AstVisitor<String> {
 
         List<AstNode> children = new ArrayList<>();
         children.add(node.getImperative());
-        if (node.getParameterList() != null) {
-            children.add(node.getParameterList());
-        }
-        if (node.getOptionList() != null) {
-            children.add(node.getOptionList());
-        }
+        children.add(node.getParameterList());
+        children.add(node.getOptionList());
 
         for (int i = 0; i < children.size(); i++) {
             boolean isLast = (i == children.size() - 1);
@@ -84,7 +80,7 @@ public class AstPrinter implements AstVisitor<String> {
     @Override
     public String visitParameter(AstNode.Parameter node) {
         StringBuilder builder = new StringBuilder("Parameter");
-        String wordString = node.getWord().accept(this);
+        String wordString = node.getText().accept(this);
         builder.append("\n").append(addPrefixes(wordString, true));
         return builder.toString();
     }

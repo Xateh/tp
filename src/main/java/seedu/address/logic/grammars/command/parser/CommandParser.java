@@ -98,8 +98,8 @@ public class CommandParser {
 
     private AstNode.Parameter parseParameter() throws ProductionApplicationException {
         try {
-            AstNode.Word word = this.parseWord();
-            return new AstNode.Parameter(word);
+            AstNode.Text text = this.parseText();
+            return new AstNode.Parameter(text);
         } catch (ProductionApplicationException e) {
             ParserError error = e.getParserError();
             error.addProductionNonterminal("parameter");

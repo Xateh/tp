@@ -44,7 +44,7 @@ public class CommandExtractor implements AstVisitor<String> {
 
     @Override
     public String visitParameter(AstNode.Parameter node) {
-        this.commandBuilder.addParameter(visitWord(node.getWord()));
+        this.commandBuilder.addParameter(visitText(node.getText()));
         return null;
     }
 
@@ -58,7 +58,13 @@ public class CommandExtractor implements AstVisitor<String> {
 
     @Override
     public String visitOption(AstNode.Option node) {
-        this.commandBuilder.setOption(visitOptionName(node.getOptionName()), visitOptionValue((node.getOptionValue())));
+        if (node.hasOptionValue()) {
+            this.commandBuilder.setOption(visitOptionName(node.getOptionName()),
+                    visitOptionValue((node.getOptionValue())));
+        } else {
+            this.commandBuilder.setOption(visitOptionName(node.getOptionName()));
+        }
+
         return null;
     }
 

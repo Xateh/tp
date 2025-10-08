@@ -101,6 +101,12 @@ public class Command {
         return this.options.get(key);
     }
 
+    /**
+     * Returns whether the key was defined as an option; typically used for boolean flags.
+     *
+     * @param key The option key to look for.
+     * @return True if the option key was specified/defined, else returns false.
+     */
     public boolean hasOption(String key) {
         return this.options.containsKey(key);
     }

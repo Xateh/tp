@@ -42,11 +42,11 @@ public class CommandParserTest {
                 │  └─ Word ("test")
                 ├─ ParameterList
                 │  ├─ Parameter
-                │  │  └─ Word ("param1")
+                │  │  └─ Text ("param1")
                 │  ├─ Parameter
-                │  │  └─ Word ("param2")
+                │  │  └─ Text ("param2")
                 │  └─ Parameter
-                │     └─ Word ("param3")
+                │     └─ Text ("param3")
                 └─ OptionList\
                 """;
 
@@ -57,7 +57,7 @@ public class CommandParserTest {
 
     @Test
     public void parse_imperativeAndOptions_success() {
-        String ingest = "test /opt1:\"value1\" /opt2:\"value2\"";
+        String ingest = "test /boolopt /opt2:\"value2\"";
 
         AstNode.Command root = assertDoesNotThrow(() -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
 
@@ -68,10 +68,8 @@ public class CommandParserTest {
                 ├─ ParameterList
                 └─ OptionList
                    ├─ Option
-                   │  ├─ OptionName
-                   │  │  └─ Word ("opt1")
-                   │  └─ OptionValue
-                   │     └─ Text ("value1")
+                   │  └─ OptionName
+                   │     └─ Word ("boolopt")
                    └─ Option
                       ├─ OptionName
                       │  └─ Word ("opt2")
@@ -86,7 +84,8 @@ public class CommandParserTest {
 
     @Test
     public void parse_longCommand_success() {
-        String ingest = "event create /description:\"online quiz\" /from:\"2025-09-20 1000\" /to:\"2025-09-20 1100\"";
+        String ingest = "event create /important "
+                + "/description:\"online quiz\" /from:\"2025-09-20 1000\" /to:\"2025-09-20 1100\"";
 
         AstNode.Command root = assertDoesNotThrow(() -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
 
@@ -96,8 +95,11 @@ public class CommandParserTest {
                 │  └─ Word ("event")
                 ├─ ParameterList
                 │  └─ Parameter
-                │     └─ Word ("create")
+                │     └─ Text ("create")
                 └─ OptionList
+                   ├─ Option
+                   │  └─ OptionName
+                   │     └─ Word ("important")
                    ├─ Option
                    │  ├─ OptionName
                    │  │  └─ Word ("description")
@@ -128,8 +130,22 @@ public class CommandParserTest {
     }
 
     @Test
-    public void parse_invalidToken_throwsException() {
+    public void parse_invalidTokenWhenTextExpectedInParameter_throwsException() {
+        String ingest = "test :";
+
+        assertThrows(ParserException.class, () -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
+    }
+
+    @Test
+    public void parse_invalidTokenWhenWordExpectedInOptionName_throwsException() {
         String ingest = "test /\"opt1\":word";
+
+        assertThrows(ParserException.class, () -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
+    }
+
+    @Test
+    public void parse_invalidTokenWhenTextExpectedInOptionValue_throwsException() {
+        String ingest = "test /opt1::";
 
         assertThrows(ParserException.class, () -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
     }

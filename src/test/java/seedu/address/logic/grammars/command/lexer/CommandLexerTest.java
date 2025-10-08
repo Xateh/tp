@@ -2,16 +2,21 @@ package seedu.address.logic.grammars.command.lexer;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 public class CommandLexerTest {
     @Test
     public void lex_word_success() {
-        String ingest = "test";
+        String ingest = "test Test test0";
 
-        String expected = "[00:04] WORD : test\n"
-                + "[04:04] TERMINAL : ";
+        String expected = """
+                [00:04] WORD : test
+                [05:09] WORD : Test
+                [10:15] WORD : test0
+                [15:15] TERMINAL : \
+                """;
 
         TokenisedCommand tc = assertDoesNotThrow(() -> CommandLexer.lexCommand(ingest));
         assertEquals(expected, tc.toString());
@@ -74,5 +79,19 @@ public class CommandLexerTest {
 
         TokenisedCommand tc = assertDoesNotThrow(() -> CommandLexer.lexCommand(ingest));
         assertEquals(expected, tc.toString());
+    }
+
+    @Test
+    public void lex_unexpectedCharacter_throwsException() {
+        String ingest = "event create /description:\"online quiz\" /from:\"2025-09-20 1000\" % /to:\"2025-09-20 1100\"";
+
+        assertThrows(LexerException.class, () -> CommandLexer.lexCommand(ingest));
+    }
+
+    @Test
+    public void lex_unterminatedString_throwsException() {
+        String ingest = "event create /description:\"online quiz\" /from:\"2025-09-20 1000 /to:\"2025-09-20 1100\"";
+
+        assertThrows(LexerException.class, () -> CommandLexer.lexCommand(ingest));
     }
 }

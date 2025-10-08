@@ -2,6 +2,8 @@ package seedu.address.logic.grammars.command;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +44,7 @@ public class CommandTest {
 
     @Test
     public void parse_complexCommand_success() {
-        String cmdString = "complex param0 param1 /opt1:\"long value\" /opt2:\"single\"";
+        String cmdString = "complex param0 param1 /opt1:\"long value\" /opt2:\"single\"/ opt3";
 
         Command cmd = assertDoesNotThrow(() -> Command.parse(cmdString));
 
@@ -52,5 +54,7 @@ public class CommandTest {
         assertEquals("param1", cmd.getParameter(1));
         assertEquals("long value", cmd.getOptionValue("opt1"));
         assertEquals("single", cmd.getOptionValue("opt2"));
+        assertTrue(cmd.hasOption("opt3"));
+        assertFalse(cmd.hasOption("opt4"));
     }
 }
