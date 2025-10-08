@@ -23,5 +23,10 @@ src/test/data/sandbox/
 docs/_site/
 docs/_markbind/logs/
 
+# pixi environments
+.pixi/*
+pixi*
+.devcontainer/
+
 # VS Code Settings
 .vscode/

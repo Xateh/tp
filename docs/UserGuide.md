@@ -114,23 +114,39 @@ Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
 
+### Removing a tag : `untag`
+
+Removes a single tag from an existing person in the address book.
+
+Format: `untag INDEX t/TAG`
+
+* Removes the specified `TAG` from the person at the given `INDEX` in the displayed list.
+* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, …​
+* If the contact does not have the specified tag, the command will report an error and no changes will be made.
+
+Examples:
+* `list` followed by `untag 2 t/friends` removes the `friends` tag from the 2nd person in the address book.
+
 ### Locating persons by name: `find`
 
-Finds persons whose names contain any of the given keywords.
+Finds persons whose fields contain any of the given keywords.
 
 Format: `find KEYWORD [MORE_KEYWORDS]`
 
 * The search is case-insensitive. e.g `hans` will match `Hans`
 * The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`
-* Only the name is searched.
+* All the fields are searched.
 * Only full words will be matched e.g. `Han` will not match `Hans`
-* Persons matching at least one keyword will be returned (i.e. `OR` search).
+* Persons matching at least one keyword on any one field will be returned (i.e. `OR` search).
   e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
 
 Examples:
 * `find John` returns `john` and `John Doe`
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
+* `find 99999999` returns all persons whose phone number is `99999999`
+* `find test.dummy@gmail.com` returns all persons whose email is `test.dummy@gmail.com`
+* `find friend` returns all persons tagged with `"friend"`
 
 ### Deleting a person : `delete`
 
@@ -198,6 +214,7 @@ _Details coming soon ..._
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
