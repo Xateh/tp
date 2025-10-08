@@ -40,7 +40,7 @@ public class RemoveTagCommandTest {
         Person expectedPerson = new PersonBuilder(personWithTag).withTags("owesMoney").build();
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.setPerson(personWithTag, expectedPerson);
-    expectedModel.updateFilteredPersonList(Model.PREDICATE_SHOW_ALL_PERSONS);
+        expectedModel.updateFilteredPersonList(Model.PREDICATE_SHOW_ALL_PERSONS);
 
         String expectedMessage = String.format(RemoveTagCommand.MESSAGE_REMOVE_TAG_SUCCESS,
                 TAG_FRIEND, Messages.format(expectedPerson));

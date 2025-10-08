@@ -53,7 +53,7 @@ public class RemoveTagCommandParserTest {
 
     @Test
     public void parse_duplicateTagPrefix_throwsParseException() {
-    assertParseFailure(parser, "1" + TAG_DESC_FRIENDS + TAG_DESC_FRIENDS,
-        Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_TAG));
+        assertParseFailure(parser, "1" + TAG_DESC_FRIENDS + TAG_DESC_FRIENDS,
+            Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_TAG));
     }
 }

@@ -18,7 +18,7 @@ You can reach us at the email `e1398671@u.nus.edu`
 [[github](https://github.com/dylantjy)]
 
 * Role: Documentation; MarkBind administration; Project site
-* Responsibilities: UI 
+* Responsibilities: UI
 
 ### Alden
 
@@ -35,7 +35,7 @@ You can reach us at the email `e1398671@u.nus.edu`
 
 [[github](http://github.com/actualmulti)]
 
-* Role: Project Management 
+* Role: Project Management
 * Responsibilities: Model
 
 ### Mattheus Cheong
@@ -51,7 +51,6 @@ You can reach us at the email `e1398671@u.nus.edu`
 
 <img src="images/xateh.png" width="200px">
 
-<!-- [[homepage](http://www.comp.nus.edu.sg/~tehxuan)] -->
 [[github](https://github.com/xateh)]
 
 * Role: Documentation
