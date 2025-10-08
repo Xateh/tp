@@ -30,7 +30,7 @@ public class TokenisedCommand {
 
     @Override
     public String toString() {
-        String[] tokens = this.tokens.stream().map(t -> t.toString()).toArray(String[]::new);
+        String[] tokens = this.tokens.stream().map(Token::toString).toArray(String[]::new);
         return String.join("\n", tokens);
     }
 }

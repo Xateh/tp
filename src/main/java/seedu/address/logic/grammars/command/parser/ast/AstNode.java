@@ -2,6 +2,7 @@ package seedu.address.logic.grammars.command.parser.ast;
 
 import java.util.ArrayList;
 
+import seedu.address.logic.grammars.command.lexer.Token;
 import seedu.address.logic.grammars.command.parser.ast.visitors.AstVisitor;
 
 /**
@@ -235,19 +236,19 @@ public abstract class AstNode {
      * Text AST node.
      */
     public static class Text extends AstNode {
-        private final String text;
+        private final Token token;
 
         /**
          * Constructs a new Text node.
          *
-         * @param text Text corresponding to this node.
+         * @param token Token from lexer accepted by this node (one of WORD, TEXT).
          */
-        public Text(String text) {
-            this.text = text;
+        public Text(Token token) {
+            this.token = token;
         }
 
         public String getText() {
-            return this.text;
+            return this.token.getLiteral();
         }
 
         @Override
@@ -260,19 +261,19 @@ public abstract class AstNode {
      * Word AST node.
      */
     public static class Word extends AstNode {
-        private final String word;
+        private final Token token;
 
         /**
          * Constructs a new Word node.
          *
-         * @param word Word corresponding to this node.
+         * @param token Token from lexer accepted by this node (one of WORD).
          */
-        public Word(String word) {
-            this.word = word;
+        public Word(Token token) {
+            this.token = token;
         }
 
         public String getWord() {
-            return this.word;
+            return this.token.getLiteral();
         }
 
         @Override

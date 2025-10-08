@@ -189,9 +189,17 @@ public class CommandParser {
         }
     }
 
-    private Token eat(TokenType type) throws ProductionApplicationException {
-        if (!this.check(type)) {
-            ParserError parserError = new ParserError(this.tokenisedCommand.getIngest(), this.peek(), type);
+    /**
+     * Eats a token that matches a list of specified valid token types, and returns the eaten token. Shifts the parser
+     * forward.
+     *
+     * @param types List of acceptable token types to eat.
+     * @return Eaten token.
+     * @throws ProductionApplicationException When the next token does not match the list specified.
+     */
+    private Token eat(TokenType... types) throws ProductionApplicationException {
+        if (!this.check(types)) {
+            ParserError parserError = new ParserError(this.tokenisedCommand.getIngest(), this.peek(), types);
             throw new ProductionApplicationException(parserError);
         }
 

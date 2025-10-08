@@ -129,7 +129,7 @@ public class CommandParserTest {
 
     @Test
     public void parse_invalidToken_throwsException() {
-        String ingest = "test /opt1:word";
+        String ingest = "test /\"opt1\":word";
 
         assertThrows(ParserException.class, () -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
     }

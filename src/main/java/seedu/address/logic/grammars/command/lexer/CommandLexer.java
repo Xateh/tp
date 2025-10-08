@@ -180,7 +180,8 @@ public class CommandLexer {
     }
 
     /**
-     * Constructs a token from the current substring being looked at, and inserts it into the token accumulator internally in sequence.
+     * Constructs a token from the current substring being looked at, and inserts it into the token accumulator
+     * internally in sequence.
      *
      * @param type The type of the token just scanned.
      */
@@ -218,7 +219,8 @@ public class CommandLexer {
     }
 
     /**
-     * Constructs and throws an exception storing the state of the lexer and additional information at the point of the error.
+     * Constructs and throws an exception storing the state of the lexer and additional information at the point of the
+     * error.
      *
      * @param type The exact generic error encountered by the lexer.
      * @throws LexerException Always throws.

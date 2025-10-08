@@ -30,8 +30,8 @@ public class Command {
      */
     public static class CommandBuilder {
         private String imperative;
-        private ArrayList<String> parameters = new ArrayList<>();
-        private HashMap<String, String> options = new HashMap<>();
+        private final ArrayList<String> parameters = new ArrayList<>();
+        private final HashMap<String, String> options = new HashMap<>();
 
         public CommandBuilder() {
         }
