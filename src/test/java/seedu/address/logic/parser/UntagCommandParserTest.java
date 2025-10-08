@@ -8,42 +8,42 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
-import seedu.address.logic.commands.RemoveTagCommand;
+import seedu.address.logic.commands.UntagCommand;
 import seedu.address.model.tag.Tag;
 
 /**
- * Contains tests for {@link RemoveTagCommandParser}.
+ * Contains tests for {@link UntagCommandParser}.
  */
-public class RemoveTagCommandParserTest {
+public class UntagCommandParserTest {
 
     private static final String TAG_DESC_FRIENDS = " t/friends";
     private static final String INVALID_TAG = " t/friends!";
 
-    private final RemoveTagCommandParser parser = new RemoveTagCommandParser();
+    private final UntagCommandParser parser = new UntagCommandParser();
 
     @Test
-    public void parse_validArgs_returnsRemoveTagCommand() {
+    public void parse_validArgs_returnsUntagCommand() {
         Index index = Index.fromOneBased(1);
         Tag tag = new Tag("friends");
-        assertParseSuccess(parser, "1" + TAG_DESC_FRIENDS, new RemoveTagCommand(index, tag));
+        assertParseSuccess(parser, "1" + TAG_DESC_FRIENDS, new UntagCommand(index, tag));
     }
 
     @Test
     public void parse_missingTag_throwsParseException() {
         assertParseFailure(parser, "1", String.format(MESSAGE_INVALID_COMMAND_FORMAT,
-                RemoveTagCommand.MESSAGE_USAGE));
+                UntagCommand.MESSAGE_USAGE));
     }
 
     @Test
     public void parse_missingIndex_throwsParseException() {
         assertParseFailure(parser, TAG_DESC_FRIENDS, String.format(MESSAGE_INVALID_COMMAND_FORMAT,
-                RemoveTagCommand.MESSAGE_USAGE));
+                UntagCommand.MESSAGE_USAGE));
     }
 
     @Test
     public void parse_invalidIndex_throwsParseException() {
         assertParseFailure(parser, "-1" + TAG_DESC_FRIENDS, String.format(MESSAGE_INVALID_COMMAND_FORMAT,
-                RemoveTagCommand.MESSAGE_USAGE));
+                UntagCommand.MESSAGE_USAGE));
     }
 
     @Test

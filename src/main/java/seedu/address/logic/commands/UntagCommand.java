@@ -18,9 +18,9 @@ import seedu.address.model.tag.Tag;
 /**
  * Removes a tag from an existing person in the address book.
  */
-public class RemoveTagCommand extends Command {
+public class UntagCommand extends Command {
 
-    public static final String COMMAND_WORD = "removetag";
+    public static final String COMMAND_WORD = "untag";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Removes a tag from the person identified "
             + "by the index number used in the displayed person list.\n"
@@ -37,7 +37,7 @@ public class RemoveTagCommand extends Command {
      * @param index of the person in the filtered person list whose tag is to be removed
      * @param tagToRemove tag that will be removed from the person
      */
-    public RemoveTagCommand(Index index, Tag tagToRemove) {
+    public UntagCommand(Index index, Tag tagToRemove) {
         requireNonNull(index);
         requireNonNull(tagToRemove);
         this.index = index;
@@ -78,11 +78,11 @@ public class RemoveTagCommand extends Command {
             return true;
         }
 
-        if (!(other instanceof RemoveTagCommand)) {
+        if (!(other instanceof UntagCommand)) {
             return false;
         }
 
-        RemoveTagCommand otherCommand = (RemoveTagCommand) other;
+        UntagCommand otherCommand = (UntagCommand) other;
         return index.equals(otherCommand.index) && tagToRemove.equals(otherCommand.tagToRemove);
     }
 
