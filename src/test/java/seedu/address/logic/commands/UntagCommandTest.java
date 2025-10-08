@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
-import seedu.address.logic.commands.UntagCommand;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -36,7 +35,7 @@ public class UntagCommandTest {
     @Test
     public void execute_removeExistingTag_success() {
         Person personWithTag = model.getFilteredPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
-    UntagCommand untagCommand = new UntagCommand(INDEX_SECOND_PERSON, TAG_FRIEND);
+        UntagCommand untagCommand = new UntagCommand(INDEX_SECOND_PERSON, TAG_FRIEND);
 
         Person expectedPerson = new PersonBuilder(personWithTag).withTags("owesMoney").build();
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
@@ -78,7 +77,7 @@ public class UntagCommandTest {
         org.junit.jupiter.api.Assertions.assertTrue(firstCommand.equals(firstCommand));
 
         // same values -> returns true
-    UntagCommand firstCommandCopy = new UntagCommand(INDEX_FIRST_PERSON, TAG_FRIEND);
+        UntagCommand firstCommandCopy = new UntagCommand(INDEX_FIRST_PERSON, TAG_FRIEND);
         org.junit.jupiter.api.Assertions.assertTrue(firstCommand.equals(firstCommandCopy));
 
         // different index -> returns false
