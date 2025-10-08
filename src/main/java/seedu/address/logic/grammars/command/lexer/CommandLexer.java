@@ -10,7 +10,7 @@ import seedu.address.logic.grammars.command.utils.Location;
  * <pre>
  * {@code
  * <word> ::= [A-z0-9]+
- * <text> ::= "[^"]*"
+ * <text> ::= "[^"\/:]*"
  * <slash> ::= /
  * <colon> ::= :
  * <terminal> ::= $
@@ -44,6 +44,10 @@ public class CommandLexer {
 
     private static boolean isCharacterOfWord(char c) {
         return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || ('0' <= c && c <= '9');
+    }
+
+    private static boolean isRestrictedCharacter(char c) {
+        return c == '/' || c == ':' || c == '\"';
     }
 
     /**
@@ -207,11 +211,11 @@ public class CommandLexer {
      * Munches text, collecting as many characters matching the text regex as possible.
      */
     private void munchText() throws LexerException {
-        while (!this.isAtEnd() && this.peek() != '"') {
+        while (!this.isAtEnd() && !isRestrictedCharacter(this.peek())) {
             this.advance();
         }
 
-        if (this.isAtEnd()) {
+        if (this.isAtEnd() || this.peek() != '\"') {
             this.error(LexerErrorType.UNTERMINATED_STRING);
         }
 

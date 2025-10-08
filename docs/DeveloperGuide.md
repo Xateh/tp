@@ -680,7 +680,7 @@ The `Command` class is a high-level facade that provides a simple, queryable int
 
 **Design Philosophy**
 
-This class embodies the **Facade pattern**, hiding the multi-stage processing pipeline (lexing → parsing → AST extraction) behind a single static factory method. Users don't need to understand tokens, ASTs, or visitor patterns — they simply call `Command.parse()` and receive a structured representation of their command string.
+This class embodies the **Facade pattern**, hiding the multi-stage processing pipeline (lexing → parsing → AST extraction) behind a single static factory method. Implementors do not need to understand tokens, ASTs, or visitor patterns, but should just call `Command.parse()` and receive a structured representation of their command string.
 
 The `Command` class represents the **semantic model** of a command, distilled from the syntactic AST into three fundamental components:
 
@@ -779,7 +779,7 @@ The following regular grammar is recognised by the lexer.
 
 ```
 WORD   ::= [A-z0-9]+
-TEXT   ::= "[^"]*"
+TEXT   ::= "[^"/:]*"
 SLASH  ::= /
 COLON  ::= :
 ```

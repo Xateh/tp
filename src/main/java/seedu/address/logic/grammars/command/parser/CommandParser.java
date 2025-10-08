@@ -13,7 +13,7 @@ import seedu.address.logic.grammars.command.parser.ast.AstNode;
  * <pre>
  * {@code
  * command          → imperative parameter_list option_list TERMINAL
- * imperative       → WORD
+ * imperative       → word
  * parameter_list   → ( parameter )+
  * parameter        → text
  * option_list      → ( option )+

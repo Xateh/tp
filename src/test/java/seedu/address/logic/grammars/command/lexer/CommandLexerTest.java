@@ -94,4 +94,11 @@ public class CommandLexerTest {
 
         assertThrows(LexerException.class, () -> CommandLexer.lexCommand(ingest));
     }
+
+    @Test
+    public void lex_illegalCharacterInString_throwsException() {
+        String ingest = "event create /description:\"online quiz\" /from:\"2025-09-20:1000\" /to:\"2025-09-20 1100\"";
+
+        assertThrows(LexerException.class, () -> CommandLexer.lexCommand(ingest));
+    }
 }
