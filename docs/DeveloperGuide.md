@@ -480,3 +480,325 @@ testers are expected to do more *exploratory* testing.
    1. _{explain how to simulate a missing/corrupted file, and the expected behavior}_
 
 1. _{ more test cases …​ }_
+
+--------------------------------------------------------------------------------------------------------------------
+
+## Appendix: Lexing and Parsing
+
+This appendix details the parsing strategy used by AssetSphere, including how to:
+- properly accommodate command syntax changes,
+- handle/signal lexing/parsing errors,
+- manipulate produced ASTs, and
+- process the parser's main output, `Command`.
+
+### Overarching Architecture
+
+<box type="info" header="To be moved!">
+    This subsection will be moved to the relevant segment in the main DG once the new parser is fully integrated, and will serve as the first point of contact with the parsing component.
+</box>
+
+<puml src="diagrams/grammars/Strategy.puml" width=1080 />
+
+This diagram shows a truncated architecture (with auxiliary classes hidden) organized into five packages:
+
+- **Top-Level Package**: Contains the user-facing `Command` class and its nested `CommandBuilder`
+- **Lexer Package**: Contains `CommandLexer`, `TokenisedCommand`, `Token`, and related types for tokenisation
+- **Parser Package**: Contains `CommandParser` and exception types for syntactic analysis
+  - **AST Package**: Shows all AST node types in the hierarchy (Command, Imperative, ParameterList, etc.)
+    - **Visitor Package**: Contains the `AstVisitor` interface and `CommandExtractor` implementation
+
+<puml src="diagrams/grammars/Sequence.puml" width=1080 />
+
+This sequence diagram traces the high-level flow of execution (omitting exceptions and various internal implementation details) starting from `Command.parse(String)`:
+
+1. **Lexing Phase**: Shows how the lexer processes the string character-by-character using peek/advance/munch operations, creating tokens
+2. **Parsing Phase**: Demonstrates recursive descent parsing with the parser calling various parse methods that mirror the grammar structure
+3. **Extraction Phase**: Illustrates the Visitor pattern in action, with the CommandExtractor traversing the AST and populating a CommandBuilder
+
+The diagram includes notes explaining key concepts at each phase and shows both the normal flow and error handling paths. It clearly shows the three-stage transformation: String → Tokens → AST → Command.
+
+### Lexer Architecture
+
+The `CommandLexer` is implemented a single finite state machine. It ingests an input string, and scans characters sequentially. At any point, it maintains a window representing the current token it is scanning.
+
+The lexer operates through a single forward pass over the input string, maintaining two position indices:
+
+- start: Marks the beginning of the current lexeme being scanned
+- current: Marks the position of the next character to examine
+
+**Core Methods**
+
+`peek()`: Returns the character at the current position without advancing. This allows the lexer to examine what's ahead before committing to a state transition.
+
+`advance()`: Returns the character at current and increments the position by one. This consumes the character and moves the lexer forward in the input stream.
+
+`munch`: A family of methods (munchWord(), munchText()) that consume multiple consecutive characters matching a specific pattern. "Munching" refers to the greedy consumption of characters: the lexer keeps calling advance() as long as characters match the expected pattern, maximizing the length of each token.
+
+**Usage**
+
+The lexer is accessed through the static factory method:
+
+```java
+TokenisedCommand result = CommandLexer.lexCommand(inputString);
+```
+
+This returns a TokenisedCommand object containing the original input and the complete token sequence, ready for parsing.
+
+**Theoretical Foundation**
+
+The lexer is a lexical analyzer that tokenizes command strings according to a simple regular grammar. It transforms raw input strings into a sequence of tokens that can be used by a parser downstream.
+
+This lexer implements a single finite state machine (FSM) that recognizes a Level 3 regular grammar. The grammar defines five token types: `WORD`, `TEXT`, `SLASH`, `COLON`, and `TERMINAL`.
+
+As a finite state machine, the lexer maintains a current state (represented by its position in the input) and transitions between states based on the characters it encounters. The FSM operates deterministically: for any given character, the lexer knows exactly which state to transition to and which token type to emit.
+
+The regular nature of the grammar means the lexer requires no lookahead beyond a single character and no backtracking, making it efficient and straightforward to implement.
+
+### Parser Architecture
+
+The `CommandParser` is an recursive descent parser that transforms a stream of tokens produced by the `CommandLexer` into an abstract syntax tree (AST). Each nonterminal (defined in the grammar by production rules of the form `A → α`) in the grammar corresponds to a parsing method. These methods call each other recursively, mirroring the grammar's hierarchical structure.
+
+**Core Methods**
+
+`peek()`: Returns the token at the current position without advancing. This provides the one-token lookahead that characterizes LL(1) parsing, allowing the parser to decide which production rule to apply.
+
+`advance()`: Returns the current token and increments the position by one. This consumes the token and moves the parser forward in the token stream.
+
+`eat(TokenType... types)`: The fundamental consuming operation that combines checking and advancing. It verifies that the current token matches one of the expected types, then consumes it via advance(). If the token doesn't match, it throws an exception. This method enforces the grammar rules at each step.
+
+`check(TokenType... types)`: A non-consuming lookahead operation that returns true if the current token matches any of the specified types. This is used in decision points to determine which production to apply or whether to continue looping.
+
+**Error Handling and Recovery**
+
+The parser uses exception-based error propagation:
+
+- **`ProductionApplicationException`**: Thrown when `eat()` encounters an unexpected token. The exception carries a `ParserError` containing:
+    - The original input string
+    - The offending token
+    - The expected token types
+- **Error Enrichment**: As exceptions propagate up the call stack, each parsing method catches them, adds its non-terminal name to the error (building a derivation trace), and re-throws. This creates a complete picture of which production rule failed and where in the grammar hierarchy the error occurred.
+- **`ParserException`**: The final exception type thrown to the caller, wrapping the enriched parser error with full diagnostic information.
+
+**Usage**
+
+The parser is accessed through the static factory method:
+
+```java
+AstNode.Command ast = CommandParser.parseCommand(tokenisedCommand);
+```
+
+This returns the root of the AST, which can then be traversed for semantic analysis, validation, and execution.
+
+**Theoretical Foundation**
+
+This parser implements an LL(1) parsing strategy, where:
+
+- _LL_ stands for "Left-to-right, Leftmost derivation"
+- _(1)_ indicates one token of lookahead
+
+The parser recognises a Level 2 context-free grammar that defines the hierarchical structure of commands. Unlike the lexer's regular grammar, this context-free grammar can express nested and recursive structures, making it more powerful and suitable for parsing syntactic constructs.
+
+All production rules in a context-free grammar are of the form: `A → α`.
+
+The LL(1) property means the parser can determine which production rule to apply by examining only the current token, without backtracking. This is possible because the grammar is carefully designed so that each production has a distinct FIRST set (tokens that can begin that production) and FOLLOW set (tokens that can legally appear after that production).
+
+### AST Processing
+
+**Overview**
+
+The `AstVisitor<R>` interface defines the contract for implementing the **Visitor pattern** on command Abstract Syntax Trees. It enables traversal and processing of AST nodes without modifying the node classes themselves, providing a clean separation between the tree structure and the operations performed on it.
+
+This interface is generic over the return type produced by visiting each node. This generic parameter provides flexibility for different visitor use cases.
+
+**Visitor Pattern**
+
+The Visitor pattern solves a common problem in compiler design: how to perform different operations on an AST (extraction, validation, transformation, optimization) without cluttering the node classes with operation-specific code.
+
+This interface declares one `visit` method for each AST node type in the command grammar. When a visitor traverses the tree, each node calls the appropriate `visit` method on the visitor, passing itself as an argument. This technique, called **double dispatch**, allows the visitor to execute type-specific logic for each node.
+
+**Visitor Methods**
+
+Each method corresponds to one AST node type and follows the naming convention `visit[NodeType]`:
+
+- **visitCommand**: Processes the root command structure (imperative + parameters + options)
+- **visitImperative**: Processes the command verb
+- **visitParameterList** / **visitParameter**: Processes positional arguments
+- **visitOptionList** / **visitOption**: Processes named options
+- **visitOptionName** / **visitOptionValue**: Processes option components
+- **visitText** / **visitWord**: Processes terminal (leaf) nodes containing actual token data
+
+The complete set of methods ensures visitors can handle every node type in the grammar, providing exhaustive coverage of the AST structure.
+
+**Implementing Custom Visitors**
+
+To create a custom AST processor, implement the `AstVisitor<R>` interface with your desired return type:
+
+```java
+public class MyCustomVisitor implements AstVisitor<MyResultType> {
+    @Override
+    public MyResultType visitCommand(AstNode.Command node) {
+        // Process command node
+        // Typically calls accept() on child nodes to traverse deeper
+        MyResultType imperativeResult = node.getImperative().accept(this);
+        MyResultType paramsResult = node.getParameterList().accept(this);
+        MyResultType optionsResult = node.getOptionList().accept(this);
+
+        // Combine results and return
+        return combineResults(imperativeResult, paramsResult, optionsResult);
+    }
+
+    @Override
+    public MyResultType visitWord(AstNode.Word node) {
+        // Process leaf node
+        // Extract token data and convert to result type
+        String tokenValue = node.getToken().getLiteral();
+        return processWord(tokenValue);
+    }
+
+    // Implement remaining visit methods...
+}
+```
+
+**Traversal Pattern**
+
+Visitors typically follow a **recursive descent** pattern:
+
+1. Each `visit` method processes the current node
+2. For non-terminal nodes, the visitor calls `accept(this)` on child nodes to continue traversal
+3. For terminal nodes (Word, Text), the visitor extracts token data directly
+4. Results from child visits are combined to produce the parent's result
+
+**Provided Visitors**
+- Extraction (`CommandExtractor`): Builds a `Command` object by accumulating data as the visitor descends through the tree.
+- Pretty-Printing (`AstPrinter`): Returns a formatted `String` visualisation of a tree.
+
+### Lexer/Parser Interface: Commands
+
+**Overview**
+
+The `Command` class is a high-level facade that provides a simple, queryable interface for working with parsed commands. It serves as the primary entry point for users of the lexer/parser package, abstracting away the complexities of tokenisation, parsing, and AST traversal behind a clean, intuitive API.
+
+**Design Philosophy**
+
+This class embodies the **Facade pattern**, hiding the multi-stage processing pipeline (lexing → parsing → AST extraction) behind a single static factory method. Users don't need to understand tokens, ASTs, or visitor patterns — they simply call `Command.parse()` and receive a structured representation of their command string.
+
+The `Command` class represents the **semantic model** of a command, distilled from the syntactic AST into three fundamental components:
+
+- **Imperative**: The command verb (e.g., `add`, `delete`, `edit`)
+- **Parameters**: Ordered positional arguments
+- **Options**: Named flags with optional values (e.g., `/email:john@example.com` or `/force`)
+
+#### Architecture
+
+**Processing Pipeline**
+
+The `parse()` method orchestrates a three-stage transformation:
+
+1. **Lexical Analysis** (`CommandLexer.lexCommand()`): Converts the raw command string into a stream of tokens, recognising the basic lexical elements (words, text, slashes, colons).
+
+2. **Syntactic Analysis** (`CommandParser.parseCommand()`): Transforms the token stream into an Abstract Syntax Tree that captures the hierarchical grammatical structure of the command.
+
+3. **Semantic Extraction** (`CommandExtractor.extract()`): Traverses the AST using the visitor pattern to extract semantic information, populating a `CommandBuilder` with the command's meaningful components.
+
+This pipeline separates concerns cleanly: lexing handles character-level details, parsing handles grammar structure, and extraction handles meaning. The `Command` class receives only the final, distilled result.
+
+**Data Model**
+
+The internal representation uses three data structures optimised for different access patterns:
+
+- **`imperative`** (`String`): A single command verb, accessed via `getImperative()`
+- **`parameters`** (`String[]`): An ordered array for positional arguments, supporting indexed access via `getParameter(int)` or bulk retrieval via `getAllParameters()`
+- **`options`** (`HashMap<String, String>`): A key-value map for named options, enabling fast lookup via `getOptionValue(String)` and existence checks via `hasOption(String)`
+
+This design reflects typical command usage patterns: imperatives are always present and unique, parameters are order-dependent, and options are queried by name.
+
+**Builder Pattern**
+
+The nested `CommandBuilder` class implements the **Builder pattern** to construct `Command` instances incrementally. This is particularly useful for the `CommandExtractor` visitor, which discovers command components as it traverses the AST:
+
+- **`setImperative(String)`**: Sets the command verb (called once)
+- **`addParameter(String)`**: Appends a positional parameter (called zero or more times, preserving order)
+- **`setOption(String)`** and **setOption(String, String)**: Adds flag-style or value-bearing options (called zero or more times)
+- **`build()`**: Produces the immutable `Command` instance
+
+The builder accumulates components in mutable collections (`ArrayList` for parameters, `HashMap` for options), then converts them to the appropriate final representations during `build()`. This separation allows flexible construction while maintaining immutability in the final product.
+
+#### Usage Patterns
+
+**Basic Parsing**
+
+The primary interface is the static factory method:
+
+```java
+Command cmd = Command.parse("add John Doe /email:john@example.com /force");
+```
+
+This single call handles all processing stages and returns a fully-populated `Command` object.
+
+**Querying Commands**
+
+Once parsed, commands support intuitive queries:
+
+```java
+String verb = cmd.getImperative();           // "add"
+String firstName = cmd.getParameter(0);      // "John"
+String[] allParams = cmd.getAllParameters(); // ["John", "Doe"]
+String email = cmd.getOptionValue("email");  // "john@example.com"
+boolean forced = cmd.hasOption("force");     // true
+```
+
+The API distinguishes between:
+- **`getOptionValue()`**: Returns the value (or null for flags/missing options)
+- **`hasOption()`**: Tests for option presence (useful for boolean flags)
+
+**Error Handling**
+
+The `parse()` method declares two checked exceptions corresponding to the two stages where errors can occur:
+
+- **`LexerException`**: Thrown when the input contains invalid characters or malformed tokens (e.g., unterminated strings)
+- **`ParserException`**: Thrown when the token sequence doesn't conform to the command grammar (e.g., missing imperatives, unexpected token order)
+
+Users should handle both exceptions to provide appropriate error feedback:
+
+```java
+try {
+    Command cmd = Command.parse(userInput);
+    // process command
+} catch (LexerException e) {
+    // handle tokenization errors
+} catch (ParserException e) {
+    // handle grammar errors
+}
+```
+
+### Command Grammar
+
+**Lexer Tokens**
+
+The following regular grammar is recognised by the lexer.
+
+```
+WORD   ::= [A-z0-9]+
+TEXT   ::= "[^"]*"
+SLASH  ::= /
+COLON  ::= :
+```
+
+The `TERMINAL` token denotes the end of input.
+
+**Command Grammar**
+
+The following command grammar is recognised by the parser, in EBNF notation.
+
+```
+command          → imperative parameter_list option_list TERMINAL
+imperative       → word
+parameter_list   → ( parameter )+
+parameter        → text
+option_list      → ( option )+
+option           → SLASH option_name ( COLON option_value )*
+option_name      → word
+option_value     → text
+text             → TEXT | WORD
+word             → WORD
+```
