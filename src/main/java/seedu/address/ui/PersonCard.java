@@ -1,6 +1,8 @@
 package seedu.address.ui;
 
 import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -17,6 +19,11 @@ import seedu.address.model.person.Person;
 public class PersonCard extends UiPart<Region> {
 
     private static final String FXML = "PersonListCard.fxml";
+    /**
+     * Feature flag for showing preview custom fields in the UI only (no logic/persistence).
+     */
+    private static final String FLAG_CUSTOM_FIELDS_UI = "feature.customFields.ui";
+    private static final String ENV_CUSTOM_FIELDS_UI = "CF_UI";
 
     /**
      * Note: Certain keywords such as "location" and "resources" are reserved keywords in JavaFX.
@@ -69,38 +76,57 @@ public class PersonCard extends UiPart<Region> {
         // ----- Custom fields (schema-less key:value) -----
         // We render arbitrary user-defined attributes as "key : value" rows.
         // If there are no rows, the entire section is hidden to keep the card compact.
-        // Once Person#getCustomFields() is added on the model, the reflection-based
-        // lookup below will start returning data without additional UI changes.
+        // This PR is UI-only: preview data is supplied behind a feature flag so that master
+        // is not coupled to logic/persistence that does not exist yet.
 
         customFieldsBox.getChildren().clear();
 
-        var fields = tryGetCustomFields(person); // empty for now; real values later
+        // In preview mode we show deterministic example fields; otherwise none.
+        Map<String, String> fields = getPreviewCustomFieldsIfEnabled();
 
-        // Stable alphabetical order (case-insensitive) so cards are predictable to scan.
+        // Stable alphabetical order (case-insensitive) sp cards are predictable to scan.
         var keys = new java.util.ArrayList<>(fields.keySet());
         java.util.Collections.sort(keys, String.CASE_INSENSITIVE_ORDER);
         for (String key : keys) {
-            Object valObj = fields.get(key);
-            String val = (valObj == null) ? "" : String.valueOf(valObj);
+            String val = fields.get(key);
             if (!val.isBlank()) {
                 customFieldsBox.getChildren().add(kvRow(key, val));
             }
         }
 
-        // DEV PREVIEW:
-        // Launch with: ./gradlew run -Ddev.customfields.preview=true
-        // to visualize two sample rows before the model feature lands.
-        if (customFieldsBox.getChildren().isEmpty()
-               && (Boolean.getBoolean("dev.customfields.preview") || System.getenv("CF_PREVIEW") != null)) {
-            customFieldsBox.getChildren().addAll(
-                kvRow("asset-class", "gold"),
-                kvRow("company", "Goldman Sachs")
-            );
-        }
+        // Back-compat: if no fields were provided by the flag-specific provider above, nothing is shown.
 
         if (customFieldsBox.getChildren().isEmpty()) {
             hide(customFieldsBox); // hide LAST
         }
+    }
+
+    /**
+     * Returns preview custom fields only when the feature flag is enabled.
+     * <p>This keeps the UI change non-invasive: by default the section remains hidden and
+     * there is no dependency on model/persistence. When enabled, the returned map is used
+     * to render the same UI that future real data will drive.</p>
+     *
+     * @return a deterministic, insertion-ordered map of key-value pairs when enabled; otherwise an empty map.
+     */
+    private Map<String, String> getPreviewCustomFieldsIfEnabled() {
+
+        // Preferred: environment variable
+        String env = System.getenv(ENV_CUSTOM_FIELDS_UI);
+        boolean viaEnv = env != null && !env.isBlank();
+
+        // Optional: JVM property (works if your run task forwards it; otherwise ignored)
+        boolean viaProperty = Boolean.getBoolean("feature.customFields.ui");
+
+        if (!viaProperty && !viaEnv) {
+            return Map.of();
+        }
+
+        // Keep order stable for predictable UI and tests.
+        Map<String, String> preview = new LinkedHashMap<>();
+        preview.put("asset-class", "gold");
+        preview.put("company", "Goldman Sachs");
+        return preview;
     }
 
     /**
@@ -123,43 +149,14 @@ public class PersonCard extends UiPart<Region> {
     */
     private HBox kvRow(String key, String value) {
         Label keyLabel = new Label(key + ":");
-        keyLabel.getStyleClass().add("Label");
+        keyLabel.getStyleClass().add("Label"); // keep casing to preserve current visuals
 
         Label valueLabel = new Label(" " + value);
-        valueLabel.getStyleClass().add("Label");
+        valueLabel.getStyleClass().add("Label"); // keep casing to preserve current visuals
 
         HBox pill = new HBox(4, keyLabel, valueLabel);
         pill.getStyleClass().add("custom-field-pill");
 
         return new HBox(pill);
-    }
-
-    /**
-    * Attempts to obtain a map of custom fields from {@code person} without creating a compile-time
-    * dependency on model changes.
-    * <p>This uses reflection to call {@code getCustomFields()} if/when it exists. If absent or
-    * incompatible, returns an empty map. This lets the UI ship now and "light up" automatically
-    * later when the model adds the method.</p>
-    * @param person the model object for this card
-    * @return a non-null map of {@code key -> value} pairs (empty if none/unsupported)
-    */
-    @SuppressWarnings("unchecked")
-    private java.util.Map<String, Object> tryGetCustomFields(Object person) {
-        try {
-            var m = person.getClass().getMethod("getCustomFields");
-            Object result = m.invoke(person);
-            if (result instanceof java.util.Map<?, ?> map) {
-                var out = new java.util.LinkedHashMap<String, Object>();
-                map.forEach((k, v) -> {
-                    if (k != null) {
-                        out.put(String.valueOf(k), v);
-                    }
-                });
-                return out;
-            }
-        } catch (Exception ignored) {
-            // Method not present yet, or not accessible; fall through to empty map.
-        }
-        return java.util.Map.of();
     }
 }
