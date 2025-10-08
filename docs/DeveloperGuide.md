@@ -158,6 +158,15 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Remark feature
+
+The remark feature lets users annotate a person with optional free-form text using the `remark` command.
+
+* **Command** – `RemarkCommand` retrieves the target `Person` from the filtered list using an `Index`, creates an edited copy with the supplied `Remark`, and persists the change via `Model#setPerson(...)`.
+* **Parser** – `RemarkCommandParser` tokenises user input with the `r/` prefix defined in `CliSyntax`, derives the `Index` from the preamble, and wraps the remark text inside a `Remark` value object.
+* **Model** – Each `Person` now owns a `Remark` field. Address book samples, JSON adapters, and builders have been updated so that the remark is stored, serialised, and compared consistently.
+* **UI** – `PersonCard` binds the `Remark` to a new label in `PersonListCard.fxml`, ensuring the latest remark is displayed in the contact list.
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
