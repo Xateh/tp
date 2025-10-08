@@ -32,9 +32,8 @@ public class RemarkCommandTest {
         Person personToEdit = model.getFilteredPersonList().get(INDEX_THIRD_PERSON.getZeroBased());
         Remark remark = new Remark("Likes salsa dancing.");
         RemarkCommand remarkCommand = new RemarkCommand(INDEX_THIRD_PERSON, remark);
-
         Person editedPerson = new Person(personToEdit.getName(), personToEdit.getPhone(), personToEdit.getEmail(),
-                personToEdit.getAddress(), remark, personToEdit.getTags());
+            remark, personToEdit.getTags());
 
         String expectedMessage = String.format(RemarkCommand.MESSAGE_ADD_REMARK_SUCCESS, Messages.format(editedPerson));
 
@@ -49,9 +48,8 @@ public class RemarkCommandTest {
         Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Remark remark = new Remark("");
         RemarkCommand remarkCommand = new RemarkCommand(INDEX_FIRST_PERSON, remark);
-
         Person editedPerson = new Person(personToEdit.getName(), personToEdit.getPhone(), personToEdit.getEmail(),
-                personToEdit.getAddress(), remark, personToEdit.getTags());
+            remark, personToEdit.getTags());
 
         String expectedMessage = String.format(RemarkCommand.MESSAGE_DELETE_REMARK_SUCCESS,
                 Messages.format(editedPerson));
@@ -80,17 +78,17 @@ public class RemarkCommandTest {
         RemarkCommand secondCommand = new RemarkCommand(INDEX_SECOND_PERSON, remarkBob);
 
         // same object -> returns true
-    assertTrue(firstCommand.equals(firstCommand));
+        assertTrue(firstCommand.equals(firstCommand));
 
         // same values -> returns true
         RemarkCommand firstCommandCopy = new RemarkCommand(INDEX_FIRST_PERSON, new Remark("Enjoys reading."));
-    assertTrue(firstCommand.equals(firstCommandCopy));
+        assertTrue(firstCommand.equals(firstCommandCopy));
 
         // different types -> returns false
-    assertFalse(firstCommand.equals(1));
+        assertFalse(firstCommand.equals(1));
 
         // null -> returns false
-    assertFalse(firstCommand.equals(null));
+        assertFalse(firstCommand.equals(null));
 
         // different index and remark -> returns false
         assertFalse(firstCommand.equals(secondCommand));

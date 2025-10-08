@@ -40,7 +40,7 @@ public class RemarkCommandParserTest {
 
     @Test
     public void parse_duplicateRemarkPrefix_throwsParseException() {
-    assertParseFailure(parser, "1 r/First r/Second",
-        seedu.address.logic.Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_REMARK));
+        assertParseFailure(parser, "1 r/First r/Second",
+                seedu.address.logic.Messages.getErrorMessageForDuplicatePrefixes(CliSyntax.PREFIX_REMARK));
     }
 }
