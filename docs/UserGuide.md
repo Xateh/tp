@@ -114,6 +114,19 @@ Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
 
+### Adding a tag : `tag`
+
+Adds a single tag to an existing person in the address book.
+
+Format: `tag INDEX TAG+`
+
+* Adds the specified `TAG` from the person at the given `INDEX` in the displayed list.
+* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
+* There can be multiple tags added at one time, the tags are separated by a whitespace
+
+Examples:
+* `list` followed by `tag 2 friend cool` will add `friend` and `cool` to the 2nd person in the address book.
+
 ### Removing a tag : `untag`
 
 Removes a single tag from an existing person in the address book.
@@ -214,6 +227,7 @@ _Details coming soon ..._
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Tag**    | `add INDEX TAG+` <br> e.g., `tag 2 friend cool`
 **Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
