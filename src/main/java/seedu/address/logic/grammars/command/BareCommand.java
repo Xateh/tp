@@ -110,4 +110,11 @@ public class BareCommand {
     public boolean hasOption(String key) {
         return this.options.containsKey(key);
     }
+
+    /*
+     * Returns a read-only view of all option key→value pairs.
+     */
+    public java.util.Map<String, String> getAllOptions() {
+        return java.util.Collections.unmodifiableMap(this.options);
+    }
 }

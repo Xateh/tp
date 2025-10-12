@@ -81,8 +81,8 @@ public class PersonCard extends UiPart<Region> {
 
         customFieldsBox.getChildren().clear();
 
-        // In preview mode we show deterministic example fields; otherwise none.
-        Map<String, String> fields = getPreviewCustomFieldsIfEnabled();
+        // Real Data
+        Map<String, String> fields = new java.util.LinkedHashMap<>(person.getCustomFields());
 
         // Stable alphabetical order (case-insensitive) sp cards are predictable to scan.
         var keys = new java.util.ArrayList<>(fields.keySet());

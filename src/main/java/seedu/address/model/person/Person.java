@@ -4,6 +4,8 @@ import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -24,6 +26,7 @@ public class Person {
     // Data fields
     private final Address address;
     private final Set<Tag> tags = new HashSet<>();
+    private final Map<String, String> customFields;
 
     /**
      * Every field must be present and not null.
@@ -35,6 +38,23 @@ public class Person {
         this.email = email;
         this.address = address;
         this.tags.addAll(tags);
+        this.customFields = new LinkedHashMap<>(); //default: empty
+    }
+
+    /**
+     * Full constructor including custom fields.
+     * Kept package-private to encourage creation via {@link #withCustomFields(Map)}
+     */
+    public Person(Name name, Phone phone, Email email, Address address,
+                  Set<Tag> tags, Map<String, String> customFields) {
+        requireAllNonNull(name, phone, email, address, tags);
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.address = address;
+        this.tags.addAll(tags);
+        // Preserve order and make defensive copy
+        this.customFields = new LinkedHashMap<>(customFields);
     }
 
     public Name getName() {
@@ -59,6 +79,21 @@ public class Person {
      */
     public Set<Tag> getTags() {
         return Collections.unmodifiableSet(tags);
+    }
+
+    /**
+     * Returns an unmodifiable view of custom fields.
+     */
+    public Map<String, String> getCustomFields() {
+        return Collections.unmodifiableMap(customFields);
+    }
+
+    /**
+     * Returns a new {@code Person} identical to this, but with the provided custom fields.
+     * The provided map is copied defensively and iteration order is preserved.
+     */
+    public Person withCustomFields(Map<String, String> fields) {
+        return new Person(name, phone, email, address, tags, new LinkedHashMap<>(fields));
     }
 
     /**
@@ -94,13 +129,14 @@ public class Person {
                 && phone.equals(otherPerson.phone)
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
-                && tags.equals(otherPerson.tags);
+                && tags.equals(otherPerson.tags)
+                && customFields.equals(otherPerson.customFields);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags);
+        return Objects.hash(name, phone, email, address, tags, customFields);
     }
 
     @Override
