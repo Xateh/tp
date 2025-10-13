@@ -6,7 +6,7 @@ import seedu.address.logic.grammars.command.BareCommand;
 
 /**
  * Functional interface for command extractors, that accept a {@code BareCommand} and extracts information out of that
- * {@code BareCommand} to construct the final {@code command} to be run.
+ * {@code BareCommand} to construct the final {@code Command} to be run.
  *
  * @param <T>
  */

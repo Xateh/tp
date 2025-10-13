@@ -9,7 +9,7 @@ public class ResolutionException extends Exception {
     }
 
     /**
-     * Constructs a new {@code ValidationException} with the specified detail {@code message} and {@code cause}.
+     * Constructs a new {@code ResolutionException} with the specified detail {@code message} and {@code cause}.
      */
     public ResolutionException(String message, Throwable cause) {
         super(message, cause);
