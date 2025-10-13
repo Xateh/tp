@@ -16,7 +16,8 @@ import seedu.address.model.tag.Tag;
 public class TagCommandExtractor {
     // Messages for extraction
     public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
-    public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected integer, got %1$s";
+    public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
+    public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_TAGS_UNSPECIFIED = "At least one tag must be specified.";
 
     /**
@@ -37,7 +38,11 @@ public class TagCommandExtractor {
         try {
             index = Index.fromOneBased(Integer.parseInt(params[0]));
         } catch (NumberFormatException e) {
+            // only thrown by Integer::parseInt
             throw new ValidationException(String.format(MESSAGE_INDEX_FAILED_TO_PARSE, params[0]));
+        } catch (IndexOutOfBoundsException e) {
+            // only thrown by Index::fromOneBased
+            throw new ValidationException(String.format(MESSAGE_INDEX_OUT_OF_RANGE, params[0]));
         }
 
         // extract tags
