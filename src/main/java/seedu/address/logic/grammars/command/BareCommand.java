@@ -28,12 +28,12 @@ public class BareCommand {
     /**
      * Builder for commands.
      */
-    public static class CommandBuilder {
+    public static class BareCommandBuilder {
         private String imperative;
         private final ArrayList<String> parameters = new ArrayList<>();
         private final HashMap<String, String> options = new HashMap<>();
 
-        public CommandBuilder() {
+        public BareCommandBuilder() {
         }
 
         public void setImperative(String imperative) {
