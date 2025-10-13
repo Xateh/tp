@@ -19,6 +19,11 @@ import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.TagCommand;
 import seedu.address.logic.commands.UntagCommand;
+import seedu.address.logic.commands.decoder.Decoder;
+import seedu.address.logic.commands.exceptions.ValidationException;
+import seedu.address.logic.grammars.command.BareCommand;
+import seedu.address.logic.grammars.command.lexer.LexerException;
+import seedu.address.logic.grammars.command.parser.ParserException;
 import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
@@ -64,9 +69,6 @@ public class AddressBookParser {
         case DeleteCommand.COMMAND_WORD:
             return new DeleteCommandParser().parse(arguments);
 
-        case TagCommand.COMMAND_WORD:
-            return new TagCommandParser().parse(arguments);
-
         case ClearCommand.COMMAND_WORD:
             return new ClearCommand();
 
@@ -86,6 +88,12 @@ public class AddressBookParser {
             return new HelpCommand();
 
         default:
+            try {
+                return Decoder.decode(BareCommand.parse(userInput));
+            } catch (LexerException | ParserException | ValidationException e) {
+                System.out.println(e.getMessage());
+            }
+
             logger.finer("This user input caused a ParseException: " + userInput);
             throw new ParseException(MESSAGE_UNKNOWN_COMMAND);
         }

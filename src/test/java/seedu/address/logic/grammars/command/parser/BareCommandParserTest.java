@@ -10,7 +10,7 @@ import seedu.address.logic.grammars.command.lexer.CommandLexer;
 import seedu.address.logic.grammars.command.parser.ast.AstNode;
 import seedu.address.logic.grammars.command.parser.ast.visitors.AstPrinter;
 
-public class CommandParserTest {
+public class BareCommandParserTest {
     @Test
     public void parse_imperativeOnly_success() {
         String ingest = "test";

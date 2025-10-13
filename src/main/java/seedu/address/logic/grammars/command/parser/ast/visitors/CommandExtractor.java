@@ -1,13 +1,13 @@
 package seedu.address.logic.grammars.command.parser.ast.visitors;
 
-import seedu.address.logic.grammars.command.Command;
+import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.logic.grammars.command.parser.ast.AstNode;
 
 /**
  * Extractor for commands from a complete AST.
  */
 public class CommandExtractor implements AstVisitor<String> {
-    private final Command.CommandBuilder commandBuilder = new Command.CommandBuilder();
+    private final BareCommand.CommandBuilder commandBuilder = new BareCommand.CommandBuilder();
 
     /**
      * Returns a Command populated with the given AST's items.
@@ -15,7 +15,7 @@ public class CommandExtractor implements AstVisitor<String> {
      * @param node Root of the AST to populate Command with.
      * @return Populated Command.
      */
-    public Command extract(AstNode node) {
+    public BareCommand extract(AstNode node) {
         node.accept(this);
         return this.commandBuilder.build();
     }

@@ -14,12 +14,12 @@ import seedu.address.logic.grammars.command.parser.ast.visitors.CommandExtractor
 /**
  * Command class that stores the various command tokens in an easily-queryable manner.
  */
-public class Command {
+public class BareCommand {
     private final String imperative;
     private final String[] parameters;
     private final HashMap<String, String> options;
 
-    private Command(String imperative, String[] parameters, HashMap<String, String> options) {
+    private BareCommand(String imperative, String[] parameters, HashMap<String, String> options) {
         this.imperative = imperative;
         this.parameters = parameters;
         this.options = options;
@@ -57,11 +57,11 @@ public class Command {
          *
          * @return Built command.
          */
-        public Command build() {
+        public BareCommand build() {
             String imperative = this.imperative;
             String[] parameters = this.parameters.toArray(String[]::new);
             HashMap<String, String> options = this.options;
-            return new Command(imperative, parameters, options);
+            return new BareCommand(imperative, parameters, options);
         }
     }
 
@@ -73,7 +73,7 @@ public class Command {
      * @throws LexerException  If command string fails to lex.
      * @throws ParserException If command string fails to parse.
      */
-    public static Command parse(String commandString) throws LexerException, ParserException {
+    public static BareCommand parse(String commandString) throws LexerException, ParserException {
         TokenisedCommand tokenisedCommand = CommandLexer.lexCommand(commandString);
         AstNode.Command rootCommandNode = CommandParser.parseCommand(tokenisedCommand);
         return new CommandExtractor().extract(rootCommandNode);

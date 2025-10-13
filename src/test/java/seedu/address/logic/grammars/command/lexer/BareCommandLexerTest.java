@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-public class CommandLexerTest {
+public class BareCommandLexerTest {
     @Test
     public void lex_word_success() {
         String ingest = "test Test test0";
