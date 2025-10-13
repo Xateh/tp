@@ -439,6 +439,7 @@ Asset manager | assign follow-ups to team members                               
    Use case ends
 
 **Extensions**
+
 * 2a. System is unable to parse or decode command.
     * 2a1. System informs user of exact error and hints at how to fix the error.
     * 2a2. User corrects and reenters the command.
@@ -456,6 +457,64 @@ Asset manager | assign follow-ups to team members                               
     * 3a2. User repeats steps 1-3 to remove the correct tags
   
   Use case ends.
+
+**Use case: Add fields to contacts**
+
+**MSS**
+
+1. User keys command to add fields with a corresponding value to a contact.
+2. System searches for contact specified by index number and adds the specified field with the corresponding value to the contact
+3. System displays to user the field and associated value added to the specified contact.
+
+    Steps 1-3 are repeated until all desired fields have been    
+added.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. System is unable to parse or decode command.
+    * 2a1. System informs user of exact error and hints at how to fix the error.
+    * 2a2. User corrects and reenters the command.
+
+  Steps 2a1-2a2 are repeated until a valid command is entered.
+
+* 2b. The field to be added already exists.
+    * 2b1. System updates the already existent field with the new value passed in.
+
+* 3a. The user realised he added the fields wrongly.
+    * 3a1. User keys command to delete the wrongly added field
+    
+  Use case resumes from step 1
+
+**Use case: Delete fields from contacts**
+
+**MSS**
+
+1. User keys command to delete field from a contact.
+2. System searches for contact specified by index number and removes specified field.
+3. System displays to user the field removed from the specified contact.
+
+   Steps 1-3 are repeated until all desired fields have been removed.
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. System is unable to parse or decode command.
+    * 2a1. System informs user of exact error and hints at how to fix the error.
+    * 2a2. User corrects and reenters the command.
+
+  Steps 2a1-2a2 are repeated until a valid command is entered.
+
+* 2b. The field to be removed does not exist.
+    * 2b1. System informs user that the field is not found.
+    * 2b2. User corrects and reenters the command.
+
+* 3a. User realises he removed the wrong field.
+    * 3a1. User keys command to add the wrongly deleted field.
+
+  Use case resumes from step 1
 
 ### Non-Functional Requirements
 
