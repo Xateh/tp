@@ -32,20 +32,20 @@ public class TagCommandExtractorTest {
     @Test
     public void parse_invalidArgs_throwsParseException() throws LexerException, ParserException, ValidationException {
         // no index
-        assertThrows(ValidationException.class,
-                () -> TagCommandExtractor.extract(BareCommand.parse("tag")));
-        assertThrows(ValidationException.class,
-                () -> TagCommandExtractor.extract(BareCommand.parse("tag friend")));
+        assertThrows(ValidationException.class, () ->
+                TagCommandExtractor.extract(BareCommand.parse("tag")));
+        assertThrows(ValidationException.class, () ->
+                TagCommandExtractor.extract(BareCommand.parse("tag friend")));
 
         // invalid index
-        assertThrows(ValidationException.class,
-                () -> TagCommandExtractor.extract(BareCommand.parse("tag 0 friend")));
-        assertThrows(ValidationException.class,
-                () -> TagCommandExtractor.extract(BareCommand.parse("tag a friend")));
+        assertThrows(ValidationException.class, () ->
+                TagCommandExtractor.extract(BareCommand.parse("tag 0 friend")));
+        assertThrows(ValidationException.class, () ->
+                TagCommandExtractor.extract(BareCommand.parse("tag a friend")));
 
         // no tags after valid index
-        assertThrows(ValidationException.class,
-                () -> TagCommandExtractor.extract(BareCommand.parse("tag 1")));
+        assertThrows(ValidationException.class, () ->
+                TagCommandExtractor.extract(BareCommand.parse("tag 1")));
     }
 
     @Test

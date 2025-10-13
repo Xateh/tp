@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 
 import seedu.address.logic.commands.Command;
+import seedu.address.logic.commands.exceptions.ResolutionException;
 import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.commands.extractors.CommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
@@ -45,17 +46,17 @@ public enum Bindings {
      * @return CommandExtractor corresponding to the imperatives that match the predicate.
      * @throws ValidationException When no commands are resolved to or there are multiple resolved commands.
      */
-    public static CommandExtractor<?> resolveExactBinding(Predicate<String> predicate) throws ValidationException {
+    public static CommandExtractor<?> resolveExactBinding(Predicate<String> predicate) throws ResolutionException {
         CommandExtractor<?>[] extractors = Arrays.stream(Bindings.values())
                 .filter(binding -> predicate.test(binding.imperative))
                 .map(binding -> binding.extractor).toArray(CommandExtractor<?>[]::new);
 
         if (extractors.length == 0) {
-            throw new ValidationException(MESSAGE_NO_MATCHING_BINDING);
+            throw new ResolutionException(MESSAGE_NO_MATCHING_BINDING);
         }
 
         if (extractors.length > 1) {
-            throw new ValidationException(MESSAGE_AMBIGUOUS_BINDING);
+            throw new ResolutionException(MESSAGE_AMBIGUOUS_BINDING);
         }
 
         return extractors[0];

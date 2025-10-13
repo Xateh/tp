@@ -5,7 +5,6 @@ import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.TagCommand;
-import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.model.tag.Tag;
