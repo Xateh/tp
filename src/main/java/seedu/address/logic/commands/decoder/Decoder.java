@@ -10,6 +10,8 @@ import seedu.address.logic.grammars.command.BareCommand;
  * Utility class for decoding given commands and dispatching to the relevant command(s).
  */
 public class Decoder {
+    private Decoder() {}
+
     /**
      * Decodes the relevant {@code Command} to be executed.
      * @param bareCommand Input bare command

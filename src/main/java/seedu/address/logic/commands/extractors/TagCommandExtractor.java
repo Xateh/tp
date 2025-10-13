@@ -19,6 +19,8 @@ public class TagCommandExtractor {
     public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_TAGS_UNSPECIFIED = "At least one tag must be specified.";
 
+    private TagCommandExtractor() {}
+
     /**
      * Extracts command parameters from the given Command object. Performs input validation as well.
      *
