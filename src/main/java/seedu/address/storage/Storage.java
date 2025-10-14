@@ -36,4 +36,7 @@ public interface Storage extends AddressBookStorage, UserPrefsStorage, SessionSt
     @Override
     Optional<SessionData> readSession() throws DataLoadingException;
 
+    @Override
+    Path getSessionDirectory();
+
 }

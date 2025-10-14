@@ -4,8 +4,9 @@ This document specifies a JSON-based format for persisting an AddressBook sessio
 
 ## File Location and Naming
 
-* Session files are stored inside the data directory alongside `addressbook.json`.
-* The default filename is `session.json`. Implementations may append a timestamp suffix (e.g. `session-2025-10-14T04-45-00.json`) when keeping multiple snapshots.
+* Session files are stored inside the data directory, under a dedicated `sessions/` subfolder (e.g. `data/sessions/`).
+* Each snapshot is written as a unique file named `session-<timestamp>-<zone>.json`, where `<timestamp>` is the local time formatted as `yyyy-MM-dd'T'HH-mm-ss-SSS` and `<zone>` is the system zone ID with slashes replaced by hyphens (e.g. `session-2025-10-14T12-45-00-123-Asia-Singapore.json`).
+* At startup, the application picks the snapshot with the latest `savedAt` value automatically.
 
 ## Top-Level Structure
 

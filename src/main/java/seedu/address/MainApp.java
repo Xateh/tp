@@ -22,6 +22,7 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.util.SampleDataUtil;
+import seedu.address.session.SessionData;
 import seedu.address.storage.AddressBookStorage;
 import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonSessionStorage;
@@ -60,23 +61,31 @@ public class MainApp extends Application {
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
         Path addressBookPath = userPrefs.getAddressBookFilePath();
         AddressBookStorage addressBookStorage = new JsonAddressBookStorage(addressBookPath);
-        Path sessionPath = deriveSessionPath(addressBookPath);
-        JsonSessionStorage sessionStorage = new JsonSessionStorage(sessionPath);
+        Path sessionDir = deriveSessionDirectory(addressBookPath);
+        JsonSessionStorage sessionStorage = new JsonSessionStorage(sessionDir);
         storage = new StorageManager(addressBookStorage, userPrefsStorage, sessionStorage);
 
         model = initModelManager(storage, userPrefs);
 
-        logic = new LogicManager(model, storage);
+        Optional<SessionData> restoredSession = Optional.empty();
+        try {
+            restoredSession = storage.readSession();
+        } catch (DataLoadingException e) {
+            logger.warning("Session files could not be read. Starting without restoring session. "
+                    + e.getMessage());
+        }
+
+        logic = new LogicManager(model, storage, restoredSession);
 
         ui = new UiManager(logic);
     }
 
-    private Path deriveSessionPath(Path addressBookPath) {
+    private Path deriveSessionDirectory(Path addressBookPath) {
         Path parent = addressBookPath.getParent();
         if (parent == null) {
-            return Path.of("session.json");
+            return Path.of("sessions");
         }
-        return parent.resolve("session.json");
+        return parent.resolve("sessions");
     }
 
     /**

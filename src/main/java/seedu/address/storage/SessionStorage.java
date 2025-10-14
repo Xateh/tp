@@ -12,9 +12,12 @@ import seedu.address.session.SessionData;
  */
 public interface SessionStorage {
 
-    Path getSessionFilePath();
+    /** Returns the directory where session snapshots are stored. */
+    Path getSessionDirectory();
 
+    /** Reads the session snapshot with the latest timestamp, if any. */
     Optional<SessionData> readSession() throws DataLoadingException;
 
+    /** Persists a new session snapshot. */
     void saveSession(SessionData sessionData) throws IOException;
 }
