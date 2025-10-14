@@ -24,6 +24,7 @@ import seedu.address.model.UserPrefs;
 import seedu.address.model.util.SampleDataUtil;
 import seedu.address.storage.AddressBookStorage;
 import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonSessionStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.Storage;
 import seedu.address.storage.StorageManager;
@@ -57,14 +58,25 @@ public class MainApp extends Application {
 
         UserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(config.getUserPrefsFilePath());
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
-        AddressBookStorage addressBookStorage = new JsonAddressBookStorage(userPrefs.getAddressBookFilePath());
-        storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        Path addressBookPath = userPrefs.getAddressBookFilePath();
+        AddressBookStorage addressBookStorage = new JsonAddressBookStorage(addressBookPath);
+        Path sessionPath = deriveSessionPath(addressBookPath);
+        JsonSessionStorage sessionStorage = new JsonSessionStorage(sessionPath);
+        storage = new StorageManager(addressBookStorage, userPrefsStorage, sessionStorage);
 
         model = initModelManager(storage, userPrefs);
 
         logic = new LogicManager(model, storage);
 
         ui = new UiManager(logic);
+    }
+
+    private Path deriveSessionPath(Path addressBookPath) {
+        Path parent = addressBookPath.getParent();
+        if (parent == null) {
+            return Path.of("session.json");
+        }
+        return parent.resolve("session.json");
     }
 
     /**
@@ -181,6 +193,11 @@ public class MainApp extends Application {
             storage.saveUserPrefs(model.getUserPrefs());
         } catch (IOException e) {
             logger.severe("Failed to save preferences " + StringUtil.getDetails(e));
+        }
+        try {
+            storage.saveSession(logic.getCurrentSessionData());
+        } catch (IOException e) {
+            logger.severe("Failed to save session " + StringUtil.getDetails(e));
         }
     }
 }

@@ -13,6 +13,7 @@ import static seedu.address.testutil.TypicalPersons.AMY;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,8 +30,10 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Person;
 import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonSessionStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
+import seedu.address.session.SessionData;
 import seedu.address.testutil.PersonBuilder;
 
 public class LogicManagerTest {
@@ -48,7 +51,8 @@ public class LogicManagerTest {
         JsonAddressBookStorage addressBookStorage =
                 new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        JsonSessionStorage sessionStorage = new JsonSessionStorage(temporaryFolder.resolve("session.json"));
+        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage, sessionStorage);
         logic = new LogicManager(model, storage);
     }
 
@@ -160,7 +164,8 @@ public class LogicManagerTest {
 
         JsonUserPrefsStorage userPrefsStorage =
                 new JsonUserPrefsStorage(temporaryFolder.resolve("ExceptionUserPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+    JsonSessionStorage sessionStorage = new JsonSessionStorage(temporaryFolder.resolve("session.json"));
+    StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage, sessionStorage);
 
         logic = new LogicManager(model, storage);
 
@@ -171,5 +176,25 @@ public class LogicManagerTest {
         ModelManager expectedModel = new ModelManager();
         expectedModel.addPerson(expectedPerson);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void getCurrentSessionData_recordsSuccessfulCommands() throws Exception {
+        logic.execute(ListCommand.COMMAND_WORD);
+        SessionData sessionData = logic.getCurrentSessionData();
+        assertEquals(1, sessionData.getCommandHistory().size());
+        assertEquals(ListCommand.COMMAND_WORD, sessionData.getCommandHistory().get(0).getCommandText());
+    }
+
+    @Test
+    public void getCurrentSessionData_tracksSearchKeywords() throws Exception {
+        model.addPerson(new PersonBuilder().withName("Alice Pauline").build());
+        logic.execute("find Alice");
+        SessionData sessionData = logic.getCurrentSessionData();
+        assertEquals(List.of("Alice"), sessionData.getSearchKeywords());
+
+        logic.execute(ListCommand.COMMAND_WORD);
+        sessionData = logic.getCurrentSessionData();
+        assertEquals(List.of(), sessionData.getSearchKeywords());
     }
 }
