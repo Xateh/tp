@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
@@ -16,6 +17,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
+import seedu.address.session.SessionCommand;
 import seedu.address.session.SessionData;
 
 public class StorageManagerTest {
@@ -29,7 +31,7 @@ public class StorageManagerTest {
     public void setUp() {
         JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(getTempFilePath("ab"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(getTempFilePath("prefs"));
-        JsonSessionStorage sessionStorage = new JsonSessionStorage(getTempFilePath("session"));
+        JsonSessionStorage sessionStorage = new JsonSessionStorage(getTempFilePath("sessions"));
         storageManager = new StorageManager(addressBookStorage, userPrefsStorage, sessionStorage);
     }
 
@@ -71,15 +73,31 @@ public class StorageManagerTest {
 
     @Test
     public void sessionReadSave() throws Exception {
-        SessionData session = new SessionData(
+        SessionData olderSession = new SessionData(
                 Instant.parse("2025-10-14T00:00:00Z"),
                 storageManager.getAddressBookFilePath(),
                 List.of("Alice"),
-                List.of(),
+                List.of(new SessionCommand(Instant.parse("2025-10-14T00:00:00Z"), "list")),
                 new GuiSettings());
-        storageManager.saveSession(session);
+        SessionData newerSession = new SessionData(
+                Instant.parse("2025-10-15T00:00:00Z"),
+                storageManager.getAddressBookFilePath(),
+                List.of("Bob"),
+                List.of(new SessionCommand(Instant.parse("2025-10-15T00:00:00Z"), "find Bob")),
+                new GuiSettings());
+
+        storageManager.saveSession(olderSession);
+        storageManager.saveSession(newerSession);
+
         SessionData retrieved = storageManager.readSession().get();
-        assertEquals(session.getSearchKeywords(), retrieved.getSearchKeywords());
+        assertEquals(newerSession.getSavedAt(), retrieved.getSavedAt());
+        assertEquals(newerSession.getSearchKeywords(), retrieved.getSearchKeywords());
+
+        long fileCount;
+        try (var stream = Files.list(storageManager.getSessionDirectory())) {
+            fileCount = stream.count();
+        }
+        assertEquals(2, fileCount);
     }
 
 }

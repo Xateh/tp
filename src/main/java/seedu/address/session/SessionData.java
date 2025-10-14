@@ -22,8 +22,17 @@ public class SessionData {
     private final List<SessionCommand> commandHistory;
     private final GuiSettings guiSettings;
 
+    /**
+     * Constructs a {@code SessionData} snapshot with all persisted session attributes.
+     *
+     * @param savedAt time the snapshot was captured
+     * @param addressBookPath path to the address book associated with this session
+     * @param searchKeywords active search keywords when the snapshot was taken
+     * @param commandHistory history of executed commands
+     * @param guiSettings GUI settings to restore on the next launch
+     */
     public SessionData(Instant savedAt, Path addressBookPath, List<String> searchKeywords,
-            List<SessionCommand> commandHistory, GuiSettings guiSettings) {
+        List<SessionCommand> commandHistory, GuiSettings guiSettings) {
         this.savedAt = requireNonNull(savedAt);
         this.addressBookPath = requireNonNull(addressBookPath);
         this.searchKeywords = List.copyOf(requireNonNull(searchKeywords));

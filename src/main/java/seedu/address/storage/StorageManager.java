@@ -82,11 +82,6 @@ public class StorageManager implements Storage {
     // ================ Session methods ==============================
 
     @Override
-    public Path getSessionFilePath() {
-        return sessionStorage.getSessionFilePath();
-    }
-
-    @Override
     public Optional<SessionData> readSession() throws DataLoadingException {
         return sessionStorage.readSession();
     }
@@ -94,6 +89,11 @@ public class StorageManager implements Storage {
     @Override
     public void saveSession(SessionData sessionData) throws IOException {
         sessionStorage.saveSession(sessionData);
+    }
+
+    @Override
+    public Path getSessionDirectory() {
+        return sessionStorage.getSessionDirectory();
     }
 
 }

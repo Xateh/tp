@@ -3,13 +3,19 @@ package seedu.address.storage;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
-import seedu.address.commons.util.FileUtil;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.session.SessionData;
 
@@ -20,49 +26,68 @@ public class JsonSessionStorage implements SessionStorage {
 
     private static final Logger logger = LogsCenter.getLogger(JsonSessionStorage.class);
 
-    private final Path sessionFilePath;
+    private static final DateTimeFormatter FILE_NAME_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss-SSS");
 
-    public JsonSessionStorage(Path sessionFilePath) {
-        this.sessionFilePath = requireNonNull(sessionFilePath);
+    private final Path sessionDirectory;
+
+    public JsonSessionStorage(Path sessionDirectory) {
+        this.sessionDirectory = requireNonNull(sessionDirectory);
     }
 
     @Override
-    public Path getSessionFilePath() {
-        return sessionFilePath;
+    public Path getSessionDirectory() {
+        return sessionDirectory;
     }
 
     @Override
     public Optional<SessionData> readSession() throws DataLoadingException {
-        return readSession(sessionFilePath);
-    }
-
-    public Optional<SessionData> readSession(Path filePath) throws DataLoadingException {
-        requireNonNull(filePath);
-
-        Optional<JsonSerializableSession> jsonSession =
-                JsonUtil.readJsonFile(filePath, JsonSerializableSession.class);
-        if (!jsonSession.isPresent()) {
+        if (!Files.exists(sessionDirectory) || !Files.isDirectory(sessionDirectory)) {
             return Optional.empty();
         }
 
-        try {
-            return Optional.of(jsonSession.get().toModelType());
-        } catch (Exception e) {
-            logger.warning("Failed to convert session file to model: " + e.getMessage());
+        List<Path> sessionFiles;
+        try (Stream<Path> stream = Files.list(sessionDirectory)) {
+            sessionFiles = stream.filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
             throw new DataLoadingException(e);
         }
+
+        SessionData latestSession = null;
+        for (Path file : sessionFiles) {
+            Optional<JsonSerializableSession> jsonSession =
+                    JsonUtil.readJsonFile(file, JsonSerializableSession.class);
+            if (!jsonSession.isPresent()) {
+                continue;
+            }
+            try {
+                SessionData candidate = jsonSession.get().toModelType();
+                if (latestSession == null || candidate.getSavedAt().isAfter(latestSession.getSavedAt())) {
+                    latestSession = candidate;
+                }
+            } catch (Exception e) {
+                logger.warning("Skipping invalid session file " + file + ": " + e.getMessage());
+            }
+        }
+
+        return Optional.ofNullable(latestSession);
     }
 
     @Override
     public void saveSession(SessionData sessionData) throws IOException {
-        saveSession(sessionData, sessionFilePath);
+        requireNonNull(sessionData);
+        Files.createDirectories(sessionDirectory);
+        Path target = sessionDirectory.resolve(createFileName(sessionData));
+        JsonUtil.saveJsonFile(new JsonSerializableSession(sessionData), target);
     }
 
-    public void saveSession(SessionData sessionData, Path filePath) throws IOException {
-        requireNonNull(sessionData);
-        requireNonNull(filePath);
-
-        FileUtil.createIfMissing(filePath);
-        JsonUtil.saveJsonFile(new JsonSerializableSession(sessionData), filePath);
+    private String createFileName(SessionData sessionData) {
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime zoned = sessionData.getSavedAt().atZone(zoneId);
+        String zoneIdComponent = zoneId.getId().replace('/', '-');
+        String timestampComponent = zoned.format(FILE_NAME_FORMATTER);
+        return String.format("session-%s-%s.json", timestampComponent, zoneIdComponent);
     }
 }

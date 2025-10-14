@@ -13,6 +13,12 @@ public class SessionCommand {
     private final Instant timestamp;
     private final String commandText;
 
+    /**
+     * Constructs a {@code SessionCommand} representing a single executed command.
+     *
+     * @param timestamp instant the command was executed
+     * @param commandText raw command text entered by the user
+     */
     public SessionCommand(Instant timestamp, String commandText) {
         this.timestamp = requireNonNull(timestamp);
         this.commandText = requireNonNull(commandText);
