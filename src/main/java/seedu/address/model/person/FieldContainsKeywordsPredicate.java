@@ -16,6 +16,11 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
         this.keywords = keywords;
     }
 
+    /** Returns the keywords used by this predicate. */
+    public List<String> getKeywords() {
+        return List.copyOf(keywords);
+    }
+
     /**
      * Returns {@code true} if any of the given {@code keywords} matches at least one of the
      * {@link Person}'s fields exactly. A match is case-insensitive and checks across multiple fields:
