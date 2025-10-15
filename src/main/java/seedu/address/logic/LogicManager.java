@@ -11,7 +11,7 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.FieldCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.grammars.command.Command;
+import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.logic.grammars.command.lexer.LexerException;
 import seedu.address.logic.grammars.command.parser.ParserException;
 import seedu.address.logic.parser.AddressBookParser;
@@ -50,13 +50,14 @@ public class LogicManager implements Logic {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
         try {
-            Command gcmd = Command.parse(commandText);
+            BareCommand gcmd = BareCommand.parse(commandText);
             String imp = gcmd.getImperative();
             logger.info("[GRAMMAR] imp=" + imp); //TEMP: remove after verifying
 
             if (imp != null && imp.equalsIgnoreCase("field")) {
                 FieldCommand fc = new FieldCommand(gcmd);
-                String feedback = fc.execute(model); // mutates model
+                CommandResult result = fc.execute(model);
+                String feedback = result.getFeedbackToUser(); // mutates model
 
                 try {
                     storage.saveAddressBook(model.getAddressBook());

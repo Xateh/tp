@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import seedu.address.logic.Messages;
-import seedu.address.logic.grammars.command.Command;
+import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
 
@@ -15,16 +16,17 @@ import seedu.address.model.person.Person;
  * Adds or updates custom key→value fields on a person.
  * Usage: {@code field <index> /<key>:<value> ...}
  */
-public class FieldCommand {
+public class FieldCommand extends Command {
 
+    public static final String COMMAND_WORD = "field";
     private final int oneBasedIndex;
     private final Map<String, String> pairs;
 
     /**
-     * Creates a FieldCommand from a parsed {@link Command}.
+     * Creates a FieldCommand from a parsed {@link BareCommand}.
      * @throws IllegalArgumentException if parameters/options are invalid.
      */
-    public FieldCommand(Command c) {
+    public FieldCommand(BareCommand c) {
         requireNonNull(c);
         if (!"field".equalsIgnoreCase(c.getImperative())) {
             throw new IllegalArgumentException("Wrong imperative for FieldCommand");
@@ -67,12 +69,13 @@ public class FieldCommand {
     /**
      * Executes the command: updates the selected person's custom fields and returns a user message.
      */
-    public String execute(Model model) {
+    @Override
+    public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         List<Person> list = model.getFilteredPersonList();
         int zero = oneBasedIndex - 1;
         if (zero < 0 || zero >= list.size()) {
-            throw new IllegalArgumentException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
         Person target = list.get(zero);
 
@@ -100,7 +103,7 @@ public class FieldCommand {
             sb.append(e.getKey()).append(":").append(e.getValue());
         }
         sb.append(" for ").append(edited.getName().fullName);
-        return sb.toString();
+        return new CommandResult(sb.toString());
     }
 
     private static String normalizeKey(String key) {

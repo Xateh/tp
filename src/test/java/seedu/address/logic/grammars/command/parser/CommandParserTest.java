@@ -69,10 +69,10 @@ public class CommandParserTest {
                 └─ OptionList
                    ├─ Option
                    │  └─ OptionName
-                   │     └─ Word ("boolopt")
+                   │     └─ Text ("boolopt")
                    └─ Option
                       ├─ OptionName
-                      │  └─ Word ("opt2")
+                      │  └─ Text ("opt2")
                       └─ OptionValue
                          └─ Text ("value2")\
                 """;
@@ -99,20 +99,20 @@ public class CommandParserTest {
                 └─ OptionList
                    ├─ Option
                    │  └─ OptionName
-                   │     └─ Word ("important")
+                   │     └─ Text ("important")
                    ├─ Option
                    │  ├─ OptionName
-                   │  │  └─ Word ("description")
+                   │  │  └─ Text ("description")
                    │  └─ OptionValue
                    │     └─ Text ("online quiz")
                    ├─ Option
                    │  ├─ OptionName
-                   │  │  └─ Word ("from")
+                   │  │  └─ Text ("from")
                    │  └─ OptionValue
                    │     └─ Text ("2025-09-20 1000")
                    └─ Option
                       ├─ OptionName
-                      │  └─ Word ("to")
+                      │  └─ Text ("to")
                       └─ OptionValue
                          └─ Text ("2025-09-20 1100")\
                 """;
@@ -137,8 +137,8 @@ public class CommandParserTest {
     }
 
     @Test
-    public void parse_invalidTokenWhenWordExpectedInOptionName_throwsException() {
-        String ingest = "test /\"opt1\":word";
+    public void parse_invalidTokenWhenOptionNameExpected_throwsException() {
+        String ingest = "test /:word";
 
         assertThrows(ParserException.class, () -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
     }

@@ -18,7 +18,7 @@ import seedu.address.logic.grammars.command.parser.ast.AstNode;
  * parameter        → text
  * option_list      → ( option )+
  * option           → SLASH option_name ( COLON option_value )*
- * option_name      → word
+ * option_name      → text
  * option_value     → text
  * text             → TEXT | WORD
  * word             → WORD
@@ -147,8 +147,8 @@ public class CommandParser {
 
     private AstNode.OptionName parseOptionName() throws ProductionApplicationException {
         try {
-            AstNode.Word word = this.parseWord();
-            return new AstNode.OptionName(word);
+            AstNode.Text text = this.parseText();
+            return new AstNode.OptionName(text);
         } catch (ProductionApplicationException e) {
             ParserError error = e.getParserError();
             error.addProductionNonterminal("option-name");

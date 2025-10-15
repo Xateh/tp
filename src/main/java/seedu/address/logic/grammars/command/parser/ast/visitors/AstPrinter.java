@@ -117,8 +117,8 @@ public class AstPrinter implements AstVisitor<String> {
     @Override
     public String visitOptionName(AstNode.OptionName node) {
         StringBuilder builder = new StringBuilder("OptionName");
-        String wordString = node.getWord().accept(this);
-        builder.append("\n").append(addPrefixes(wordString, true));
+        String textString = node.getText().accept(this);
+        builder.append("\n").append(addPrefixes(textString, true));
         return builder.toString();
     }
 
