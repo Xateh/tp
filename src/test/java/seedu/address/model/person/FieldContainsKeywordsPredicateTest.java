@@ -2,6 +2,7 @@ package seedu.address.model.person;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -155,6 +156,24 @@ public class FieldContainsKeywordsPredicateTest {
 
         String expected = FieldContainsKeywordsPredicate.class.getCanonicalName() + "{keywords=" + keywords + "}";
         assertEquals(expected, predicate.toString());
+    }
+
+    @Test
+    public void getKeywords_returnsDefensiveCopy() {
+        List<String> original = Arrays.asList("Alice", "Bob");
+        FieldContainsKeywordsPredicate predicate = new FieldContainsKeywordsPredicate(original);
+
+        List<String> extracted = predicate.getKeywords();
+        assertEquals(original, extracted);
+        assertFalse(extracted == original);
+    }
+
+    @Test
+    public void getKeywords_returnsUnmodifiableList() {
+        FieldContainsKeywordsPredicate predicate = new FieldContainsKeywordsPredicate(Arrays.asList("Alice"));
+
+        List<String> extracted = predicate.getKeywords();
+        assertThrows(UnsupportedOperationException.class, () -> extracted.add("Bob"));
     }
 }
 

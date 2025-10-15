@@ -1,8 +1,10 @@
 package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.awt.Point;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -68,5 +70,75 @@ class JsonSerializableSessionTest {
         JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
 
         assertThrows(IllegalValueException.class, jsonSession::toModelType);
+    }
+
+    @Test
+    void toModelType_missingCommandText_throwsIllegalValueException() throws IOException {
+        String addressBookPathJson = ADDRESS_BOOK_PATH.toString().replace("\\", "\\\\");
+        String template = "{\"formatVersion\":\"1.0\",\"savedAt\":\"2025-10-14T00:00:00Z\","
+                + "\"addressBookPath\":\"%s\",\"guiSettings\":{\"windowWidth\":800,\"windowHeight\":600},"
+                + "\"commandHistory\":[{\"timestamp\":\"2025-10-14T00:01:00Z\"}]}";
+        String json = String.format(template, addressBookPathJson);
+        JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
+
+        assertThrows(IllegalValueException.class, jsonSession::toModelType);
+    }
+
+    @Test
+    void toModelType_invalidCommandTimestamp_throwsIllegalValueException() throws IOException {
+        String addressBookPathJson = ADDRESS_BOOK_PATH.toString().replace("\\", "\\\\");
+        String template = "{\"formatVersion\":\"1.0\",\"savedAt\":\"2025-10-14T00:00:00Z\","
+                + "\"addressBookPath\":\"%s\",\"guiSettings\":{\"windowWidth\":800,\"windowHeight\":600},"
+                + "\"commandHistory\":[{\"timestamp\":\"invalid-timestamp\",\"commandText\":\"list\"}]}";
+        String json = String.format(template, addressBookPathJson);
+        JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
+
+        assertThrows(IllegalValueException.class, jsonSession::toModelType);
+    }
+
+    @Test
+    void toModelType_missingAddressBookPath_throwsIllegalValueException() throws IOException {
+        String json = "{\"formatVersion\":\"1.0\",\"savedAt\":\"2025-10-14T00:00:00Z\","
+                + "\"guiSettings\":{\"windowWidth\":800,\"windowHeight\":600},\"commandHistory\":[]}";
+        JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
+
+        assertThrows(IllegalValueException.class, jsonSession::toModelType);
+    }
+
+    @Test
+    void toModelType_missingGuiSettings_throwsIllegalValueException() throws IOException {
+        String addressBookPathJson = ADDRESS_BOOK_PATH.toString().replace("\\", "\\\\");
+        String template = "{\"formatVersion\":\"1.0\",\"savedAt\":\"2025-10-14T00:00:00Z\","
+                + "\"addressBookPath\":\"%s\",\"guiSettings\":null,\"commandHistory\":[]}";
+        String json = String.format(template, addressBookPathJson);
+        JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
+
+        assertThrows(IllegalValueException.class, jsonSession::toModelType);
+    }
+
+    @Test
+    void toModelType_missingGuiWindowWidth_throwsIllegalValueException() throws IOException {
+        String addressBookPathJson = ADDRESS_BOOK_PATH.toString().replace("\\", "\\\\");
+        String template = "{\"formatVersion\":\"1.0\",\"savedAt\":\"2025-10-14T00:00:00Z\","
+                + "\"addressBookPath\":\"%s\",\"guiSettings\":{\"windowHeight\":600},\"commandHistory\":[]}";
+        String json = String.format(template, addressBookPathJson);
+        JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
+
+        assertThrows(IllegalValueException.class, jsonSession::toModelType);
+    }
+
+    @Test
+    void toModelType_guiSettingsMissingCoordinates_defaultsToOrigin() throws IllegalValueException, IOException {
+        String addressBookPathJson = ADDRESS_BOOK_PATH.toString().replace("\\", "\\\\");
+        String template = "{\"formatVersion\":\"1.0\",\"savedAt\":\"2025-10-14T00:00:00Z\","
+                + "\"addressBookPath\":\"%s\",\"guiSettings\":{\"windowWidth\":800,\"windowHeight\":600},"
+                + "\"commandHistory\":[]}";
+        String json = String.format(template, addressBookPathJson);
+        JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
+
+        SessionData converted = jsonSession.toModelType();
+        Point coordinates = converted.getGuiSettings().getWindowCoordinates();
+        assertNotNull(coordinates);
+        assertEquals(new Point(0, 0), coordinates);
     }
 }
