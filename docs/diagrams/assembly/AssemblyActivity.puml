@@ -1,0 +1,61 @@
+@startuml
+start
+
+:Receive command string;
+
+partition "Phase 1: Lexing" {
+    :Lex and create TokenisedCommand;
+
+    if () then ([Lexing fails])
+        #pink:Throw LexerException;
+        stop
+    else ([Lexing passes])
+    endif
+}
+
+partition "Phase 2: Parsing" {
+    :Parse and create Command AST;
+
+    if () then ([Parsing fails])
+        #pink:Throw ParserException;
+        stop
+    else ([Parsing passes])
+        :Visit AST to extract BareCommand;
+    endif
+}
+
+partition "Phase 3: Resolution" {
+    :Extract imperative from BareCommand;
+
+    :Query Bindings with imperative predicate;
+
+    :Filter bindings by predicate;
+    :Count matching extractors;
+
+    if () then ([match count == 0])
+        #pink:Throw ResolutionException\n"Unable to find valid matching command";
+        stop
+    elseif () then ([match count > 1])
+        #pink:Throw ResolutionException\n"Resolved command is ambiguous";
+        stop
+    else ([match count == 1])
+        :Retrieve CommandExtractor;
+    endif
+}
+
+partition "Phase 4: Validation" {
+    :Extract and validate parameters from BareCommand;
+
+    if () then ([Validation fails])
+        #pink:Throw ValidationException;
+        stop
+    else ([Validation passes])
+        :Construct typed Command object;
+    endif
+}
+
+:Return executable Command;
+
+stop
+
+@enduml

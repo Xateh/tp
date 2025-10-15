@@ -1,0 +1,68 @@
+@startuml
+actor System
+participant "Caller" as Caller
+participant "Decoder" as Decoder
+participant "BareCommand" as BareCmd
+participant "Bindings" as Bindings
+participant "CommandExtractor" as Extractor
+participant "Command" as Cmd
+
+System -> Decoder: decode(bareCommand)
+activate Decoder
+
+note right of Decoder
+  Resolution Phase:
+  Match imperative to
+  command extractor
+end note
+
+Decoder -> BareCmd: getImperative()
+activate BareCmd
+BareCmd --> Decoder
+deactivate BareCmd
+
+Decoder -> Bindings: resolveExactBinding(predicate)
+activate Bindings
+
+note right of Bindings
+  Filter bindings using predicate:
+  imperative.equals("tag")
+end note
+
+Bindings --> Decoder: return CommandExtractor
+deactivate Bindings
+
+note right of Decoder
+  Validation Phase:
+  Extract and validate
+  command parameters
+end note
+
+Decoder -> Extractor: extract(bareCommand)
+activate Extractor
+
+note right of Extractor
+  Construction Phase:
+  Build typed command
+  with validated parameters
+end note
+
+create Cmd
+Extractor -> Cmd
+activate Cmd
+Cmd --> Extractor: return Command
+deactivate Cmd
+
+Extractor --> Decoder: return Command
+deactivate Extractor
+
+Decoder --> System: return Command
+deactivate Decoder
+
+note right of System
+  Command is now ready
+  for execution with validated
+  index and tag set
+end note
+
+@enduml

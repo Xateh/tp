@@ -1,13 +1,13 @@
 package seedu.address.logic.grammars.command.parser.ast.visitors;
 
-import seedu.address.logic.grammars.command.Command;
+import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.logic.grammars.command.parser.ast.AstNode;
 
 /**
  * Extractor for commands from a complete AST.
  */
 public class CommandExtractor implements AstVisitor<String> {
-    private final Command.CommandBuilder commandBuilder = new Command.CommandBuilder();
+    private final BareCommand.BareCommandBuilder bareCommandBuilder = new BareCommand.BareCommandBuilder();
 
     /**
      * Returns a Command populated with the given AST's items.
@@ -15,9 +15,9 @@ public class CommandExtractor implements AstVisitor<String> {
      * @param node Root of the AST to populate Command with.
      * @return Populated Command.
      */
-    public Command extract(AstNode node) {
+    public BareCommand extract(AstNode node) {
         node.accept(this);
-        return this.commandBuilder.build();
+        return this.bareCommandBuilder.build();
     }
 
     @Override
@@ -30,7 +30,7 @@ public class CommandExtractor implements AstVisitor<String> {
 
     @Override
     public String visitImperative(AstNode.Imperative node) {
-        this.commandBuilder.setImperative(visitWord(node.getWord()));
+        this.bareCommandBuilder.setImperative(visitWord(node.getWord()));
         return null;
     }
 
@@ -44,7 +44,7 @@ public class CommandExtractor implements AstVisitor<String> {
 
     @Override
     public String visitParameter(AstNode.Parameter node) {
-        this.commandBuilder.addParameter(visitText(node.getText()));
+        this.bareCommandBuilder.addParameter(visitText(node.getText()));
         return null;
     }
 
@@ -59,10 +59,10 @@ public class CommandExtractor implements AstVisitor<String> {
     @Override
     public String visitOption(AstNode.Option node) {
         if (node.hasOptionValue()) {
-            this.commandBuilder.setOption(visitOptionName(node.getOptionName()),
+            this.bareCommandBuilder.setOption(visitOptionName(node.getOptionName()),
                     visitOptionValue((node.getOptionValue())));
         } else {
-            this.commandBuilder.setOption(visitOptionName(node.getOptionName()));
+            this.bareCommandBuilder.setOption(visitOptionName(node.getOptionName()));
         }
 
         return null;
