@@ -2,12 +2,12 @@
 /.gradle/
 /build/
 src/main/resources/docs/
-/gradle-test.log
 
 # IDEA files
 /.idea/
 /out/
 /*.iml
+/gradle-test.log
 
 # Storage/log files
 /data/
