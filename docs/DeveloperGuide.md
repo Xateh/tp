@@ -599,13 +599,9 @@ testers are expected to do more *exploratory* testing.
 
 --------------------------------------------------------------------------------------------------------------------
 
-## Appendix: Lexing and Parsing
+## Appendix: Command Assembly
 
-This appendix details the parsing strategy used by AssetSphere, including how to:
-- properly accommodate command syntax changes,
-- handle/signal lexing/parsing errors,
-- manipulate produced ASTs, and
-- process the parser's main output, `Command`.
+This appendix details the full command assembly strategy used by AssetSphere.
 
 ### Overarching Architecture
 
@@ -613,7 +609,25 @@ This appendix details the parsing strategy used by AssetSphere, including how to
     This subsection will be moved to the relevant segment in the main DG once the new parser is fully integrated, and will serve as the first point of contact with the parsing component.
 </box>
 
-<puml src="diagrams/grammars/Strategy.puml" width=1080 />
+Command assembly in AssetSphere is handled as shown in the following activity diagram.
+
+<puml src="diagrams/assembly/AssemblyActivity.puml" width=1080 />
+
+Before a command can be executed, a sequence of steps assemble the `Command` object to be called. This process, which we call **assembly**, is split into four distinct phases. Any of these phases may produce an exception, which will terminate this process.
+1. Lexing - User Input: `String` → Tokenised Command: `TokenisedCommand`
+2. Parsing - Tokenised Command: `TokenisedCommand` → AST: `ASTNode.Command`
+3. Resolution - Imperative: `String` → Command Extractor: `CommandExtractor`
+4. Validation - Bare Command: `BareCommand` → Assembled Command: `Command`
+
+We jointly refer to:
+- (1) and (2) together as **recognition**, and
+- (3) and (4) together as **decoding**.
+
+**Recognition**
+
+This segment describes the lexer and parser. The lexer and parser are interfaced with through the `BareCommand` facade.
+
+<puml src="diagrams/assembly/RecognitionStructure.puml" width=1080 />
 
 This diagram shows a truncated architecture (with auxiliary classes hidden) organized into five packages:
 
@@ -623,15 +637,39 @@ This diagram shows a truncated architecture (with auxiliary classes hidden) orga
   - **AST Package**: Shows all AST node types in the hierarchy (Command, Imperative, ParameterList, etc.)
     - **Visitor Package**: Contains the `AstVisitor` interface and `CommandExtractor` implementation
 
-<puml src="diagrams/grammars/Sequence.puml" width=1080 />
+<puml src="diagrams/assembly/RecognitionSequence.puml" width=1080 />
 
-This sequence diagram traces the high-level flow of execution (omitting exceptions and various internal implementation details) starting from `Command.parse(String)`:
+This sequence diagram traces the high-level flow of execution (omitting exceptions and various internal implementation details) starting from `BareCommand.parse(String)`:
 
 1. **Lexing Phase**: Shows how the lexer processes the string character-by-character using peek/advance/munch operations, creating tokens
 2. **Parsing Phase**: Demonstrates recursive descent parsing with the parser calling various parse methods that mirror the grammar structure
-3. **Extraction Phase**: Illustrates the Visitor pattern in action, with the CommandExtractor traversing the AST and populating a CommandBuilder
+3. **Extraction Phase** (not an actual distinguished phase): Illustrates the Visitor pattern in action, with the CommandExtractor traversing the AST and populating a CommandBuilder
 
-The diagram includes notes explaining key concepts at each phase and shows both the normal flow and error handling paths. It clearly shows the three-stage transformation: String → Tokens → AST → Command.
+The diagram includes notes explaining key concepts at each phase and shows both the normal flow and error handling paths. It clearly shows the three-stage transformation: String → Tokens → AST → BareCommand.
+
+**Decoding**
+
+This segment describes resolution and validation. The components involved are interfaced with through the `Decoder` facade.
+
+<puml src="diagrams/assembly/DecodingStructure.puml" width=1080 />
+
+This diagram shows a truncated architecture (with auxiliary classes hidden) with the classes responsible for resolution and validation demarcated in their own packages.
+
+<puml src="diagrams/assembly/DecodingSequence.puml" width=1080 />
+
+This sequence diagram traces the high-level flow of execution (omitting exceptions and various internal implementation details) starting from `Decoder.decode(BareCommand)`:
+1. **Resolution Phase**: Shows how the exact command extractor (exact: no ambiguity) is identified given the imperative.
+2. **Validation Phase**: Validates all parameters and options to finish assembling the final `Command`.
+
+**Adding New Commands**
+
+To add a new command to the system,
+
+1. **Create the Command class** (e.g., `DeleteCommand extends Command`)
+2. **Implement a CommandExtractor** (e.g., `DeleteCommandExtractor` with static `extract()` method)
+3. **Register in Bindings enum**: Add one line like `DELETE("delete", DeleteCommandExtractor::extract)`
+
+The system automatically handles routing and dispatch.
 
 ### Lexer Architecture
 
@@ -792,13 +830,13 @@ Visitors typically follow a **recursive descent** pattern:
 
 **Overview**
 
-The `Command` class is a high-level facade that provides a simple, queryable interface for working with parsed commands. It serves as the primary entry point for users of the lexer/parser package, abstracting away the complexities of tokenisation, parsing, and AST traversal behind a clean, intuitive API.
+The `BareCommand` class is a high-level facade that provides a simple, queryable interface for working with parsed commands. It serves as the primary entry point for users of the lexer/parser package, abstracting away the complexities of tokenisation, parsing, and AST traversal behind a clean, intuitive API.
 
 **Design Philosophy**
 
-This class embodies the **Facade pattern**, hiding the multi-stage processing pipeline (lexing → parsing → AST extraction) behind a single static factory method. Implementors do not need to understand tokens, ASTs, or visitor patterns, but should just call `Command.parse()` and receive a structured representation of their command string.
+This class embodies the **Facade pattern**, hiding the multi-stage processing pipeline (lexing → parsing → AST extraction) behind a single static factory method. Implementors do not need to understand tokens, ASTs, or visitor patterns, but should just call `BareCommand.parse()` and receive a structured representation of their command string.
 
-The `Command` class represents the **semantic model** of a command, distilled from the syntactic AST into three fundamental components:
+The `BareCommand` class represents the **semantic model** of a command, distilled from the syntactic AST into three fundamental components:
 
 - **Imperative**: The command verb (e.g., `add`, `delete`, `edit`)
 - **Parameters**: Ordered positional arguments
@@ -816,7 +854,7 @@ The `parse()` method orchestrates a three-stage transformation:
 
 3. **Semantic Extraction** (`CommandExtractor.extract()`): Traverses the AST using the visitor pattern to extract semantic information, populating a `CommandBuilder` with the command's meaningful components.
 
-This pipeline separates concerns cleanly: lexing handles character-level details, parsing handles grammar structure, and extraction handles meaning. The `Command` class receives only the final, distilled result.
+This pipeline separates concerns cleanly: lexing handles character-level details, parsing handles grammar structure, and extraction handles meaning. The `BareCommand` class receives only the final, distilled result.
 
 **Data Model**
 
@@ -830,12 +868,12 @@ This design reflects typical command usage patterns: imperatives are always pres
 
 **Builder Pattern**
 
-The nested `CommandBuilder` class implements the **Builder pattern** to construct `Command` instances incrementally. This is particularly useful for the `CommandExtractor` visitor, which discovers command components as it traverses the AST:
+The nested `BareCommandBuilder` class implements the **Builder pattern** to construct `Command` instances incrementally. This is particularly useful for the `CommandExtractor` visitor, which discovers command components as it traverses the AST:
 
 - **`setImperative(String)`**: Sets the command verb (called once)
 - **`addParameter(String)`**: Appends a positional parameter (called zero or more times, preserving order)
 - **`setOption(String)`** and **setOption(String, String)**: Adds flag-style or value-bearing options (called zero or more times)
-- **`build()`**: Produces the immutable `Command` instance
+- **`build()`**: Produces the immutable `BareCommand` instance
 
 The builder accumulates components in mutable collections (`ArrayList` for parameters, `HashMap` for options), then converts them to the appropriate final representations during `build()`. This separation allows flexible construction while maintaining immutability in the final product.
 
@@ -846,12 +884,12 @@ The builder accumulates components in mutable collections (`ArrayList` for param
 The primary interface is the static factory method:
 
 ```java
-Command cmd = Command.parse("add John Doe /email:john@example.com /force");
+BareCommand cmd = BareCommand.parse("add John Doe /email:john@example.com /force");
 ```
 
-This single call handles all processing stages and returns a fully-populated `Command` object.
+This single call handles all processing stages and returns a fully-populated `BareCommand` object.
 
-**Querying Commands**
+**Querying BareCommands**
 
 Once parsed, commands support intuitive queries:
 
@@ -878,7 +916,7 @@ Users should handle both exceptions to provide appropriate error feedback:
 
 ```java
 try {
-    Command cmd = Command.parse(userInput);
+    BareCommand cmd = BareCommand.parse(userInput);
     // process command
 } catch (LexerException e) {
     // handle tokenization errors
@@ -918,3 +956,54 @@ option_value     → text
 text             → TEXT | WORD
 word             → WORD
 ```
+
+### Resolution Architecture
+
+The resolution step involves identifying the right command to run. This step uses the imperative parsed previously and matches the imperative to exactly one `CommandExtractor` (explained later, in validation), which builds the final `Command` eventually.
+
+#### Core Components
+
+**`Decoder`**: The entry point that orchestrates command resolution. Given a `BareCommand`, it:
+1. Extracts the imperative (command verb)
+2. Queries `Bindings` to find the matching `CommandExtractor`
+3. Delegates to that extractor to build the final `Command`
+
+**`Bindings`**: An enumeration serving as the **command registry**. Each enum constant associates:
+- An **imperative string** (e.g., `"tag"`)
+- A **CommandExtractor** (method reference like `TagCommandExtractor::extract`)
+
+This enum acts as the single source of truth for all available commands. Adding a new command requires adding one line to this enum.
+
+**`BareCommand` to `Command` Transformation**
+
+The system transforms generic `BareCommand` objects (containing raw imperative, parameters, and options) into specific, type-safe `Command` instances ready for execution. This separation allows the parser to remain generic while enabling domain-specific validation and construction logic for each command type.
+
+**Exact Matching Strategy**
+
+The `Decoder.decode()` method uses **exact matching** via `Bindings.resolveExactBinding()`:
+1. A predicate tests each binding's imperative for equality with the input
+2. If no matches found: throws `ResolutionException` ("Unable to find a valid matching command")
+3. If multiple matches found: throws `ResolutionException` ("Resolved command is ambiguous")
+4. If exactly one match: returns that binding's extractor
+
+This strict resolution ensures deterministic command dispatch and catches configuration errors (duplicate imperatives) for now.
+
+**Flexible Resolution Support**
+
+The above also allows us to accommodate more flexible resolution for commands in the future.
+
+For exact binding resolution, we can support more flexible matching strategies (prefix matching, aliases) in the future by simply modifying the predicate passed in by the decoder.
+
+The `Bindings.resolveBindings()` method supports even more flexible matching strategies (fuzzy search) by returning all matching extractors. While not currently used by `Decoder`, this enables future features like command suggestions.
+
+### Validation Architecture
+
+The validation step involves assembling the final command by parsing all necessary parameters and options and constructing the final `Command` executor object.
+
+#### Core Components
+
+**`CommandExtractor<T>`**: A functional interface defining the contract for command-specific extraction logic. Each extractor:
+- Accepts a `BareCommand` (generic parsed representation)
+- Validates parameters and options and transforms them into valid constructor inputs for their respective `Command` constructors according to command-specific rules
+- Constructs and returns a typed `Command` instance (e.g., `TagCommand`)
+- Throws `ValidationException` for invalid inputs

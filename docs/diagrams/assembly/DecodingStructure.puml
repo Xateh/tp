@@ -1,0 +1,65 @@
+@startuml
+!define INTERFACE interface
+
+class Decoder {
+    + {static} decode(BareCommand): Command
+}
+
+abstract class Command {
+    + execute(): CommandResult
+}
+
+class BareCommand {
+    - imperative: String
+    - parameters: String[]
+    - options: HashMap<String,String>
+    __
+    + getImperative(): String
+    + getParameter(int): String
+    + getAllParameters(): String[]
+    + getOptionValue(String): String
+    + hasOption(String): boolean
+}
+
+package "Resolution" {
+    enum Bindings {
+        TAG("tag", TagCommandExtractor::extract)
+        __
+        - imperative: String
+        - extractor: CommandExtractor<?>
+        __
+        + {static} resolveBindings(Predicate<String>): CommandExtractor<?>[]
+        + {static} resolveExactBinding(Predicate<String>): CommandExtractor<?>
+    }
+}
+
+package "Validation" {
+    INTERFACE "CommandExtractor<T>" as CommandExtractor {
+        + extract(BareCommand): T
+    }
+}
+
+' Relationships - Core Decoding Flow
+Decoder ..> Bindings : uses
+Decoder ..> BareCommand : accepts
+Decoder ..> Command : returns
+
+Bindings --> CommandExtractor : contains
+
+CommandExtractor ..> BareCommand : accepts
+CommandExtractor ..> Command : returns
+
+' Notes
+note right of Bindings
+Registry mapping imperatives
+to their extractors.
+Add new commands here.
+end note
+
+note right of CommandExtractor
+Functional interface for
+command-specific extraction
+and validation logic.
+end note
+
+@enduml
