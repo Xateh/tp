@@ -286,6 +286,12 @@ In addition, they:
 
 **User type/role**<br />_As a_ | **Function**<br />_I can_                                               | **Benefit**<br />_so that_ | Priority
 -|-------------------------------------------------------------------------| - | -
+Asset manager | find for contacts using keywords based on all fields | cast wider searches | Must-have (✓✓)
+Asset manager | additively add tags | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
+Asset manager | remove existing tags | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
+Asset manager | find for contacts using keywords based on all fields | cast wider searches | Must-have (✓✓)
+Asset manager | additively add tags | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
+Asset manager | remove existing tags | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
 Asset manager | save data between sessions                                              | I don’t have to re-enter information after relaunching | Must-have (✓✓)
 Organised asset manager | categorise contacts based on asset classes                              | I can quickly identify relevant people per portfolio | Must-have (✓✓)
 Detailed asset manager | customise client profiles with custom fields                            | I can track unique client details/needs | Must-have (✓✓)
