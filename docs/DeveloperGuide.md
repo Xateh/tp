@@ -349,12 +349,12 @@ Asset manager | assign follow-ups to team members                               
 
   Use case ends.
 
-**Use case: Find set of contacts that fit a specific filter**
+**Use case: Comprehensive find set of contacts that fit a specific filter**
 
 **MSS**
 
 1. User keys command to specify criteria on which to match contacts/records.
-2. System searches for records that match the provided criteria.
+2. System searches for records for any fields that match the provided criteria.
 3. System displays to user the records found.
 
    Steps 1-3 are repeated with the user refining their criteria until they are satisfied with    the located records.
@@ -375,7 +375,7 @@ Asset manager | assign follow-ups to team members                               
 
 **Extensions**
 
-* 3a. User releases that they made an incorrect link with invalid fields.
+* 3a. User realises that they made an incorrect link with invalid fields.
     * 3a1. User keys command for deleting the affected contacts.
     * 3a2. User adds the deleted contacts in 3a1.
     * 3a3. User keys in link command with the correct fields.
@@ -399,6 +399,122 @@ Asset manager | assign follow-ups to team members                               
     * 5a2. User closes the system and fixes the error in the data file.
 
   Use case resumes from step 4.
+
+**Use case: Add tags to contacts**
+
+**MSS**
+
+1. User keys command to add tags to a contact.
+2. System searches for contact specified by index number and adds the specified tags to the contact.
+3. System displays to user the tags added to the specified contact.
+
+   Steps 1 - 3 are repeated for all tags that are to be added.
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. System is unable to parse or decode command.
+    * 2a1. System informs user of exact error and hints at how to fix the error.
+    * 2a2. User corrects and reenters the command.
+
+  Steps 2a1-2a2 are repeated until a valid command is entered.
+
+* 3a. User realises he added the tags wrongly.
+    * 3a1. User keys command for untagging the wrongly added tags.
+    * 3a2. User repeats steps 1-3 to add the correct tags.
+
+  Use case ends.
+
+**Use case: Remove tags from contacts**
+
+**MSS**
+
+1. User keys command to remove tags from a contact
+2. System searches for contact specified by index number and removes the specified tags from the contact
+3. System displays to user the tags removed from the specified contact
+
+   Steps 1–3 are repeated until the user is satisfied with the tags remaining on their contacts.
+
+   Use case ends
+
+**Extensions**
+
+* 2a. System is unable to parse or decode command.
+    * 2a1. System informs user of exact error and hints at how to fix the error.
+    * 2a2. User corrects and reenters the command.
+
+  Steps 2a1-2a2 are repeated until a valid command is entered.
+
+* 2b. System is unable to find the specified tags to remove
+    * 2b1. System informs user that the tag is not found
+    * 2b2. User corrects and reenters the command
+
+  Steps 2b1-2b2 are repeated until a valid tag to be removed is entered.
+
+* 3a. User realises he removed the tags wrongly
+    * 3a1. User keys command for re-tagging the wrongly removed tags
+    * 3a2. User repeats steps 1-3 to remove the correct tags
+  
+  Use case ends.
+
+**Use case: Add fields to contacts**
+
+**MSS**
+
+1. User keys command to add fields with a corresponding value to a contact.
+2. System searches for contact specified by index number and adds the specified field with the corresponding value to the contact
+3. System displays to user the field and associated value added to the specified contact.
+
+    Steps 1-3 are repeated until all desired fields have been    
+added.
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. System is unable to parse or decode command.
+    * 2a1. System informs user of exact error and hints at how to fix the error.
+    * 2a2. User corrects and reenters the command.
+
+  Steps 2a1-2a2 are repeated until a valid command is entered.
+
+* 2b. The field to be added already exists.
+    * 2b1. System updates the already existent field with the new value passed in.
+
+* 3a. The user realised he added the fields wrongly.
+    * 3a1. User keys command to delete the wrongly added field
+    
+  Use case resumes from step 1
+
+**Use case: Delete fields from contacts**
+
+**MSS**
+
+1. User keys command to delete field from a contact.
+2. System searches for contact specified by index number and removes specified field.
+3. System displays to user the field removed from the specified contact.
+
+   Steps 1-3 are repeated until all desired fields have been removed.
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. System is unable to parse or decode command.
+    * 2a1. System informs user of exact error and hints at how to fix the error.
+    * 2a2. User corrects and reenters the command.
+
+  Steps 2a1-2a2 are repeated until a valid command is entered.
+
+* 2b. The field to be removed does not exist.
+    * 2b1. System informs user that the field is not found.
+    * 2b2. User corrects and reenters the command.
+
+* 3a. User realises he removed the wrong field.
+    * 3a1. User keys command to add the wrongly deleted field.
+
+  Use case resumes from step 1
 
 ### Non-Functional Requirements
 
