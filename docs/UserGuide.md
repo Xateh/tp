@@ -123,7 +123,7 @@ Adds a single tag to an existing person in the address book.
 
 Format: `tag INDEX TAG+`
 
-* Adds the specified `TAG` from the person at the given `INDEX` in the displayed list.
+* Adds the specified `TAG` to the person at the given `INDEX` in the displayed list.
 * The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
 * There can be multiple tags added at one time, the tags are separated by a whitespace
 
