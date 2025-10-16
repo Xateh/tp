@@ -2,7 +2,9 @@ package seedu.address.storage;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,7 @@ class JsonAdaptedPerson {
     private final String email;
     private final String address;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
+    private final Map<String, String> customFields = new LinkedHashMap<>();
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
@@ -57,6 +60,7 @@ class JsonAdaptedPerson {
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
+        customFields.putAll(source.getCustomFields()); // preserve order
     }
 
     /**
@@ -103,7 +107,8 @@ class JsonAdaptedPerson {
         final Address modelAddress = new Address(address);
 
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags);
+        // Backward compatible: if customFields missing, LinkedHashMap stays empty.
+        Person base = new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags);
+        return base.withCustomFields(customFields);
     }
-
 }
