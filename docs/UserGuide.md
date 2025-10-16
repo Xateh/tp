@@ -4,9 +4,9 @@
   pageNav: 3
 ---
 
-# AB-3 User Guide
+# AssetSphere User Guide
 
-AddressBook Level 3 (AB3) is a **desktop app for managing contacts, optimized for use via a  Line Interface** (CLI) while still having the benefits of a Graphical User Interface (GUI). If you can type fast, AB3 can get your contact management tasks done faster than traditional GUI apps.
+AssetSphere is a **desktop app for managing contacts, optimized for use via a Command Line Interface** (CLI) while still having the benefits of a Graphical User Interface (GUI). If you can type fast, AssetSphere can get your contact management tasks done faster than traditional GUI apps.
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -57,6 +57,9 @@ AddressBook Level 3 (AB3) is a **desktop app for managing contacts, optimized fo
 
 * Items with `…`​ after them can be used multiple times including zero times.<br>
   e.g. `[t/TAG]…​` can be used as ` ` (i.e. 0 times), `t/friend`, `t/friend t/family` etc.
+
+* Items with `+` after them can be used one or more times. <br>
+  e.g. `tag INDEX TAG+` can be used as `tag 1 friend cool`
 
 * Parameters can be in any order.<br>
   e.g. if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
@@ -113,6 +116,19 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
 Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+
+### Adding a tag : `tag`
+
+Adds a single tag to an existing person in the address book.
+
+Format: `tag INDEX TAG+`
+
+* Adds the specified `TAG` to the person at the given `INDEX` in the displayed list.
+* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
+* There can be multiple tags added at one time, the tags are separated by a whitespace
+
+Examples:
+* `list` followed by `tag 2 friend cool` will add `friend` and `cool` to the 2nd person in the address book.
 
 ### Removing a tag : `untag`
 
@@ -214,6 +230,7 @@ _Details coming soon ..._
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
 **Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
