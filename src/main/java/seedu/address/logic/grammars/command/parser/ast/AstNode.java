@@ -190,19 +190,19 @@ public abstract class AstNode {
      * Option Name AST node.
      */
     public static class OptionName extends AstNode {
-        private final Text text;
+        private final Word word;
 
         /**
          * Constructs a new OptionName node.
          *
          * @param word Word node.
          */
-        public OptionName(Text text) {
-            this.text = text;
+        public OptionName(Word word) {
+            this.word = word;
         }
 
-        public Text getText() {
-            return text;
+        public Word getWord() {
+            return word;
         }
 
         @Override

@@ -43,9 +43,7 @@ public class CommandLexer {
     }
 
     private static boolean isCharacterOfWord(char c) {
-        return ('A' <= c && c <= 'Z')
-               || ('a' <= c && c <= 'z')
-               || ('0' <= c && c <= '9');
+        return ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || ('0' <= c && c <= '9');
     }
 
     private static boolean isRestrictedCharacter(char c) {

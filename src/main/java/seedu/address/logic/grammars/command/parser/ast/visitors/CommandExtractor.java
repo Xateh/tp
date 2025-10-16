@@ -70,7 +70,7 @@ public class CommandExtractor implements AstVisitor<String> {
 
     @Override
     public String visitOptionName(AstNode.OptionName node) {
-        return visitText(node.getText());
+        return visitWord(node.getWord());
     }
 
     @Override
