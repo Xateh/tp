@@ -13,6 +13,7 @@ import static seedu.address.testutil.TypicalPersons.AMY;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -148,6 +149,21 @@ public class LogicManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void getCommandHistorySnapshot_unmodifiableList() {
+        assertThrows(UnsupportedOperationException.class,
+                () -> logic.getCommandHistorySnapshot().add("new command"));
+    }
+
+    @Test
+    public void getCommandHistorySnapshot_includesExecutedCommands() throws Exception {
+        logic.execute(ListCommand.COMMAND_WORD);
+        logic.execute(HistoryCommand.COMMAND_WORD);
+
+        List<String> snapshot = logic.getCommandHistorySnapshot();
+        assertEquals(List.of(ListCommand.COMMAND_WORD, HistoryCommand.COMMAND_WORD), snapshot);
     }
 
     /**

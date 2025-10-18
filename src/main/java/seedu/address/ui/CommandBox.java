@@ -1,8 +1,13 @@
 package seedu.address.ui;
 
+import java.util.List;
+import java.util.Objects;
+
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Region;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -17,6 +22,10 @@ public class CommandBox extends UiPart<Region> {
     private static final String FXML = "CommandBox.fxml";
 
     private final CommandExecutor commandExecutor;
+    private final HistorySupplier historySupplier;
+
+    private int historyPointer;
+    private boolean navigatingHistory;
 
     @FXML
     private TextField commandTextField;
@@ -24,11 +33,20 @@ public class CommandBox extends UiPart<Region> {
     /**
      * Creates a {@code CommandBox} with the given {@code CommandExecutor}.
      */
-    public CommandBox(CommandExecutor commandExecutor) {
+    public CommandBox(CommandExecutor commandExecutor, HistorySupplier historySupplier) {
         super(FXML);
         this.commandExecutor = commandExecutor;
+        this.historySupplier = Objects.requireNonNull(historySupplier);
         // calls #setStyleToDefault() whenever there is a change to the text of the command box.
-        commandTextField.textProperty().addListener((unused1, unused2, unused3) -> setStyleToDefault());
+        commandTextField.textProperty().addListener((unused1, unused2, unused3) -> {
+            setStyleToDefault();
+            if (!navigatingHistory) {
+                resetHistoryPointer();
+            }
+        });
+
+        commandTextField.addEventFilter(KeyEvent.KEY_PRESSED, this::handleHistoryNavigation);
+        resetHistoryPointer();
     }
 
     /**
@@ -43,10 +61,79 @@ public class CommandBox extends UiPart<Region> {
 
         try {
             commandExecutor.execute(commandText);
-            commandTextField.setText("");
+            setCommandText("");
+            resetHistoryPointer();
         } catch (CommandException | ParseException e) {
             setStyleToIndicateCommandFailure();
+            resetHistoryPointer();
         }
+    }
+
+    private void handleHistoryNavigation(KeyEvent event) {
+        if (event.getCode() == KeyCode.UP) {
+            navigateToPreviousCommand();
+            event.consume();
+        } else if (event.getCode() == KeyCode.DOWN) {
+            navigateToNextCommand();
+            event.consume();
+        }
+    }
+
+    private void navigateToPreviousCommand() {
+        List<String> history = getHistorySnapshot();
+        if (history.isEmpty()) {
+            return;
+        }
+
+        if (historyPointer > history.size()) {
+            historyPointer = history.size();
+        }
+
+        if (historyPointer == history.size()) {
+            historyPointer = history.size() - 1;
+        } else if (historyPointer > 0) {
+            historyPointer--;
+        } else {
+            return;
+        }
+
+        setCommandText(history.get(historyPointer));
+    }
+
+    private void navigateToNextCommand() {
+        List<String> history = getHistorySnapshot();
+        if (historyPointer >= history.size()) {
+            if (historyPointer != history.size()) {
+                historyPointer = history.size();
+            }
+            if (!commandTextField.getText().isEmpty()) {
+                setCommandText("");
+            }
+            return;
+        }
+
+        if (historyPointer == history.size() - 1) {
+            historyPointer = history.size();
+            setCommandText("");
+        } else {
+            historyPointer++;
+            setCommandText(history.get(historyPointer));
+        }
+    }
+
+    private void resetHistoryPointer() {
+        historyPointer = getHistorySnapshot().size();
+    }
+
+    private List<String> getHistorySnapshot() {
+        return historySupplier.getHistory();
+    }
+
+    private void setCommandText(String text) {
+        navigatingHistory = true;
+        commandTextField.setText(text);
+        commandTextField.positionCaret(commandTextField.getText().length());
+        navigatingHistory = false;
     }
 
     /**
@@ -80,6 +167,12 @@ public class CommandBox extends UiPart<Region> {
          * @see seedu.address.logic.Logic#execute(String)
          */
         CommandResult execute(String commandText) throws CommandException, ParseException;
+    }
+
+    /** Supplies snapshots of the command history for navigation. */
+    @FunctionalInterface
+    public interface HistorySupplier {
+        List<String> getHistory();
     }
 
 }
