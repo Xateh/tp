@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.Command;
+import seedu.address.logic.commands.HistoryCommand;
 import seedu.address.logic.commands.TagCommand;
 import seedu.address.logic.commands.exceptions.ResolutionException;
 import seedu.address.logic.commands.exceptions.ValidationException;
@@ -22,5 +23,12 @@ public class DecoderTest {
             LexerException, ParserException, ResolutionException, ValidationException {
         Command tagCommand = Decoder.decode(BareCommand.parse("tag 1 test1 test2"));
         assertEquals(TagCommand.class, tagCommand.getClass());
+    }
+
+    @Test
+    public void decode_historyCommandExactMatch_success()
+            throws LexerException, ParserException, ResolutionException, ValidationException {
+        Command historyCommand = Decoder.decode(BareCommand.parse("history"));
+        assertEquals(HistoryCommand.class, historyCommand.getClass());
     }
 }
