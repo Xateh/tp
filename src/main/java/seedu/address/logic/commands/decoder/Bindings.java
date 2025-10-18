@@ -7,12 +7,14 @@ import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.exceptions.ResolutionException;
 import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.commands.extractors.CommandExtractor;
+import seedu.address.logic.commands.extractors.HistoryCommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
 
 /**
  * Enumeration containing bindings for all imperatives and their respective command extractors.
  */
 public enum Bindings {
+    HISTORY("history", HistoryCommandExtractor::extract),
     TAG("tag", TagCommandExtractor::extract);
 
     private static final String MESSAGE_NO_MATCHING_BINDING = "Unable to find a valid matching command.";

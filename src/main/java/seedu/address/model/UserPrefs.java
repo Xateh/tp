@@ -37,7 +37,7 @@ public class UserPrefs implements ReadOnlyUserPrefs {
         requireNonNull(newUserPrefs);
         setGuiSettings(newUserPrefs.getGuiSettings());
         setAddressBookFilePath(newUserPrefs.getAddressBookFilePath());
-    setCommandHistoryFilePath(newUserPrefs.getCommandHistoryFilePath());
+        setCommandHistoryFilePath(newUserPrefs.getCommandHistoryFilePath());
     }
 
     public GuiSettings getGuiSettings() {
@@ -79,14 +79,14 @@ public class UserPrefs implements ReadOnlyUserPrefs {
         }
 
         UserPrefs otherUserPrefs = (UserPrefs) other;
-    return guiSettings.equals(otherUserPrefs.guiSettings)
-        && addressBookFilePath.equals(otherUserPrefs.addressBookFilePath)
-        && commandHistoryFilePath.equals(otherUserPrefs.commandHistoryFilePath);
+        return guiSettings.equals(otherUserPrefs.guiSettings)
+                && addressBookFilePath.equals(otherUserPrefs.addressBookFilePath)
+                && commandHistoryFilePath.equals(otherUserPrefs.commandHistoryFilePath);
     }
 
     @Override
     public int hashCode() {
-    return Objects.hash(guiSettings, addressBookFilePath, commandHistoryFilePath);
+        return Objects.hash(guiSettings, addressBookFilePath, commandHistoryFilePath);
     }
 
     @Override

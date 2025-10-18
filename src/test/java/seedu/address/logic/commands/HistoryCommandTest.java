@@ -9,21 +9,22 @@ import org.junit.jupiter.api.Test;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
-import seedu.address.model.person.Person;
 import seedu.address.model.history.CommandHistory;
+import seedu.address.model.person.Person;
 
 public class HistoryCommandTest {
 
     @Test
     public void execute_emptyHistory_returnsEmptyMessage() {
         CommandHistory history = new CommandHistory();
-        HistoryCommand command = new HistoryCommand(history);
-        CommandResult result = command.execute(new ModelStub());
+        HistoryCommand command = new HistoryCommand(historyBareCommand());
+        CommandResult result = command.execute(new ModelStub(history));
         assertEquals(HistoryCommand.MESSAGE_EMPTY_HISTORY, result.getFeedbackToUser());
     }
 
@@ -32,14 +33,25 @@ public class HistoryCommandTest {
         CommandHistory history = new CommandHistory();
         history.add("list");
         history.add("add n/Amy");
-        HistoryCommand command = new HistoryCommand(history);
-        CommandResult result = command.execute(new ModelStub());
+        HistoryCommand command = new HistoryCommand(historyBareCommand());
+        CommandResult result = command.execute(new ModelStub(history));
         String expectedHistory = String.join(System.lineSeparator(), "1. list", "2. add n/Amy");
         String expected = String.format(HistoryCommand.MESSAGE_SUCCESS, expectedHistory);
         assertEquals(expected, result.getFeedbackToUser());
     }
 
+    private static BareCommand historyBareCommand() {
+        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
+        builder.setImperative(HistoryCommand.COMMAND_WORD);
+        return builder.build();
+    }
+
     private static class ModelStub implements Model {
+        private final CommandHistory history;
+
+        private ModelStub(CommandHistory history) {
+            this.history = history;
+        }
         @Override
         public void setUserPrefs(ReadOnlyUserPrefs userPrefs) {
             throw new AssertionError("This method should not be called.");
@@ -107,6 +119,16 @@ public class HistoryCommandTest {
 
         @Override
         public void updateFilteredPersonList(Predicate<Person> predicate) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public CommandHistory getCommandHistory() {
+            return history;
+        }
+
+        @Override
+        public void setCommandHistory(CommandHistory commandHistory) {
             throw new AssertionError("This method should not be called.");
         }
     }

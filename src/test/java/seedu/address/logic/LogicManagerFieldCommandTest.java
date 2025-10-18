@@ -38,12 +38,12 @@ class LogicManagerFieldCommandTest {
     void executeField_succeedsAndSaves() throws Exception {
         Path abPath = temp.resolve("ab.json");
         Path prefsPath = temp.resolve("prefs.json");
-    Path historyPath = temp.resolve("history.json");
+        Path historyPath = temp.resolve("history.json");
 
         StorageManager storage = new StorageManager(
-                new JsonAddressBookStorage(abPath),
-        new JsonUserPrefsStorage(prefsPath),
-        new JsonCommandHistoryStorage(historyPath));
+            new JsonAddressBookStorage(abPath),
+            new JsonUserPrefsStorage(prefsPath),
+            new JsonCommandHistoryStorage(historyPath));
 
         Model model = baseModelWithOnePerson();
         Logic logic = new LogicManager(model, storage);
@@ -61,8 +61,8 @@ class LogicManagerFieldCommandTest {
     void executeField_saveAccessDenied_wrapsAsCommandException() {
         StorageManager throwing = new SaveThrowingStorage(
                 temp.resolve("ab.json"),
-        temp.resolve("prefs.json"),
-        temp.resolve("history.json"),
+                temp.resolve("prefs.json"),
+                temp.resolve("history.json"),
                 new AccessDeniedException("denied"));
 
         Model model = baseModelWithOnePerson();
@@ -77,8 +77,8 @@ class LogicManagerFieldCommandTest {
     void executeField_saveIoException_wrapsAsCommandException() {
         StorageManager throwing = new SaveThrowingStorage(
                 temp.resolve("ab.json"),
-        temp.resolve("prefs.json"),
-        temp.resolve("history.json"),
+                temp.resolve("prefs.json"),
+                temp.resolve("history.json"),
                 new IOException("io"));
 
         Model model = baseModelWithOnePerson();
@@ -93,12 +93,12 @@ class LogicManagerFieldCommandTest {
     void executeMalformedFieldFallsThroughToLegacyParser() throws Exception {
         Path abPath = temp.resolve("ab.json");
         Path prefsPath = temp.resolve("prefs.json");
-    Path historyPath = temp.resolve("history.json");
+        Path historyPath = temp.resolve("history.json");
 
         StorageManager storage = new StorageManager(
-                new JsonAddressBookStorage(abPath),
-        new JsonUserPrefsStorage(prefsPath),
-        new JsonCommandHistoryStorage(historyPath));
+            new JsonAddressBookStorage(abPath),
+            new JsonUserPrefsStorage(prefsPath),
+            new JsonCommandHistoryStorage(historyPath));
         Model model = baseModelWithOnePerson();
         Logic logic = new LogicManager(model, storage);
 

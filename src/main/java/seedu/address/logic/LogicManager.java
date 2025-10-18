@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.FieldCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -16,12 +17,11 @@ import seedu.address.logic.grammars.command.lexer.LexerException;
 import seedu.address.logic.grammars.command.parser.ParserException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.history.CommandHistory;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.history.CommandHistory;
 import seedu.address.model.person.Person;
 import seedu.address.storage.Storage;
-import seedu.address.commons.exceptions.DataLoadingException;
 
 /**
  * The main LogicManager of the app.
@@ -37,7 +37,6 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final AddressBookParser addressBookParser;
-    private final CommandHistory commandHistory;
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -45,8 +44,9 @@ public class LogicManager implements Logic {
     public LogicManager(Model model, Storage storage) {
         this.model = model;
         this.storage = storage;
-        this.commandHistory = loadCommandHistory(storage);
-        addressBookParser = new AddressBookParser(commandHistory);
+        CommandHistory initialHistory = loadCommandHistory(storage);
+        this.addressBookParser = new AddressBookParser();
+        this.model.setCommandHistory(initialHistory);
     }
 
     @Override
@@ -70,7 +70,6 @@ public class LogicManager implements Logic {
         } catch (LexerException | ParserException ex) {
             logger.info("[GRAMMAR] parse failed: " + ex.getMessage());
         }
-
         var command = addressBookParser.parseCommand(commandText);
         CommandResult commandResult = command.execute(model);
 
@@ -112,6 +111,7 @@ public class LogicManager implements Logic {
     }
 
     private void persistCommandHistory(String commandText) throws CommandException {
+        CommandHistory commandHistory = model.getCommandHistory();
         commandHistory.add(commandText);
         try {
             storage.saveCommandHistory(commandHistory);

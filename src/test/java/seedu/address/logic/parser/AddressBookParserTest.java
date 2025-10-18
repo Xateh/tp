@@ -32,12 +32,10 @@ import seedu.address.model.tag.Tag;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
 import seedu.address.testutil.PersonUtil;
-import seedu.address.model.history.CommandHistory;
 
 public class AddressBookParserTest {
 
-    private final CommandHistory commandHistory = new CommandHistory();
-    private final AddressBookParser parser = new AddressBookParser(commandHistory);
+    private final AddressBookParser parser = new AddressBookParser();
 
     @Test
     public void parseCommand_add() throws Exception {
