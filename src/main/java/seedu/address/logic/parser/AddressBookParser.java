@@ -16,6 +16,7 @@ import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
+import seedu.address.logic.commands.HistoryCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.UntagCommand;
 import seedu.address.logic.commands.decoder.Decoder;
@@ -25,6 +26,7 @@ import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.logic.grammars.command.lexer.LexerException;
 import seedu.address.logic.grammars.command.parser.ParserException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.history.CommandHistory;
 
 /**
  * Parses user input.
@@ -36,6 +38,12 @@ public class AddressBookParser {
      */
     private static final Pattern BASIC_COMMAND_FORMAT = Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)");
     private static final Logger logger = LogsCenter.getLogger(AddressBookParser.class);
+
+    private final CommandHistory commandHistory;
+
+    public AddressBookParser(CommandHistory commandHistory) {
+        this.commandHistory = commandHistory;
+    }
 
     /**
      * Parses user input into command for execution.
@@ -86,6 +94,9 @@ public class AddressBookParser {
 
         case HelpCommand.COMMAND_WORD:
             return new HelpCommand();
+
+        case HistoryCommand.COMMAND_WORD:
+            return new HistoryCommand(commandHistory);
 
         default:
             try {

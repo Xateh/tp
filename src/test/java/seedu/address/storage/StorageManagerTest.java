@@ -14,6 +14,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.history.CommandHistory;
 
 public class StorageManagerTest {
 
@@ -26,7 +27,8 @@ public class StorageManagerTest {
     public void setUp() {
         JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(getTempFilePath("ab"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(getTempFilePath("prefs"));
-        storageManager = new StorageManager(addressBookStorage, userPrefsStorage);
+        JsonCommandHistoryStorage commandHistoryStorage = new JsonCommandHistoryStorage(getTempFilePath("history"));
+        storageManager = new StorageManager(addressBookStorage, userPrefsStorage, commandHistoryStorage);
     }
 
     private Path getTempFilePath(String fileName) {
@@ -63,6 +65,21 @@ public class StorageManagerTest {
     @Test
     public void getAddressBookFilePath() {
         assertNotNull(storageManager.getAddressBookFilePath());
+    }
+
+    @Test
+    public void getCommandHistoryFilePath() {
+        assertNotNull(storageManager.getCommandHistoryFilePath());
+    }
+
+    @Test
+    public void commandHistoryReadSave() throws Exception {
+        CommandHistory original = new CommandHistory();
+        original.add("list");
+        original.add("add n/Bob");
+        storageManager.saveCommandHistory(original);
+        CommandHistory retrieved = storageManager.readCommandHistory().get();
+        assertEquals(original, retrieved);
     }
 
 }

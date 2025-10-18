@@ -16,10 +16,12 @@ import seedu.address.logic.grammars.command.lexer.LexerException;
 import seedu.address.logic.grammars.command.parser.ParserException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.history.CommandHistory;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.person.Person;
 import seedu.address.storage.Storage;
+import seedu.address.commons.exceptions.DataLoadingException;
 
 /**
  * The main LogicManager of the app.
@@ -35,6 +37,7 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final AddressBookParser addressBookParser;
+    private final CommandHistory commandHistory;
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -42,7 +45,8 @@ public class LogicManager implements Logic {
     public LogicManager(Model model, Storage storage) {
         this.model = model;
         this.storage = storage;
-        addressBookParser = new AddressBookParser();
+        this.commandHistory = loadCommandHistory(storage);
+        addressBookParser = new AddressBookParser(commandHistory);
     }
 
     @Override
@@ -52,40 +56,26 @@ public class LogicManager implements Logic {
         try {
             BareCommand gcmd = BareCommand.parse(commandText);
             String imp = gcmd.getImperative();
-            logger.info("[GRAMMAR] imp=" + imp); //TEMP: remove after verifying
+            logger.info("[GRAMMAR] imp=" + imp);
 
             if (imp != null && imp.equalsIgnoreCase("field")) {
                 FieldCommand fc = new FieldCommand(gcmd);
                 CommandResult result = fc.execute(model);
-                String feedback = result.getFeedbackToUser(); // mutates model
+                String feedback = result.getFeedbackToUser();
 
-                try {
-                    storage.saveAddressBook(model.getAddressBook());
-                } catch (AccessDeniedException e) {
-                    throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
-                } catch (IOException ioe) {
-                    throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
-                }
-
+                persistAddressBook();
+                persistCommandHistory(commandText);
                 return new CommandResult(feedback);
             }
-            // if imperative is not "field", continue to legacy parser below
         } catch (LexerException | ParserException ex) {
-            logger.info("[GRAMMAR] parse failed: " + ex.getMessage()); // TEMP: remove later
+            logger.info("[GRAMMAR] parse failed: " + ex.getMessage());
         }
 
-        // Existing flow for all other commands
-        CommandResult commandResult;
         var command = addressBookParser.parseCommand(commandText);
-        commandResult = command.execute(model);
+        CommandResult commandResult = command.execute(model);
 
-        try {
-            storage.saveAddressBook(model.getAddressBook());
-        } catch (AccessDeniedException e) {
-            throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
-        } catch (IOException ioe) {
-            throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
-        }
+        persistAddressBook();
+        persistCommandHistory(commandText);
 
         return commandResult;
     }
@@ -98,6 +88,39 @@ public class LogicManager implements Logic {
     @Override
     public ObservableList<Person> getFilteredPersonList() {
         return model.getFilteredPersonList();
+    }
+
+    private CommandHistory loadCommandHistory(Storage storage) {
+        try {
+            return storage.readCommandHistory().orElseGet(CommandHistory::new);
+        } catch (DataLoadingException e) {
+            logger.warning("Command history at " + storage.getCommandHistoryFilePath()
+                    + " could not be loaded. Starting with an empty history.");
+            return new CommandHistory();
+        }
+    }
+
+    private void persistAddressBook() throws CommandException {
+        try {
+            storage.saveAddressBook(model.getAddressBook());
+        } catch (AccessDeniedException e) {
+            throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT,
+                    e.getMessage()), e);
+        } catch (IOException ioe) {
+            throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+        }
+    }
+
+    private void persistCommandHistory(String commandText) throws CommandException {
+        commandHistory.add(commandText);
+        try {
+            storage.saveCommandHistory(commandHistory);
+        } catch (AccessDeniedException e) {
+            throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT,
+                    storage.getCommandHistoryFilePath()), e);
+        } catch (IOException ioe) {
+            throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+        }
     }
 
     @Override
