@@ -20,6 +20,7 @@ import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.FieldCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
@@ -77,6 +78,18 @@ public class AddressBookParserTest {
         FindCommand command = (FindCommand) parser.parseCommand(
                 FindCommand.COMMAND_WORD + " " + keywords.stream().collect(Collectors.joining(" ")));
         assertEquals(new FindCommand(new FieldContainsKeywordsPredicate(keywords)), command);
+    }
+
+    @Test
+    public void parseCommand_field() throws Exception {
+        assertTrue(parser.parseCommand("field 1 /k:v") instanceof FieldCommand);
+    }
+
+    @Test
+    public void parseCommand_fieldInvalidArgs_throwsParseException() {
+        assertThrows(ParseException.class,
+                     "Invalid index. Must be a positive integer.", ()
+                      -> parser.parseCommand("field x /k:v"));
     }
 
     @Test

@@ -127,7 +127,8 @@ class FieldCommandTest {
         Map<String, String> pairs = new LinkedHashMap<>();
         pairs.put("   ", "v"); // trims to empty -> validate fails
         FieldCommand cmd = new FieldCommand(1, pairs);
-        assertThrows(IllegalArgumentException.class, () -> cmd.execute(model));
+        CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
+        assertEquals("Field name cannot be blank.", ex.getMessage());
     }
 
     @Test
@@ -135,7 +136,8 @@ class FieldCommandTest {
         Map<String, String> pairs = new LinkedHashMap<>();
         pairs.put("k", "   "); // trims to empty -> validate fails
         FieldCommand cmd = new FieldCommand(1, pairs);
-        assertThrows(IllegalArgumentException.class, () -> cmd.execute(model));
+        CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
+        assertEquals("Field value cannot be blank.", ex.getMessage());
     }
 
     @Test
@@ -143,7 +145,8 @@ class FieldCommandTest {
         Map<String, String> pairs = new LinkedHashMap<>();
         pairs.put(null, "v"); // null -> normalizeKey returns ""
         FieldCommand cmd = new FieldCommand(1, pairs);
-        assertThrows(IllegalArgumentException.class, () -> cmd.execute(model));
+        CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
+        assertEquals("Field name cannot be blank.", ex.getMessage());
     }
 
     @Test
@@ -151,7 +154,8 @@ class FieldCommandTest {
         Map<String, String> pairs = new LinkedHashMap<>();
         pairs.put("k", null); // null -> normalizeValue returns ""
         FieldCommand cmd = new FieldCommand(1, pairs);
-        assertThrows(IllegalArgumentException.class, () -> cmd.execute(model));
+        CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
+        assertEquals("Field value cannot be blank.", ex.getMessage());
     }
 }
 

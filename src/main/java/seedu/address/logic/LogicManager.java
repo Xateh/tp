@@ -8,12 +8,9 @@ import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
-import seedu.address.logic.commands.FieldCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.grammars.command.BareCommand;
-import seedu.address.logic.grammars.command.lexer.LexerException;
-import seedu.address.logic.grammars.command.parser.ParserException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
@@ -49,34 +46,8 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
-        try {
-            BareCommand gcmd = BareCommand.parse(commandText);
-            String imp = gcmd.getImperative();
-            logger.info("[GRAMMAR] imp=" + imp); //TEMP: remove after verifying
-
-            if (imp != null && imp.equalsIgnoreCase("field")) {
-                FieldCommand fc = new FieldCommand(gcmd);
-                CommandResult result = fc.execute(model);
-                String feedback = result.getFeedbackToUser(); // mutates model
-
-                try {
-                    storage.saveAddressBook(model.getAddressBook());
-                } catch (AccessDeniedException e) {
-                    throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
-                } catch (IOException ioe) {
-                    throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
-                }
-
-                return new CommandResult(feedback);
-            }
-            // if imperative is not "field", continue to legacy parser below
-        } catch (LexerException | ParserException ex) {
-            logger.info("[GRAMMAR] parse failed: " + ex.getMessage()); // TEMP: remove later
-        }
-
-        // Existing flow for all other commands
         CommandResult commandResult;
-        var command = addressBookParser.parseCommand(commandText);
+        Command command = addressBookParser.parseCommand(commandText);
         commandResult = command.execute(model);
 
         try {

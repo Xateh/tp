@@ -19,6 +19,10 @@ import seedu.address.model.person.Person;
 public class FieldCommand extends Command {
 
     public static final String COMMAND_WORD = "field";
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Adds or updates custom fields for the person identified by the index number.\n"
+            + "Parameters: INDEX (must be a positive integer) /KEY:VALUE...\n"
+            + "Example: " + COMMAND_WORD + " 1 /company:\"Goldman Sachs\"";
     private final int oneBasedIndex;
     private final Map<String, String> pairs;
 
@@ -81,11 +85,15 @@ public class FieldCommand extends Command {
 
         // Merge strategy: overwrite existing keys with new values, keep others.
         Map<String, String> merged = new LinkedHashMap<>(target.getCustomFields());
-        for (Map.Entry<String, String> e : pairs.entrySet()) {
-            String k = normalizeKey(e.getKey());
-            String v = normalizeValue(e.getValue());
-            validate(k, v);
-            merged.put(k, v);
+        try {
+            for (Map.Entry<String, String> e : pairs.entrySet()) {
+                String k = normalizeKey(e.getKey());
+                String v = normalizeValue(e.getValue());
+                validate(k, v);
+                merged.put(k, v);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new CommandException(e.getMessage(), e);
         }
 
         Person edited = target.withCustomFields(merged);
