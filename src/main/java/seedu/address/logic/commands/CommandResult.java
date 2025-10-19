@@ -25,7 +25,7 @@ public class CommandResult {
     private final boolean showInfoEditor;
 
     /** The person whose info is to be edited. */
-    private final Person personToedit;
+    private final Person personToEdit;
 
     /**
      * Constructs a {@code CommandResult} with the specified fields.
@@ -35,7 +35,7 @@ public class CommandResult {
         this.showHelp = showHelp;
         this.exit = exit;
         this.showInfoEditor = false;
-        this.personToedit = null;
+        this.personToEdit = null;
     }
 
     /**
@@ -46,7 +46,7 @@ public class CommandResult {
         this.showHelp = false;
         this.exit = false;
         this.showInfoEditor = true;
-        this.personToedit = requireNonNull(personToEdit);
+        this.personToEdit = requireNonNull(personToEdit);
     }
 
     /**
@@ -73,8 +73,8 @@ public class CommandResult {
         return showInfoEditor;
     }
 
-    public Optional<Person> getPersonToedit() {
-        return Optional.ofNullable(personToedit);
+    public Optional<Person> getPersonToEdit() {
+        return Optional.ofNullable(personToEdit);
     }
 
     @Override
@@ -91,12 +91,14 @@ public class CommandResult {
         CommandResult otherCommandResult = (CommandResult) other;
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && showHelp == otherCommandResult.showHelp
-                && exit == otherCommandResult.exit;
+                && exit == otherCommandResult.exit
+                && showInfoEditor == otherCommandResult.showInfoEditor
+                && Objects.equals(personToEdit, otherCommandResult.personToEdit);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit);
+        return Objects.hash(feedbackToUser, showHelp, exit, showInfoEditor, personToEdit);
     }
 
     @Override
@@ -105,6 +107,8 @@ public class CommandResult {
                 .add("feedbackToUser", feedbackToUser)
                 .add("showHelp", showHelp)
                 .add("exit", exit)
+                .add("showInfoEditor", showInfoEditor)
+                .add("personToEdit", personToEdit)
                 .toString();
     }
 
