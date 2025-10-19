@@ -11,19 +11,16 @@ import seedu.address.model.Model;
 import seedu.address.model.person.Person;
 
 /**
- * Displays the information of a person identified using it's displayed index from the address book.
+ * Views the information of a person identified by the index number used in the displayed person list.
  */
 public class InfoViewCommand extends Command {
 
     public static final String COMMAND_WORD = "infoview";
-
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Displays the information of the person identified by the index number used in the "
-            + "displayed person list.\n"
+            + ": Displays the info of the person identified by the index number.\n"
             + "Parameters: INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 1";
-
-    public static final String MESSAGE_INFO_VIEW_SUCCESS = "Viewing info for Person: %1$s";
+    public static final String MESSAGE_INFO_VIEW_SUCCESS = "Viewing info for Person: %1$s\n---\n%2$s";
 
     private final Index targetIndex;
 
@@ -40,10 +37,10 @@ public class InfoViewCommand extends Command {
             throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
 
-        Person personToShow = lastShownList.get(targetIndex.getZeroBased());
+        Person person = lastShownList.get(targetIndex.getZeroBased());
+        String infoText = person.getInfo().value.isEmpty() ? "No information available." : person.getInfo().value;
 
-        return new CommandResult(String.format(MESSAGE_INFO_VIEW_SUCCESS, Messages.format(personToShow))
-                + "\n" + personToShow.getInfo().value);
+        return new CommandResult(String.format(MESSAGE_INFO_VIEW_SUCCESS, Messages.format(person), infoText));
     }
 
     @Override

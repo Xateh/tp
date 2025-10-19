@@ -1,5 +1,7 @@
 package seedu.address.logic.commands.extractors;
 
+import java.nio.charset.StandardCharsets;
+
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.InfoSaveCommand;
 import seedu.address.logic.commands.exceptions.ValidationException;
@@ -37,26 +39,37 @@ public class InfoSaveCommandExtractor {
             throw new ValidationException(MESSAGE_INFO_UNSPECIFIED);
         }
 
-        // Reconstruct the info string from all remaining parameters
-        StringBuilder infoBuilder = new StringBuilder();
-        for (int i = 1; i < params.length; i++) {
-            if (i > 1) {
-                infoBuilder.append(" ");
-            }
-            infoBuilder.append(params[i]);
+        // The second parameter is the hex encoded info
+        String hexEncodedInfo = params[1];
+
+        String infoString;
+        try {
+            infoString = decodeFromSafeHex(hexEncodedInfo);
+        } catch (Exception e) {
+            throw new ValidationException("Failed to decode information data: " + e.getMessage());
         }
-
-        String infoString = infoBuilder.toString();
-
-        // Remove surrounding quotes if present
-        if (infoString.startsWith("\"") && infoString.endsWith("\"") && infoString.length() > 1) {
-            infoString = infoString.substring(1, infoString.length() - 1);
-        }
-
-        // Handle escaped quotes
-        infoString = infoString.replace("\\\"", "\"");
 
         Info info = new Info(infoString);
         return new InfoSaveCommand(index, info);
+    }
+
+    /**
+     * Decodes a hex string back to the original string.
+     */
+    private static String decodeFromSafeHex(String hexString) throws ValidationException {
+        if (hexString.length() % 2 != 0) {
+            throw new ValidationException("Invalid hex string length");
+        }
+
+        try {
+            byte[] bytes = new byte[hexString.length() / 2];
+            for (int i = 0; i < bytes.length; i++) {
+                String hexByte = hexString.substring(2 * i, 2 * i + 2);
+                bytes[i] = (byte) Integer.parseInt(hexByte, 16);
+            }
+            return new String(bytes, StandardCharsets.UTF_8);
+        } catch (NumberFormatException e) {
+            throw new ValidationException("Invalid hex characters in encoded string");
+        }
     }
 }

@@ -54,7 +54,7 @@ public class Person {
         this.address = address;
         this.tags.addAll(tags);
         this.customFields = new LinkedHashMap<>(); //default: empty
-        this.info = new Info(""); // default: empty string
+        this.info = info;
     }
 
     /**

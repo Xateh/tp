@@ -1,5 +1,6 @@
 package seedu.address.ui;
 
+import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -53,12 +54,26 @@ public class InfoEditorPanel extends UiPart<Region> {
     @FXML
     private void handleSave() {
         int oneBasedIndex = personIndex + 1;
-        // Escape quotes in the text to avoid breaking the parser
-        String infoText = infoTextArea.getText().replace("\"", "\\\"");
-        String commandText = "infosave " + oneBasedIndex + " \"" + infoText + "\"";
+        String infoText = infoTextArea.getText();
 
-        logger.info("Executing save command: " + commandText);
+        // Use custom hex encoding that only produces alphanumeric characters
+        String encodedInfo = encodeToSafeHex(infoText);
+        String commandText = "infosave " + oneBasedIndex + " " + encodedInfo;
+
+        logger.info("Executing save command with hex encoded info");
         commandExecutor.accept(commandText);
         showPersonList.run();
+    }
+
+    /**
+     * Encodes a string to hex using only alphanumeric characters (0-9, A-F).
+     */
+    private String encodeToSafeHex(String input) {
+        byte[] bytes = input.getBytes(StandardCharsets.UTF_8);
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : bytes) {
+            hexString.append(String.format("%02X", b & 0xFF));
+        }
+        return hexString.toString();
     }
 }
