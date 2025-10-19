@@ -7,13 +7,17 @@ import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.exceptions.ResolutionException;
 import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.commands.extractors.CommandExtractor;
+import seedu.address.logic.commands.extractors.InfoEditCommandExtractor;
+import seedu.address.logic.commands.extractors.InfoViewCommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
 
 /**
  * Enumeration containing bindings for all imperatives and their respective command extractors.
  */
 public enum Bindings {
-    TAG("tag", TagCommandExtractor::extract);
+    TAG("tag", TagCommandExtractor::extract),
+    INFO_VIEW("infoview", InfoViewCommandExtractor::extract),
+    INFO_EDIT("infoedit", InfoEditCommandExtractor::extract);
 
     private static final String MESSAGE_NO_MATCHING_BINDING = "Unable to find a valid matching command.";
     private static final String MESSAGE_AMBIGUOUS_BINDING = "Resolved command is ambiguous.";
