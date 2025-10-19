@@ -2,6 +2,9 @@ package seedu.address.logic.commands.extractors;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.exceptions.ValidationException;
@@ -39,12 +42,18 @@ public final class FindCommandExtractor {
         boolean optEmail = bareCommand.hasOption("email");
         boolean optAddress = bareCommand.hasOption("address");
         boolean optTag = bareCommand.hasOption("tags") || bareCommand.hasOption("tag");
+        List<String> keysToRemove = List.of("name", "phone", "email", "address", "tags", "tag");
+        Map<String, String> map = bareCommand.getAllOptions();
+        Set<String> customKeys = map.keySet().stream()
+                .map(k -> k != null ? k.trim().toLowerCase() : "")
+                .filter(k -> !keysToRemove.contains(k))
+                .collect(Collectors.toSet());
 
         // check if user specified any options
         boolean anyFlag = optName || optPhone || optEmail || optAddress || optTag;
 
         FieldContainsKeywordsPredicate predicate;
-        if (anyFlag) {
+        if (anyFlag || !customKeys.isEmpty()) {
             // Only the specified fields
             predicate = new FieldContainsKeywordsPredicate(
                     keywords,
@@ -52,7 +61,8 @@ public final class FindCommandExtractor {
                     optPhone,
                     optEmail,
                     optAddress,
-                    optTag
+                    optTag,
+                    customKeys
             );
         } else {
             // No options provided, default to search all non custom fields
