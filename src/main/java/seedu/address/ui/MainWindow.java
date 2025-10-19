@@ -34,6 +34,7 @@ public class MainWindow extends UiPart<Stage> {
     private PersonListPanel personListPanel;
     private ResultDisplay resultDisplay;
     private HelpWindow helpWindow;
+    private InfoEditorPanel infoEditorPanel;
 
     @FXML
     private StackPane commandBoxPlaceholder;
@@ -121,6 +122,8 @@ public class MainWindow extends UiPart<Stage> {
 
         CommandBox commandBox = new CommandBox(this::executeCommand);
         commandBoxPlaceholder.getChildren().add(commandBox.getRoot());
+
+        infoEditorPanel = new InfoEditorPanel(this::executeCommandForEditor, this::showPersonList);
     }
 
     /**
@@ -186,11 +189,32 @@ public class MainWindow extends UiPart<Stage> {
                 handleExit();
             }
 
+            if (commandResult.isShowInfoEditor()) {
+                commandResult.getPersonToEdit().ifPresent(person -> {
+                    int personIndex = logic.getFilteredPersonList().indexOf(person);
+                    infoEditorPanel.setPerson(person, personIndex);
+                    personListPanelPlaceholder.getChildren().setAll(infoEditorPanel.getRoot());
+                });
+            }
+
             return commandResult;
         } catch (CommandException | ParseException e) {
             logger.info("An error occurred while executing command: " + commandText);
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
         }
+    }
+
+    private void executeCommandForEditor(String commandText) {
+        try {
+            CommandResult result = executeCommand(commandText);
+            resultDisplay.setFeedbackToUser(result.getFeedbackToUser());
+        } catch (CommandException | ParseException e) {
+            // Error handled by executeCommand
+        }
+    }
+
+    private void showPersonList() {
+        personListPanelPlaceholder.getChildren().setAll(personListPanel.getRoot());
     }
 }
