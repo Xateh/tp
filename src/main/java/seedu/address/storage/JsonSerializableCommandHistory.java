@@ -25,7 +25,7 @@ class JsonSerializableCommandHistory {
     }
 
     JsonSerializableCommandHistory(CommandHistory source) {
-        commands.addAll(source.asUnmodifiableList());
+        commands.addAll(source.getEntries());
     }
 
     CommandHistory toModelType() {

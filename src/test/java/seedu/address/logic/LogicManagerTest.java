@@ -241,7 +241,7 @@ public class LogicManagerTest {
     }
 
     private void syncCommandHistory(Model expectedModel, Model actualModel) {
-        CommandHistory historySnapshot = new CommandHistory(actualModel.getCommandHistory().asUnmodifiableList());
+        CommandHistory historySnapshot = new CommandHistory(actualModel.getCommandHistory().getEntries());
         expectedModel.setCommandHistory(historySnapshot);
     }
 }

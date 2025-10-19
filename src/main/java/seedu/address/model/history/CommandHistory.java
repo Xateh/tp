@@ -80,7 +80,7 @@ public class CommandHistory {
     /**
      * Returns the history entries from oldest to newest.
      */
-    public List<String> asUnmodifiableList() {
+    public List<String> getEntries() {
         return Collections.unmodifiableList(new ArrayList<>(entries));
     }
 
@@ -116,13 +116,13 @@ public class CommandHistory {
         }
 
         CommandHistory otherHistory = (CommandHistory) other;
-        return asUnmodifiableList().equals(otherHistory.asUnmodifiableList())
+        return getEntries().equals(otherHistory.getEntries())
                 && maxEntries == otherHistory.maxEntries;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(asUnmodifiableList(), maxEntries);
+        return Objects.hash(getEntries(), maxEntries);
     }
 
     @Override

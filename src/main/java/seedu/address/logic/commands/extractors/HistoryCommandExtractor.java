@@ -22,13 +22,6 @@ public final class HistoryCommandExtractor {
      */
     public static HistoryCommand extract(BareCommand bareCommand) throws ValidationException {
         requireNonNull(bareCommand);
-        if (bareCommand.getAllParameters().length > 0 || !bareCommand.getAllOptions().isEmpty()) {
-            throw new ValidationException(HistoryCommand.MESSAGE_ARGUMENTS_NOT_SUPPORTED);
-        }
-        try {
-            return new HistoryCommand(bareCommand);
-        } catch (IllegalArgumentException ex) {
-            throw new ValidationException(ex.getMessage(), ex);
-        }
+        return new HistoryCommand();
     }
 }

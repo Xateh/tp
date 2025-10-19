@@ -63,8 +63,8 @@ public class LogicManager implements Logic {
                 CommandResult result = fc.execute(model);
                 String feedback = result.getFeedbackToUser();
 
-                persistAddressBook();
-                persistCommandHistory(commandText);
+                saveAddressBookSnapshot();
+                saveToCommandHistory(commandText);
                 return new CommandResult(feedback);
             }
         } catch (LexerException | ParserException ex) {
@@ -73,8 +73,8 @@ public class LogicManager implements Logic {
         var command = addressBookParser.parseCommand(commandText);
         CommandResult commandResult = command.execute(model);
 
-        persistAddressBook();
-        persistCommandHistory(commandText);
+        saveAddressBookSnapshot();
+        saveToCommandHistory(commandText);
 
         return commandResult;
     }
@@ -99,7 +99,7 @@ public class LogicManager implements Logic {
         }
     }
 
-    private void persistAddressBook() throws CommandException {
+    private void saveAddressBookSnapshot() throws CommandException {
         try {
             storage.saveAddressBook(model.getAddressBook());
         } catch (AccessDeniedException e) {
@@ -110,7 +110,7 @@ public class LogicManager implements Logic {
         }
     }
 
-    private void persistCommandHistory(String commandText) throws CommandException {
+    private void saveToCommandHistory(String commandText) throws CommandException {
         CommandHistory commandHistory = model.getCommandHistory();
         commandHistory.add(commandText);
         try {
