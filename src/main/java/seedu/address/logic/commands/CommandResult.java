@@ -3,8 +3,10 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.model.person.Person;
 
 /**
  * Represents the result of a command execution.
@@ -19,6 +21,12 @@ public class CommandResult {
     /** The application should exit. */
     private final boolean exit;
 
+    /** The info editor should be shown to the user. */
+    private final boolean showInfoEditor;
+
+    /** The person whose info is to be edited. */
+    private final Person personToedit;
+
     /**
      * Constructs a {@code CommandResult} with the specified fields.
      */
@@ -26,6 +34,19 @@ public class CommandResult {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
+        this.showInfoEditor = false;
+        this.personToedit = null;
+    }
+
+    /**
+     * Constructs a {@code CommandResult} for the info editor.
+     */
+    public CommandResult(String feedbackToUser, Person personToEdit) {
+        this.feedbackToUser = requireNonNull(feedbackToUser);
+        this.showHelp = false;
+        this.exit = false;
+        this.showInfoEditor = true;
+        this.personToedit = requireNonNull(personToEdit);
     }
 
     /**
@@ -46,6 +67,14 @@ public class CommandResult {
 
     public boolean isExit() {
         return exit;
+    }
+
+    public boolean isShowInfoEditor() {
+        return showInfoEditor;
+    }
+
+    public Optional<Person> getPersonToedit() {
+        return Optional.ofNullable(personToedit);
     }
 
     @Override
