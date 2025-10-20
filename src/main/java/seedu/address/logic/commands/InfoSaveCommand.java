@@ -6,6 +6,7 @@ import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 import java.util.List;
 
 import seedu.address.commons.core.index.Index;
+import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -57,11 +58,40 @@ public class InfoSaveCommand extends Command {
         return new CommandResult(String.format(MESSAGE_SUCCESS, Messages.format(editedPerson)));
     }
 
+    public Index getIndex() {
+        return index;
+    }
+
+    public Info getInfo() {
+        return info;
+    }
+
     @Override
     public boolean equals(Object other) {
-        return other == this
-                || (other instanceof InfoSaveCommand
-                && index.equals(((InfoSaveCommand) other).index)
-                && info.equals(((InfoSaveCommand) other).info));
+        if (other == this) {
+            return true;
+        }
+
+        // instanceof handles nulls
+        if (!(other instanceof InfoSaveCommand)) {
+            return false;
+        }
+
+        InfoSaveCommand otherCommand = (InfoSaveCommand) other;
+        return index.equals(otherCommand.index)
+                && info.equals(otherCommand.info);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(index, info);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("index", index)
+                .add("info", info)
+                .toString();
     }
 }
