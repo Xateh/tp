@@ -31,7 +31,7 @@ public class InfoSaveCommandExtractor {
         Index index;
         try {
             index = Index.fromOneBased(Integer.parseInt(params[0]));
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | IndexOutOfBoundsException e) {
             throw new ValidationException(String.format(MESSAGE_INDEX_FAILED_TO_PARSE, params[0]));
         }
 
@@ -44,7 +44,12 @@ public class InfoSaveCommandExtractor {
 
         String infoString;
         try {
-            infoString = decodeFromSafeHex(hexEncodedInfo);
+            // Handle empty hex string (empty info)
+            if (hexEncodedInfo.isEmpty()) {
+                infoString = "";
+            } else {
+                infoString = decodeFromSafeHex(hexEncodedInfo);
+            }
         } catch (Exception e) {
             throw new ValidationException("Failed to decode information data: " + e.getMessage());
         }

@@ -12,6 +12,7 @@ public class InfoViewCommandExtractor {
     public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
     public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
+    public static final String MESSAGE_TOO_MANY_PARAMETERS = "Too many parameters provided for infoview command.";
 
     private InfoViewCommandExtractor() {}
 
@@ -27,6 +28,10 @@ public class InfoViewCommandExtractor {
 
         if (params.length == 0) {
             throw new ValidationException(MESSAGE_INDEX_UNSPECIFIED);
+        }
+
+        if (params.length > 1) {
+            throw new ValidationException(MESSAGE_TOO_MANY_PARAMETERS);
         }
 
         Index index;
