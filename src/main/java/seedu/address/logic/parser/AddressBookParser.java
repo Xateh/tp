@@ -14,7 +14,6 @@ import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ExitCommand;
-import seedu.address.logic.commands.FieldCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
@@ -76,9 +75,6 @@ public class AddressBookParser {
         case FindCommand.COMMAND_WORD:
             return new FindCommandParser().parse(arguments);
 
-        case FieldCommand.COMMAND_WORD:
-            return new FieldCommandParser().parse(arguments);
-
         case ListCommand.COMMAND_WORD:
             return new ListCommand();
 
@@ -94,7 +90,9 @@ public class AddressBookParser {
         default:
             try {
                 return Decoder.decode(BareCommand.parse(userInput));
-            } catch (LexerException | ParserException | ValidationException | ResolutionException e) {
+            } catch (ValidationException e) {
+                throw new ParseException(e.getMessage(), e);
+            } catch (LexerException | ParserException | ResolutionException e) {
                 System.out.println(e.getMessage());
             }
 
