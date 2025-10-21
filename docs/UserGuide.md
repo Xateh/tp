@@ -47,27 +47,57 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
 <box type="info" seamless>
 
-**Notes about the command format:**<br>
+#### Basic Command Structure
 
-* Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
-  e.g. in `add n/NAME`, `NAME` is a parameter which can be used as `add n/John Doe`.
+All commands follow the same simple format:
 
-* Items in square brackets are optional.<br>
-  e.g `n/NAME [t/TAG]` can be used as `n/John Doe t/friend` or as `n/John Doe`.
+`command <parameters…> <options…>`
 
-* Items with `…`​ after them can be used multiple times including zero times.<br>
-  e.g. `[t/TAG]…​` can be used as ` ` (i.e. 0 times), `t/friend`, `t/friend t/family` etc.
+1. **Command:** The action you want to perform (e.g., `add`, `list`, `delete`).
+2. **Parameters:** Inputs the command _needs_ to work. These are usually **required**, and their **order matters**.
+3. **Options:** Optional settings that change _how_ the command works. They always start with a slash (`/`) and can be in **any order**, but must come _after_ all parameters.
 
-* Items with `+` after them can be used one or more times. <br>
-  e.g. `tag INDEX TAG+` can be used as `tag 1 friend cool`
+**Parameters**
 
-* Parameters can be in any order.<br>
-  e.g. if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
+Parameters are the main inputs for a command.
+- **Order is Key:** You must provide them in the specific order shown in the command's help text.
+- **Handling Spaces:** If your parameter includes spaces, you **must** wrap it in straight quotes (`""`).
+    - `add "New task"` (This is one parameter: "New task")
+    - `add New task` (This is two parameters: "New" and "task")
+- **Parameter Types:** Some commands use special prefixes for parameters:
+    - **Normal:** `"My task"`
+    - **Additive:** `+tag` (Used to add an item, like a tag)
+    - **Subtractive:** `-tag` (Used to remove an item, like a tag)
 
-* Extraneous parameters for commands that do not take in parameters (such as `help`, `list`, `exit` and `clear`) will be ignored.<br>
-  e.g. if the command specifies `help 123`, it will be interpreted as `help`.
+**Options**
 
-* If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
+Options are optional settings to customise your command. They always come _after_ all parameters. There are two types of options:
+1. **Name-only (Flag):** Used to turn a setting on.
+    - **Example:** `list /all` (The `/all` flag might show completed items)
+2. **Name-Value Pair:** Used to provide a specific value for a setting. Use a colon (`:`) to separate the name and value.
+    - **Example:** `add "Finish report" /priority:high`
+    - If the value has spaces, wrap the value in quotes: `add "New event" /due:"tomorrow at 5"`
+
+When you look at the help for a command, you'll see this notation:
+
+- **Field Types:**
+    - `<string>`: Text that can be a single `word` or `"text with spaces"`.
+    - `<word>`: Text that must be a single `word` (without quotes).
+    - `<index>`: A positive number (like `1`, `2`, `3`) corresponding to an item in a list.
+- **Multiplicity (How many?):**
+    - `<item>`: Exactly one is required.
+    - `<item>?`: Zero or one (it's optional).
+    - `<item>+`: One or more are required.
+    - `<item>*`: Zero or more (it's optional and you can provide many).
+
+**Example:** `tag <index>+ <tag>+` means you must provide at least one index, followed by at least one tag.
+
+**Extraneous Parameters and Options**
+
+By default:
+- the number of parameters are fixed for commands and should be strictly adhered to. Using an number of parameters that does not conform to the requirements of the command format is **undefined behaviour**. Some commands may gracefully handle extraneous parameters if it is sensible to do so, but this behaviour _should not be relied on_.
+- extraneous options are *always* ignored.
+
 </box>
 
 ### Viewing help : `help`
