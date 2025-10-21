@@ -20,9 +20,12 @@ public class DeleteCommandExtractorTest {
     }
 
     @Test
-    public void parse_invalidArgs_throwsException() throws LexerException, ParserException, ValidationException {
-        // no index
+    public void parse_invalidArgsInvalidIndex_throwsException() {
+        assertThrows(ValidationException.class, () ->
+                DeleteCommandExtractor.extract(BareCommand.parse("delete")));
         assertThrows(ValidationException.class, () ->
                 DeleteCommandExtractor.extract(BareCommand.parse("delete a")));
+        assertThrows(ValidationException.class, () ->
+                DeleteCommandExtractor.extract(BareCommand.parse("delete 0")));
     }
 }

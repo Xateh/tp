@@ -6,7 +6,7 @@ import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.grammars.command.BareCommand;
 
 /**
- * Extractor for the {@code delete} command.
+ * Extractor that builds {@code DeleteCommand}s.
  */
 public class DeleteCommandExtractor {
     // Messages for extraction
