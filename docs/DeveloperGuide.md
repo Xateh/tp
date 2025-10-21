@@ -292,6 +292,8 @@ To add a new command to the system,
 
 The system automatically handles routing and dispatch.
 
+Your extractor should accept a `BareCommand`, a facade for the output of the lexer and parser, documented in the [BareCommand API](BareCommand.md).
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
