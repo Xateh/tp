@@ -202,22 +202,34 @@ Examples:
 
 Finds persons whose fields contain any of the given keywords.
 
-Format: `find KEYWORD [MORE_KEYWORDS]`
+Format: `find <keyword>+ [/<field>]*`
 
-* The search is case-insensitive. e.g `hans` will match `Hans`
-* The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`
+If no specific field is provided, all built-in fields will be searched.
+* The search is case-insensitive. e.g `hans` will match `Hans`.
+* The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`.
 * All the fields are searched.
-* Only full words will be matched e.g. `Han` will not match `Hans`
+* Only full words will be matched e.g. `Han` will not match `Hans`.
 * Persons matching at least one keyword on any one field will be returned (i.e. `OR` search).
   e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
 
 Examples:
-* `find John` returns `john` and `John Doe`
+* `find John` returns `john` and `John Doe`.
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
-* `find 99999999` returns all persons whose phone number is `99999999`
-* `find test.dummy@gmail.com` returns all persons whose email is `test.dummy@gmail.com`
-* `find friend` returns all persons tagged with `"friend"`
+* `find 99999999` returns all persons whose phone number is `99999999`.
+* `find test.dummy@gmail.com` returns all persons whose email is `test.dummy@gmail.com`.
+* `find friend` returns all persons tagged with `"friend"`.
+
+You can limit the search to specific fields by adding options after your keywords.
+Each field option starts with / followed by the field name.
+* The same rules for searching applies as per the case of searching all built in fields. (see above)
+* Now, only those persons matching at least one keyword on any one specified field will be returned.
+
+Examples:
+* `find John /name` returns persons whose name contains `john`.
+* `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
+* `find 99999999 /phone` returns all persons whose phone number is `99999999`.
+* `find test /name /email` returns all persons whose name or email contains the word `test`.
 
 ### Deleting a person : `delete`
 
