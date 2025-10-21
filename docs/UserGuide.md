@@ -101,10 +101,20 @@ Shows a list of all persons in the address book.
 Format: `list`
 
 ### Viewing command history : `history`
-
-Displays the list of commands previously entered, ordered from oldest to newest.
+Displays the list of commands previously entered.
 
 Format: `history`
+
+Examples:
+* `history` — displays a numbered list of past commands in the format `N. COMMAND_TEXT` (oldest first).
+
+  Example output:
+
+  ```
+  1. add n/John Doe p/98765432
+  2. list
+  3. delete 2
+  ```
 
 ### Editing a person : `edit`
 
