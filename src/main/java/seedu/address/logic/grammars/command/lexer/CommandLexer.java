@@ -13,6 +13,8 @@ import seedu.address.logic.grammars.command.utils.Location;
  * <text> ::= "[^"\/:]*"
  * <slash> ::= /
  * <colon> ::= :
+ * <plus> ::= +
+ * <minus> ::= -
  * <terminal> ::= $
  * }
  * </pre>
@@ -81,6 +83,12 @@ public class CommandLexer {
             break;
         case ':':
             this.addToken(TokenType.COLON);
+            break;
+        case '+':
+            this.addToken(TokenType.PLUS);
+            break;
+        case '-':
+            this.addToken(TokenType.MINUS);
             break;
         case 'A':
         case 'a':

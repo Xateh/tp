@@ -29,7 +29,7 @@ public class TagCommandExtractor {
      * @throws ValidationException When the command parameters fail to validate.
      */
     public static TagCommand extract(BareCommand bareCommand) throws ValidationException {
-        String[] params = bareCommand.getAllParameters();
+        BareCommand.Parameter[] params = bareCommand.getAllParameters();
 
         // extract index
         if (params.length <= 0) {
@@ -37,7 +37,7 @@ public class TagCommandExtractor {
         }
         Index index;
         try {
-            index = Index.fromOneBased(Integer.parseInt(params[0]));
+            index = Index.fromOneBased(Integer.parseInt(params[0].getValue()));
         } catch (NumberFormatException e) {
             // only thrown by Integer::parseInt
             throw new ValidationException(String.format(MESSAGE_INDEX_FAILED_TO_PARSE, params[0]));
@@ -52,7 +52,7 @@ public class TagCommandExtractor {
         }
         Set<Tag> tags = new HashSet<>();
         for (int i = 1; i < params.length; i++) {
-            tags.add(new Tag(params[i]));
+            tags.add(new Tag(params[i].getValue()));
         }
 
         return new TagCommand(index, tags);

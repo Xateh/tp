@@ -80,8 +80,32 @@ public class AstPrinter implements AstVisitor<String> {
     @Override
     public String visitParameter(AstNode.Parameter node) {
         StringBuilder builder = new StringBuilder("Parameter");
-        String wordString = node.getText().accept(this);
-        builder.append("\n").append(addPrefixes(wordString, true));
+        String variant = node.getParameterVariant().accept(this);
+        builder.append("\n").append(addPrefixes(variant, true));
+        return builder.toString();
+    }
+
+    @Override
+    public String visitNormalParameter(AstNode.NormalParameter node) {
+        StringBuilder builder = new StringBuilder("NormalParameter");
+        String textString = node.getText().accept(this);
+        builder.append("\n").append(addPrefixes(textString, true));
+        return builder.toString();
+    }
+
+    @Override
+    public String visitAdditiveParameter(AstNode.AdditiveParameter node) {
+        StringBuilder builder = new StringBuilder("AdditiveParameter");
+        String textString = node.getText().accept(this);
+        builder.append("\n").append(addPrefixes(textString, true));
+        return builder.toString();
+    }
+
+    @Override
+    public String visitSubtractiveParameter(AstNode.SubtractiveParameter node) {
+        StringBuilder builder = new StringBuilder("SubtractiveParameter");
+        String textString = node.getText().accept(this);
+        builder.append("\n").append(addPrefixes(textString, true));
         return builder.toString();
     }
 

@@ -12,16 +12,22 @@ import seedu.address.logic.grammars.command.parser.ast.AstNode;
  * the lexer (tokens from lexer are in CAPITAL):
  * <pre>
  * {@code
- * command          → imperative parameter_list option_list TERMINAL
- * imperative       → word
- * parameter_list   → ( parameter )+
- * parameter        → text
- * option_list      → ( option )+
- * option           → SLASH option_name ( COLON option_value )*
- * option_name      → word
- * option_value     → text
- * text             → TEXT | WORD
- * word             → WORD
+ * command                  → imperative parameter_list option_list TERMINAL
+ * imperative               → word
+ * parameter_list           → ( parameter )+
+ * parameter                → normal_parameter
+ *                          | additive_parameter
+ *                          | subtractive_parameter
+ * normal_parameter         → text
+ * additive_parameter       → PLUS text
+ * subtractive_parameter    → MINUS text
+ * option_list              → ( option )+
+ * option                   → SLASH option_name ( COLON option_value )*
+ * option_name              → word
+ * option_value             → text
+ * text                     → TEXT
+ *                          | WORD
+ * word                     → WORD
  * }
  * </pre>
  */
@@ -98,11 +104,59 @@ public class CommandParser {
 
     private AstNode.Parameter parseParameter() throws ProductionApplicationException {
         try {
-            AstNode.Text text = this.parseText();
-            return new AstNode.Parameter(text);
+            AstNode.Parameter.ParameterVariant parameterVariant = null;
+
+            if (this.check(TokenType.WORD, TokenType.TEXT)) {
+                parameterVariant = this.parseNormalParameter();
+            } else if (this.check(TokenType.PLUS)) {
+                parameterVariant = this.parseAdditiveParameter();
+            } else if (this.check(TokenType.MINUS)) {
+                parameterVariant = this.parseSubtractiveParameter();
+            } else {
+                // failed to find matching token - always throws
+                this.eat(TokenType.WORD, TokenType.TEXT, TokenType.PLUS, TokenType.MINUS);
+            }
+
+            assert parameterVariant != null;
+            return new AstNode.Parameter(parameterVariant);
         } catch (ProductionApplicationException e) {
             ParserError error = e.getParserError();
             error.addProductionNonterminal("parameter");
+            throw e;
+        }
+    }
+
+    private AstNode.NormalParameter parseNormalParameter() throws ProductionApplicationException {
+        try {
+            AstNode.Text text = this.parseText();
+            return new AstNode.NormalParameter(text);
+        } catch (ProductionApplicationException e) {
+            ParserError error = e.getParserError();
+            error.addProductionNonterminal("normal-parameter");
+            throw e;
+        }
+    }
+
+    private AstNode.AdditiveParameter parseAdditiveParameter() throws ProductionApplicationException {
+        try {
+            this.eat(TokenType.PLUS);
+            AstNode.Text text = this.parseText();
+            return new AstNode.AdditiveParameter(text);
+        } catch (ProductionApplicationException e) {
+            ParserError error = e.getParserError();
+            error.addProductionNonterminal("additive-parameter");
+            throw e;
+        }
+    }
+
+    private AstNode.SubtractiveParameter parseSubtractiveParameter() throws ProductionApplicationException {
+        try {
+            this.eat(TokenType.MINUS);
+            AstNode.Text text = this.parseText();
+            return new AstNode.SubtractiveParameter(text);
+        } catch (ProductionApplicationException e) {
+            ParserError error = e.getParserError();
+            error.addProductionNonterminal("subtractive-parameter");
             throw e;
         }
     }

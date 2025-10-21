@@ -18,13 +18,59 @@ import seedu.address.logic.grammars.command.parser.ast.visitors.CommandExtractor
  */
 public class BareCommand {
     private final String imperative;
-    private final String[] parameters;
+    private final Parameter[] parameters;
     private final Map<String, String> options;
 
-    private BareCommand(String imperative, String[] parameters, Map<String, String> options) {
+    private BareCommand(String imperative, Parameter[] parameters, Map<String, String> options) {
         this.imperative = imperative;
         this.parameters = parameters;
         this.options = options;
+    }
+
+    /**
+     * Parameter class that stores the parameter kind and value.
+     */
+    public static class Parameter {
+        private final ParameterKind kind;
+        private final String value;
+
+        /**
+         * Enumeration of all possible parameter kinds.
+         */
+        public enum ParameterKind {
+            NORMAL, ADDITIVE, SUBTRACTIVE
+        }
+
+        /**
+         * Constructs a new {@code Parameter}.
+         *
+         * @param kind Kind of parameter.
+         * @param value Value of parameter.
+         */
+        public Parameter(ParameterKind kind, String value) {
+            this.kind = kind;
+            this.value = value;
+        }
+
+        public ParameterKind getKind() {
+            return kind;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public boolean isNormal() {
+            return this.kind == ParameterKind.NORMAL;
+        }
+
+        public boolean isAdditive() {
+            return this.kind == ParameterKind.ADDITIVE;
+        }
+
+        public boolean isSubtractive() {
+            return this.kind == ParameterKind.SUBTRACTIVE;
+        }
     }
 
     /**
@@ -32,7 +78,7 @@ public class BareCommand {
      */
     public static class BareCommandBuilder {
         private String imperative;
-        private final ArrayList<String> parameters = new ArrayList<>();
+        private final ArrayList<Parameter> parameters = new ArrayList<>();
         private final Map<String, String> options = new LinkedHashMap<>();
 
         public BareCommandBuilder() {
@@ -42,8 +88,12 @@ public class BareCommand {
             this.imperative = imperative;
         }
 
-        public void addParameter(String parameter) {
-            this.parameters.add(parameter);
+        public void addParameter(Parameter.ParameterKind parameterKind, String parameterValue) {
+            this.parameters.add(new Parameter(parameterKind, parameterValue));
+        }
+
+        public void addParameter(String parameterValue) {
+            this.addParameter(Parameter.ParameterKind.NORMAL, parameterValue);
         }
 
         public void setOption(String optionName) {
@@ -61,7 +111,7 @@ public class BareCommand {
          */
         public BareCommand build() {
             String imperative = this.imperative;
-            String[] parameters = this.parameters.toArray(String[]::new);
+            Parameter[] parameters = this.parameters.toArray(Parameter[]::new);
             // Allows nulls (for flag-style options), but prevents external mutation
             Map<String, String> options =
                 Collections.unmodifiableMap(new LinkedHashMap<>(this.options));
@@ -87,11 +137,11 @@ public class BareCommand {
         return this.imperative;
     }
 
-    public String getParameter(int index) {
+    public Parameter getParameter(int index) {
         return this.parameters[index];
     }
 
-    public String[] getAllParameters() {
+    public Parameter[] getAllParameters() {
         return this.parameters;
     }
 
