@@ -145,20 +145,20 @@ Examples:
 
 ### Adding information to a person: `infoedit`
 
-Edits information about person given its index.
+Edits information about a person given its index.
 
 Format: `infoedit INDEX`
 
-* Displays an editable text box to the person at the given `INDEX` in the displayed list.
+* Displays an editable text box for the person at the given `INDEX` in the displayed list.
 * The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
 * If there is existing information attached to the person, it will be shown and editable in the text box.
 
 Examples:
-* `list` followed by `infoedit 2` will bring up editable text box to the 2nd person in the address book.
+* `list` followed by `infoedit 2` will bring up an editable text box for the 2nd person in the address book.
 
 ### Viewing information of a person: `infoview`
 
-View information about person given its index.
+View information about a person given its index.
 
 Format: `infoview INDEX`
 
