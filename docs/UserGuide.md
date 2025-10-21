@@ -143,6 +143,31 @@ Format: `untag INDEX t/TAG`
 Examples:
 * `list` followed by `untag 2 t/friends` removes the `friends` tag from the 2nd person in the address book.
 
+### Adding information to a person: `infoedit`
+
+Edits information about person given its index.
+
+Format: `infoedit INDEX`
+
+* Displays an editable text box to the person at the given `INDEX` in the displayed list.
+* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
+* If there is existing information attached to the person, it will be shown and editable in the text box.
+
+Examples:
+* `list` followed by `infoedit 2` will bring up editable text box to the 2nd person in the address book.
+
+### Viewing information of a person: `infoview`
+
+View information about person given its index.
+
+Format: `infoview INDEX`
+
+* Displays all the given information of the person at the `INDEX` specified.
+* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
+
+Examples:
+* `list` followed by `infoview 2` will display available information about the 2nd person in the address book.
+
 ### Locating persons by name: `find`
 
 Finds persons whose fields contain any of the given keywords.
@@ -231,6 +256,8 @@ Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
+**Edit Info** | `infoedit INDEX` <br> e.g., `infoedit 2`
+**View Info** | `infoview INDEX` <br> e.g., `infoview 2`
 **Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
