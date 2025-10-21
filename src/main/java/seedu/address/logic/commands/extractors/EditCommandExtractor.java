@@ -1,5 +1,7 @@
 package seedu.address.logic.commands.extractors;
 
+import java.util.Optional;
+
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
@@ -22,6 +24,8 @@ public class EditCommandExtractor {
     public static final String OPTION_KEY_ADDRESS = "address";
     public static final String OPTION_KEY_TAG = "tag";
 
+    private EditCommandExtractor() {}
+
     /**
      * Extracts command parameters and options from the given Command object. Performs input validation as well.
      *
@@ -41,21 +45,21 @@ public class EditCommandExtractor {
         // extract edit details
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
         try {
-            if (bareCommand.hasOption(OPTION_KEY_NAME)) {
-                editPersonDescriptor.setName(
-                        ParserUtil.parseName(bareCommand.getOptionValue(OPTION_KEY_NAME).get()));
+            Optional<String> name = bareCommand.getOptionValue(OPTION_KEY_NAME);
+            if (name.isPresent()) {
+                editPersonDescriptor.setName(ParserUtil.parseName(name.get()));
             }
-            if (bareCommand.hasOption(OPTION_KEY_PHONE)) {
-                editPersonDescriptor.setPhone(
-                        ParserUtil.parsePhone(bareCommand.getOptionValue(OPTION_KEY_PHONE).get()));
+            Optional<String> phone = bareCommand.getOptionValue(OPTION_KEY_PHONE);
+            if (phone.isPresent()) {
+                editPersonDescriptor.setPhone(ParserUtil.parsePhone(phone.get()));
             }
-            if (bareCommand.hasOption(OPTION_KEY_EMAIL)) {
-                editPersonDescriptor.setEmail(
-                        ParserUtil.parseEmail(bareCommand.getOptionValue(OPTION_KEY_EMAIL).get()));
+            Optional<String> email = bareCommand.getOptionValue(OPTION_KEY_EMAIL);
+            if (email.isPresent()) {
+                editPersonDescriptor.setEmail(ParserUtil.parseEmail(email.get()));
             }
-            if (bareCommand.hasOption(OPTION_KEY_ADDRESS)) {
-                editPersonDescriptor.setAddress(
-                        ParserUtil.parseAddress(bareCommand.getOptionValue(OPTION_KEY_ADDRESS).get()));
+            Optional<String> address = bareCommand.getOptionValue(OPTION_KEY_ADDRESS);
+            if (address.isPresent()) {
+                editPersonDescriptor.setAddress(ParserUtil.parseAddress(address.get()));
             }
             if (bareCommand.hasOption(OPTION_KEY_TAG)) {
                 editPersonDescriptor.setTags(

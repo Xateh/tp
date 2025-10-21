@@ -108,7 +108,8 @@ public class BareCommand {
 
     /**
      * Returns an {@code Optional} containing the value associated with the key, if provided as an option. If the option
-     * was specified multiple times, this returns the first specified option value.
+     * was specified multiple times, this returns the first specified option value. For this to return a nonempty
+     * Optional, the option must have been specified at least once with a value.
      *
      * @param key The option key to look for.
      * @return An {@code Optional} containing the first value associated with the given key if it exists.
@@ -125,7 +126,10 @@ public class BareCommand {
     }
 
     /**
-     * Returns an {@code Optional} containing all values associated with the key, if provided as an option.
+     * Returns an {@code Optional} containing all values associated with the key, if provided as an option. Callers must
+     * be prepared to accept any number (including 0) of values, if the option was defined. For this to return a
+     * nonempty Optional, the option must have been specified at least once, regardless of the number of values
+     * specified.
      *
      * @param key The option key to look for.
      * @return An {@code Optional} containing a {@code List} of all the values associated with the given key, if they
@@ -135,7 +139,7 @@ public class BareCommand {
         requireNonNull(key);
 
         List<String> values = this.options.get(key);
-        if (values == null || values.isEmpty()) {
+        if (values == null) {
             return Optional.empty();
         }
 
@@ -143,7 +147,8 @@ public class BareCommand {
     }
 
     /**
-     * Returns whether the key was defined as an option; typically used for boolean flags.
+     * Returns whether the key was defined as an option; typically used for boolean flags. For this to return true, the
+     * option must have been specified at least once, regardless of the number of values specified.
      *
      * @param key The option key to look for.
      * @return True if the option key was specified/defined, else returns false.
