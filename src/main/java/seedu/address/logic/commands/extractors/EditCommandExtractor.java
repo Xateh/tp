@@ -1,0 +1,70 @@
+package seedu.address.logic.commands.extractors;
+
+import seedu.address.commons.core.index.Index;
+import seedu.address.logic.commands.EditCommand;
+import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
+import seedu.address.logic.commands.exceptions.ValidationException;
+import seedu.address.logic.grammars.command.BareCommand;
+import seedu.address.logic.parser.ParserUtil;
+import seedu.address.logic.parser.exceptions.ParseException;
+
+/**
+ * Extractor that builds {@code EditCommand}s.
+ */
+public class EditCommandExtractor {
+    // Messages for extraction
+    public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
+
+    // Options
+    public static final String OPTION_KEY_NAME = "name";
+    public static final String OPTION_KEY_PHONE = "phone";
+    public static final String OPTION_KEY_EMAIL = "email";
+    public static final String OPTION_KEY_ADDRESS = "address";
+    public static final String OPTION_KEY_TAG = "tag";
+
+    /**
+     * Extracts command parameters and options from the given Command object. Performs input validation as well.
+     *
+     * @param bareCommand Command to extract parameters and options from.
+     * @return EditCommand that can be executed.
+     * @throws ValidationException When the command parameters fail to validate.
+     */
+    public static EditCommand extract(BareCommand bareCommand) throws ValidationException {
+        String[] params = bareCommand.getAllParameters();
+
+        // extract index
+        if (params.length <= 0) {
+            throw new ValidationException(MESSAGE_INDEX_UNSPECIFIED);
+        }
+        Index index = Validation.validateIndex(params[0]);
+
+        // extract edit details
+        EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
+        try {
+            if (bareCommand.hasOption(OPTION_KEY_NAME)) {
+                editPersonDescriptor.setName(
+                        ParserUtil.parseName(bareCommand.getOptionValue(OPTION_KEY_NAME).get()));
+            }
+            if (bareCommand.hasOption(OPTION_KEY_PHONE)) {
+                editPersonDescriptor.setPhone(
+                        ParserUtil.parsePhone(bareCommand.getOptionValue(OPTION_KEY_PHONE).get()));
+            }
+            if (bareCommand.hasOption(OPTION_KEY_EMAIL)) {
+                editPersonDescriptor.setEmail(
+                        ParserUtil.parseEmail(bareCommand.getOptionValue(OPTION_KEY_EMAIL).get()));
+            }
+            if (bareCommand.hasOption(OPTION_KEY_ADDRESS)) {
+                editPersonDescriptor.setAddress(
+                        ParserUtil.parseAddress(bareCommand.getOptionValue(OPTION_KEY_ADDRESS).get()));
+            }
+            if (bareCommand.hasOption(OPTION_KEY_TAG)) {
+                editPersonDescriptor.setTags(
+                    ParserUtil.parseTags(bareCommand.getOptionAllValues(OPTION_KEY_TAG).get()));
+            }
+        } catch (ParseException e) {
+            throw new ValidationException(e.getMessage());
+        }
+
+        return new EditCommand(index, editPersonDescriptor);
+    }
+}

@@ -1,5 +1,7 @@
 package seedu.address.logic.commands.extractors;
 
+import static java.util.Objects.requireNonNull;
+
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.exceptions.ValidationException;
 
@@ -14,11 +16,13 @@ public class Validation {
 
     /**
      * Validate the {@code Index} input field type for commands.
+     *
      * @param input String to validate.
      * @return {@code Index} after validation.
      * @throws ValidationException When the input fails to validate.
      */
     public static Index validateIndex(String input) throws ValidationException {
+        requireNonNull(input);
         Index index;
         try {
             index = Index.fromOneBased(Integer.parseInt(input));
