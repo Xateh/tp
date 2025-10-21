@@ -214,6 +214,31 @@ AddressBook data are saved in the hard disk automatically after any command that
 
 AddressBook data are saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
 
+Caution:
+
+- Do not edit the JSON file while the application is running. If the file becomes malformed, the app may discard the data or fail to load it correctly.
+
+### Finding the command history file
+Command history data are saved automatically as a JSON file `[JAR file location]/data/commandhistory.json`. Advanced users are welcome to update data directly by editing that data file.
+
+The file is in JSON format and contains an array of recorded commands. Example structure:
+
+  ```json
+  {
+    "commandhistory": {
+      "commands": [
+        "add n/John Doe p/98765432",
+        "list",
+        "delete 2"
+      ]
+    }
+  }
+  ```
+
+Caution:
+
+- Do not edit the JSON file while the application is running. If the file becomes malformed, the app may discard the history or fail to load it correctly.
+
 <box type="warning" seamless>
 
 **Caution:**
