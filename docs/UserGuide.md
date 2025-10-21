@@ -147,7 +147,7 @@ Examples:
 
 Finds persons whose fields contain any of the given keywords.
 
-Format: `find KEYWORD [MORE_KEYWORDS] [/FIELD [MORE_FIELDS]...]`
+Format: `find <keyword>+ [/<field>]*`
 
 If no specific field is provided, all built-in fields will be searched.
 * The search is case-insensitive. e.g `hans` will match `Hans`.
