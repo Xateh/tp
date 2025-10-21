@@ -49,6 +49,8 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
 #### Basic Command Structure
 
+**NOTE TO REVIEWERS**: This part of the UG contains the updated command syntax that the app will eventually use. However, not all of the rest of the UG has been updated to be aligned with this new syntax. This **will be fixed** in a later version.
+
 All commands follow the same simple format:
 
 `command <parameters…> <options…>`
@@ -198,6 +200,24 @@ Format: `infoview INDEX`
 Examples:
 * `list` followed by `infoview 2` will display available information about the 2nd person in the address book.
 
+### Setting a custom field on a person : `field`
+
+Sets or updates one or more **custom field values** for the specified person in the address book.
+
+Format: `field INDEX /KEY:VALUE [/KEY:VALUE]…`
+
+* Updates the person at the specified `INDEX`. The index refers to the number shown in the current list. The index **must be a positive integer** 1, 2, 3, …​
+* Each `/KEY:VALUE` pair targets a previously defined custom field (`KEY`).
+* You may provide **one or multiple** `/KEY:VALUE` pairs in a single command.
+* If a `VALUE` contains spaces, wrap it in double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
+* If a `KEY` is unknown (not defined), the command fails with an error.
+
+**Examples:**
+* `field 5 /linkedInUsername:alextan /rate:120` — Sets two fields on the 5th person in one command.
+* `field 3 /notes:"Met at FinTech conf 2025"` — Adds a note with spaces to the 3rd person.
+* `field 7 /birthday:"1999-02-01"` — Sets a field on the 7th person in one command.
+* `field 7 /birthday:"1999-02-10"` — Updates the field with `KEY` `birthday` on the 7th person.
+
 ### Locating persons by name: `find`
 
 Finds persons whose fields contain any of the given keywords.
@@ -297,13 +317,15 @@ _Details coming soon ..._
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**List**   | `list`
+**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
+**Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
 **Edit Info** | `infoedit INDEX` <br> e.g., `infoedit 2`
 **View Info** | `infoview INDEX` <br> e.g., `infoview 2`
-**Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
-**Clear**  | `clear`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Field**  | `field INDEX /KEY:VALUE` <br> e.g., `field 2 /company:"BlackRock"`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
-**List**   | `list`
+**Delete** | `delete INDEX`<br> e.g., `delete 3`
+**Clear**  | `clear`
+**Exit**  | `exit`  
 **Help**   | `help`
