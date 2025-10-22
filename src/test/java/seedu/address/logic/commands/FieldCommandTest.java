@@ -3,6 +3,7 @@ package seedu.address.logic.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.logic.commands.FieldCommand.MESSAGE_AT_LEAST_ONE_PAIR;
 import static seedu.address.logic.commands.FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK;
 import static seedu.address.logic.commands.FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK;
 
@@ -14,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.grammars.command.BareCommand;
+import seedu.address.commons.core.index.Index;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -36,8 +37,9 @@ class FieldCommandTest {
 
     @Test
     void executeSinglePairSuccess() throws Exception {
-        BareCommand gc = BareCommand.parse("field 1 /company:\"Goldman Sachs\"");
-        FieldCommand cmd = new FieldCommand(gc);
+        Map<String, String> input = new LinkedHashMap<>();
+        input.put(" company ", " Goldman Sachs ");
+        FieldCommand cmd = new FieldCommand(Index.fromOneBased(1), input);
 
         String feedback = cmd.execute(model).getFeedbackToUser();
 
@@ -46,66 +48,9 @@ class FieldCommandTest {
         assertEquals("Goldman Sachs", edited.getCustomFields().get("company"));
     }
 
-    /*
-    @Test
-    void executeMultiplePairsOverwriteAndOrder() throws Exception {
-        BareCommand gc = BareCommand.parse("field 1 /\"asset-class\":gold /company:\"Goldman Sachs\" /company:GS");
-        FieldCommand cmd = new FieldCommand(gc);
-        cmd.execute(model);
-
-        Person edited = model.getFilteredPersonList().get(0);
-        // last write wins
-        assertEquals("GS", edited.getCustomFields().get("company"));
-        // order preserved
-        assertArrayEquals(new String[]{"asset-class", "company"},
-                edited.getCustomFields().keySet().toArray(new String[0]));
-    }
-    */
-
-    @Test
-    void constructorFromGrammarInvalidIndexThrows() throws Exception {
-        BareCommand gc = BareCommand.parse("field x /k:v");
-        assertThrows(IllegalArgumentException.class, () -> new FieldCommand(gc));
-    }
-
-    @Test
-    void constructorFromGrammarNoPairsThrows() throws Exception {
-        BareCommand gc = BareCommand.parse("field 1"); // no /k:v
-        assertThrows(IllegalArgumentException.class, () -> new FieldCommand(gc));
-    }
-
     @Test
     void executeIndexOutOfBoundsThrows() throws Exception {
-        // There is only 1 person in the model
-        BareCommand gc = BareCommand.parse("field 2 /k:v");
-        FieldCommand cmd = new FieldCommand(gc);
-        CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
-        assertEquals(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX, ex.getMessage());
-    }
-
-    @Test
-    void constructorWrongImperativeThrows() {
-        // Build a Command with imperative != "field"
-        BareCommand.BareCommandBuilder b = new BareCommand.BareCommandBuilder();
-        b.setImperative("notfield");
-        b.addParameter("1");
-        b.setOption("k", "v");
-        BareCommand c = b.build();
-
-        assertThrows(IllegalArgumentException.class, () -> new FieldCommand(c));
-    }
-
-    @Test
-    void convenienceConstructorInvalidArgsThrow() {
-        assertThrows(IllegalArgumentException.class, () -> new FieldCommand(-1, Map.of("k", "v")));
-        assertThrows(IllegalArgumentException.class, () -> new FieldCommand(1, null));
-        assertThrows(IllegalArgumentException.class, () -> new FieldCommand(1, Map.of()));
-    }
-
-    @Test
-    void executeIndexZeroThrowsInvalidIndex() throws Exception {
-        BareCommand gc = BareCommand.parse("field 0 /k:v");
-        FieldCommand cmd = new FieldCommand(gc);
+        FieldCommand cmd = new FieldCommand(Index.fromOneBased(2), Map.of("k", "v"));
         CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
         assertEquals(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX, ex.getMessage());
     }
@@ -115,7 +60,7 @@ class FieldCommandTest {
         Map<String, String> ordered = new LinkedHashMap<>();
         ordered.put("asset-class", "gold");
         ordered.put("company", "GS");
-        FieldCommand cmd = new FieldCommand(1, ordered);
+        FieldCommand cmd = new FieldCommand(Index.fromOneBased(1), ordered);
 
         String msg = cmd.execute(model).getFeedbackToUser();
 
@@ -125,38 +70,56 @@ class FieldCommandTest {
     }
 
     @Test
-    void executeBlankKeyThrows() {
+    void constructorNullIndexThrows() {
+        Map<String, String> pairs = Map.of("k", "v");
+        assertThrows(NullPointerException.class, () -> new FieldCommand(null, pairs));
+    }
+
+    @Test
+    void constructorNullPairsThrows() {
+        assertThrows(NullPointerException.class, () -> new FieldCommand(Index.fromOneBased(1), null));
+    }
+
+    @Test
+    void constructorEmptyPairsThrows() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                new FieldCommand(Index.fromOneBased(1), Map.of()));
+        assertEquals(MESSAGE_AT_LEAST_ONE_PAIR, ex.getMessage());
+    }
+
+    @Test
+    void constructorBlankKeyThrows() {
         Map<String, String> pairs = new LinkedHashMap<>();
         pairs.put("   ", "v"); // trims to empty -> validate fails
-        FieldCommand cmd = new FieldCommand(1, pairs);
-        CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                new FieldCommand(Index.fromOneBased(1), pairs));
         assertEquals(MESSAGE_NAME_CANNOT_BE_BLANK, ex.getMessage());
     }
 
     @Test
-    void executeBlankValueThrows() {
+    void constructorBlankValueThrows() {
         Map<String, String> pairs = new LinkedHashMap<>();
         pairs.put("k", "   "); // trims to empty -> validate fails
-        FieldCommand cmd = new FieldCommand(1, pairs);
-        CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                new FieldCommand(Index.fromOneBased(1), pairs));
         assertEquals(MESSAGE_VALUE_CANNOT_BE_BLANK, ex.getMessage());
     }
 
     @Test
-    void executeNullKeyNormalizesToEmptyThenThrows() {
+    void constructorNullKeyThrows() {
         Map<String, String> pairs = new LinkedHashMap<>();
         pairs.put(null, "v"); // null -> normalizeKey returns ""
-        FieldCommand cmd = new FieldCommand(1, pairs);
-        CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                new FieldCommand(Index.fromOneBased(1), pairs));
         assertEquals(MESSAGE_NAME_CANNOT_BE_BLANK, ex.getMessage());
     }
 
     @Test
-    void executeNullValueNormalizesToEmptyThenThrows() {
+    void constructorNullValueThrows() {
         Map<String, String> pairs = new LinkedHashMap<>();
         pairs.put("k", null); // null -> normalizeValue returns ""
-        FieldCommand cmd = new FieldCommand(1, pairs);
-        CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
+                new FieldCommand(Index.fromOneBased(1), pairs));
         assertEquals(MESSAGE_VALUE_CANNOT_BE_BLANK, ex.getMessage());
     }
 }

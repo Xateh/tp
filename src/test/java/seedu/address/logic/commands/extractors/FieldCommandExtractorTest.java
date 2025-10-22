@@ -44,7 +44,7 @@ class FieldCommandExtractorTest {
         BareCommand bare = BareCommand.parse("field /company:\"Goldman Sachs\"");
         ValidationException ex = assertThrows(ValidationException.class, () ->
                 FieldCommandExtractor.extract(bare));
-        assertEquals("Missing index. Usage: field <index> /key:value ...", ex.getMessage());
+        assertEquals(FieldCommandExtractor.MESSAGE_INDEX_UNSPECIFIED, ex.getMessage());
     }
 
     @Test
@@ -52,7 +52,7 @@ class FieldCommandExtractorTest {
         BareCommand bare = BareCommand.parse("field x /k:v");
         ValidationException ex = assertThrows(ValidationException.class, () ->
                 FieldCommandExtractor.extract(bare));
-        assertEquals("Invalid index. Must be a positive integer.", ex.getMessage());
+        assertEquals(String.format(Validation.MESSAGE_INDEX_FAILED_TO_PARSE, "x"), ex.getMessage());
     }
 
     @Test
@@ -60,7 +60,7 @@ class FieldCommandExtractorTest {
         BareCommand bare = BareCommand.parse("field 1");
         ValidationException ex = assertThrows(ValidationException.class, () ->
                 FieldCommandExtractor.extract(bare));
-        assertEquals("Provide at least one /key:value pair. Usage: field <index> /key:value ...", ex.getMessage());
+        assertEquals(FieldCommand.MESSAGE_AT_LEAST_ONE_PAIR, ex.getMessage());
     }
 
     @Test
@@ -74,5 +74,57 @@ class FieldCommandExtractorTest {
         ValidationException ex = assertThrows(ValidationException.class, () ->
                 FieldCommandExtractor.extract(bare));
         assertEquals("Wrong imperative for FieldCommand", ex.getMessage());
+    }
+
+    @Test
+    void extract_blankKey_throwsValidationException() {
+        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
+        builder.setImperative("field");
+        builder.addParameter("1");
+        builder.setOption("   ", "value");
+        BareCommand bare = builder.build();
+
+        ValidationException ex = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(bare));
+        assertEquals(FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK, ex.getMessage());
+    }
+
+    @Test
+    void extract_blankValue_throwsValidationException() {
+        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
+        builder.setImperative("field");
+        builder.addParameter("1");
+        builder.setOption("company", "   ");
+        BareCommand bare = builder.build();
+
+        ValidationException ex = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(bare));
+        assertEquals(FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK, ex.getMessage());
+    }
+
+    @Test
+    void extract_missingOptionValue_throwsValidationException() {
+        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
+        builder.setImperative("field");
+        builder.addParameter("1");
+        builder.setOption("company");
+        BareCommand bare = builder.build();
+
+        ValidationException ex = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(bare));
+        assertEquals(FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK, ex.getMessage());
+    }
+
+    @Test
+    void extract_nullOptionValue_throwsValidationException() {
+        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
+        builder.setImperative("field");
+        builder.addParameter("1");
+        builder.setOption("company", null);
+        BareCommand bare = builder.build();
+
+        ValidationException ex = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(bare));
+        assertEquals(FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK, ex.getMessage());
     }
 }
