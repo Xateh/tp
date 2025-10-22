@@ -26,6 +26,10 @@ public class FindCommand extends Command {
         this.predicate = predicate;
     }
 
+    public FieldContainsKeywordsPredicate getPredicate() {
+        return predicate;
+    }
+
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
