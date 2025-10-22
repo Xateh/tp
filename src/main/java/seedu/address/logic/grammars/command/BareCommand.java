@@ -78,6 +78,8 @@ public class BareCommand {
      * Builder for commands.
      */
     public static class BareCommandBuilder {
+        private static final String MESSAGE_UNDECLARED_IMPERATIVE = "Imperative not declared; build illegal.";
+
         private String imperative;
         private final ArrayList<Parameter> parameters = new ArrayList<>();
         private final Map<String, String> options = new LinkedHashMap<>();
@@ -148,6 +150,10 @@ public class BareCommand {
          * @return Built command.
          */
         public BareCommand build() {
+            if (this.imperative == null) {
+                throw new IllegalStateException(MESSAGE_UNDECLARED_IMPERATIVE);
+            }
+
             String imperative = this.imperative;
             List<Parameter> parameters = this.parameters.stream().toList();
             // Allows nulls (for flag-style options), but prevents external mutation

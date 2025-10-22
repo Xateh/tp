@@ -3,7 +3,9 @@ package seedu.address.logic.grammars.command;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.logic.grammars.command.BareCommand.BareCommandBuilder;
 import static seedu.address.logic.grammars.command.BareCommand.Parameter;
 import static seedu.address.logic.grammars.command.BareCommand.Parameter.ParameterKind;
 
@@ -81,5 +83,21 @@ public class BareCommandTest {
         assertEquals("single", cmd.getOptionValue("opt2"));
         assertTrue(cmd.hasOption("opt3"));
         assertFalse(cmd.hasOption("opt4"));
+    }
+
+    @Test
+    public void builder_setImperative_success() {
+        BareCommandBuilder builder = new BareCommandBuilder();
+
+        builder.setImperative("command");
+
+        assertDoesNotThrow(builder::build);
+    }
+
+    @Test
+    public void builder_unsetImperative_throwsException() {
+        BareCommandBuilder builder = new BareCommandBuilder();
+
+        assertThrows(IllegalStateException.class, builder::build);
     }
 }
