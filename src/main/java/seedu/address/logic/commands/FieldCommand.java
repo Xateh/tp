@@ -33,7 +33,7 @@ public class FieldCommand extends Command {
         }
         // Parse index (1-based)
         try {
-            this.oneBasedIndex = Integer.parseInt(c.getParameter(0));
+            this.oneBasedIndex = Integer.parseInt(c.getParameter(0).getValue());
         } catch (ArrayIndexOutOfBoundsException ex0) {
             throw new IllegalArgumentException("Missing index. Usage: field <index> /key:value ...", ex0);
         } catch (NumberFormatException ex1) {
