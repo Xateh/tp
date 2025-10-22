@@ -21,6 +21,10 @@ public class AstPrinter implements AstVisitor<String> {
 
     @Override
     public String visitCommand(AstNode.Command node) {
+        assert node.getImperative() != null;
+        assert node.getParameterList() != null;
+        assert node.getOptionList() != null;
+
         StringBuilder builder = new StringBuilder("Command");
 
         List<AstNode> children = new ArrayList<>();
@@ -59,6 +63,8 @@ public class AstPrinter implements AstVisitor<String> {
 
     @Override
     public String visitImperative(AstNode.Imperative node) {
+        assert node.getWord() != null;
+
         StringBuilder builder = new StringBuilder("Imperative");
         String wordString = node.getWord().accept(this);
         builder.append("\n").append(addPrefixes(wordString, true)); // Always the last/only child
@@ -67,6 +73,8 @@ public class AstPrinter implements AstVisitor<String> {
 
     @Override
     public String visitParameterList(AstNode.ParameterList node) {
+        assert node.getParameters() != null;
+
         StringBuilder builder = new StringBuilder("ParameterList");
         List<AstNode.Parameter> params = node.getParameters();
         for (int i = 0; i < params.size(); i++) {
@@ -79,9 +87,41 @@ public class AstPrinter implements AstVisitor<String> {
 
     @Override
     public String visitParameter(AstNode.Parameter node) {
+        assert node.getParameterVariant() != null;
+
         StringBuilder builder = new StringBuilder("Parameter");
-        String wordString = node.getText().accept(this);
-        builder.append("\n").append(addPrefixes(wordString, true));
+        String variant = node.getParameterVariant().accept(this);
+        builder.append("\n").append(addPrefixes(variant, true));
+        return builder.toString();
+    }
+
+    @Override
+    public String visitNormalParameter(AstNode.NormalParameter node) {
+        assert node.getText() != null;
+
+        StringBuilder builder = new StringBuilder("NormalParameter");
+        String textString = node.getText().accept(this);
+        builder.append("\n").append(addPrefixes(textString, true));
+        return builder.toString();
+    }
+
+    @Override
+    public String visitAdditiveParameter(AstNode.AdditiveParameter node) {
+        assert node.getText() != null;
+
+        StringBuilder builder = new StringBuilder("AdditiveParameter");
+        String textString = node.getText().accept(this);
+        builder.append("\n").append(addPrefixes(textString, true));
+        return builder.toString();
+    }
+
+    @Override
+    public String visitSubtractiveParameter(AstNode.SubtractiveParameter node) {
+        assert node.getText() != null;
+
+        StringBuilder builder = new StringBuilder("SubtractiveParameter");
+        String textString = node.getText().accept(this);
+        builder.append("\n").append(addPrefixes(textString, true));
         return builder.toString();
     }
 
@@ -99,6 +139,8 @@ public class AstPrinter implements AstVisitor<String> {
 
     @Override
     public String visitOption(AstNode.Option node) {
+        assert node.getOptionName() != null;
+
         StringBuilder builder = new StringBuilder("Option");
         List<AstNode> children = new ArrayList<>();
         children.add(node.getOptionName());
@@ -116,6 +158,8 @@ public class AstPrinter implements AstVisitor<String> {
 
     @Override
     public String visitOptionName(AstNode.OptionName node) {
+        assert node.getWord() != null;
+
         StringBuilder builder = new StringBuilder("OptionName");
         String wordString = node.getWord().accept(this);
         builder.append("\n").append(addPrefixes(wordString, true));
@@ -124,6 +168,8 @@ public class AstPrinter implements AstVisitor<String> {
 
     @Override
     public String visitOptionValue(AstNode.OptionValue node) {
+        assert node.getText() != null;
+
         StringBuilder builder = new StringBuilder("OptionValue");
         String textString = node.getText().accept(this);
         builder.append("\n").append(addPrefixes(textString, true));
@@ -132,11 +178,15 @@ public class AstPrinter implements AstVisitor<String> {
 
     @Override
     public String visitText(AstNode.Text node) {
+        assert node.getText() != null;
+
         return "Text (\"" + node.getText() + "\")";
     }
 
     @Override
     public String visitWord(AstNode.Word node) {
+        assert node.getWord() != null;
+
         return "Word (\"" + node.getWord() + "\")";
     }
 }

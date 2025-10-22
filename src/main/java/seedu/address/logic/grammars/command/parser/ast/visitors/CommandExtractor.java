@@ -1,5 +1,7 @@
 package seedu.address.logic.grammars.command.parser.ast.visitors;
 
+import static seedu.address.logic.grammars.command.BareCommand.Parameter.ParameterKind;
+
 import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.logic.grammars.command.parser.ast.AstNode;
 
@@ -22,36 +24,54 @@ public class CommandExtractor implements AstVisitor<String> {
 
     @Override
     public String visitCommand(AstNode.Command node) {
-        visitImperative(node.getImperative());
-        visitParameterList(node.getParameterList());
-        visitOptionList(node.getOptionList());
+        node.getImperative().accept(this);
+        node.getParameterList().accept(this);
+        node.getOptionList().accept(this);
         return null;
     }
 
     @Override
     public String visitImperative(AstNode.Imperative node) {
-        this.bareCommandBuilder.setImperative(visitWord(node.getWord()));
+        this.bareCommandBuilder.setImperative(node.getWord().accept(this));
         return null;
     }
 
     @Override
     public String visitParameterList(AstNode.ParameterList node) {
         for (AstNode.Parameter parameter : node.getParameters()) {
-            visitParameter(parameter);
+            parameter.accept(this);
         }
         return null;
     }
 
     @Override
     public String visitParameter(AstNode.Parameter node) {
-        this.bareCommandBuilder.addParameter(visitText(node.getText()));
+        node.getParameterVariant().accept(this);
+        return null;
+    }
+
+    @Override
+    public String visitNormalParameter(AstNode.NormalParameter node) {
+        this.bareCommandBuilder.addParameter(ParameterKind.NORMAL, node.getText().accept(this));
+        return null;
+    }
+
+    @Override
+    public String visitAdditiveParameter(AstNode.AdditiveParameter node) {
+        this.bareCommandBuilder.addParameter(ParameterKind.ADDITIVE, node.getText().accept(this));
+        return null;
+    }
+
+    @Override
+    public String visitSubtractiveParameter(AstNode.SubtractiveParameter node) {
+        this.bareCommandBuilder.addParameter(ParameterKind.SUBTRACTIVE, node.getText().accept(this));
         return null;
     }
 
     @Override
     public String visitOptionList(AstNode.OptionList node) {
         for (AstNode.Option option : node.getOptions()) {
-            visitOption(option);
+            option.accept(this);
         }
         return null;
     }
@@ -59,8 +79,11 @@ public class CommandExtractor implements AstVisitor<String> {
     @Override
     public String visitOption(AstNode.Option node) {
         if (node.hasOptionValue()) {
-            this.bareCommandBuilder.setOption(visitOptionName(node.getOptionName()),
-                    visitOptionValue((node.getOptionValue())));
+            node.getOptionName().accept(this);
+            this.bareCommandBuilder.setOption(
+                    visitOptionName(node.getOptionName()),
+                    visitOptionValue((node.getOptionValue()))
+            );
         } else {
             this.bareCommandBuilder.setOption(visitOptionName(node.getOptionName()));
         }

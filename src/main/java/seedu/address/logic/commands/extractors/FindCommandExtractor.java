@@ -1,6 +1,7 @@
 package seedu.address.logic.commands.extractors;
 
-import java.util.Arrays;
+import static seedu.address.logic.grammars.command.BareCommand.Parameter.ParameterKind;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +20,8 @@ public final class FindCommandExtractor {
     public static final String MESSAGE_KEYWORD_UNSPECIFIED =
             "Please provide at least one keyword. Example: find alice /name";
 
-    private FindCommandExtractor() {}
+    private FindCommandExtractor() {
+    }
 
     /**
      * Extracts command parameters from the given Command object. Performs input validation as well.
@@ -30,11 +32,9 @@ public final class FindCommandExtractor {
      */
     public static FindCommand extract(BareCommand bareCommand) throws ValidationException {
         // extract keywords from parameters
-        String[] params = bareCommand.getAllParameters();
-        if (params == null || params.length == 0) {
-            throw new ValidationException(MESSAGE_KEYWORD_UNSPECIFIED);
-        }
-        List<String> keywords = Arrays.asList(params);
+        List<String> keywords = Validation.validateVariableParametersWithMinimumMultiplicity(
+                        bareCommand, 0, 1, ParameterKind.NORMAL)
+                .stream().map(BareCommand.Parameter::getValue).toList();
 
         // Determine which fields to search using options provided
         boolean optName = bareCommand.hasOption("name");
@@ -43,7 +43,7 @@ public final class FindCommandExtractor {
         boolean optAddress = bareCommand.hasOption("address");
         boolean optTag = bareCommand.hasOption("tag");
         List<String> keysToRemove = List.of("name", "phone", "email", "address", "tags", "tag");
-        Map<String, String> map = bareCommand.getAllOptions();
+        Map<String, List<String>> map = bareCommand.getAllOptions();
         Set<String> customKeys = map.keySet().stream()
                 .map(k -> k != null ? k.trim().toLowerCase() : "")
                 .filter(k -> !keysToRemove.contains(k))

@@ -8,6 +8,8 @@ public enum TokenType {
     TEXT("TEXT"),
     SLASH("SLASH"),
     COLON("COLON"),
+    PLUS("PLUS"),
+    MINUS("MINUS"),
     TERMINAL("TERMINAL");
 
     private final String description;
