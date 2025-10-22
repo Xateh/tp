@@ -1,5 +1,6 @@
 package seedu.address.logic.commands.extractors;
 
+import static seedu.address.logic.grammars.command.BareCommand.Parameter;
 import static seedu.address.logic.grammars.command.BareCommand.Parameter.ParameterKind;
 
 import java.util.HashSet;
@@ -33,7 +34,7 @@ public class TagCommandExtractor {
      */
     public static TagCommand extract(BareCommand bareCommand) throws ValidationException {
         // extract index
-        String param0 = Validation.validateParameter(bareCommand, 0, ParameterKind.NORMAL);
+        String param0 = Validation.validateParameter(bareCommand, 0, ParameterKind.NORMAL).getValue();
         Index index;
         try {
             index = Index.fromOneBased(Integer.parseInt(param0));
@@ -47,12 +48,12 @@ public class TagCommandExtractor {
 
         // extract tags
         Set<Tag> tags = new HashSet<>();
-        List<String> varParams;
+        List<Parameter> varParams;
         try {
             varParams = Validation.validateVariableParametersWithMinimumMultiplicity(
                     bareCommand, 1, 1, ParameterKind.NORMAL);
-            for (String varParam : varParams) {
-                tags.add(new Tag(varParam));
+            for (Parameter varParam : varParams) {
+                tags.add(new Tag(varParam.getValue()));
             }
         } catch (ValidationException e) {
             throw new ValidationException(e.getMessage() + "\n" + MESSAGE_TAGS_UNSPECIFIED);

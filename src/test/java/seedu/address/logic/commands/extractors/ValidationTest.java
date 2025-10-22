@@ -2,6 +2,7 @@ package seedu.address.logic.commands.extractors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static seedu.address.logic.grammars.command.BareCommand.Parameter;
 import static seedu.address.logic.grammars.command.BareCommand.Parameter.ParameterKind;
 
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public class ValidationTest {
                     .setImperative("command")
                     .addParameter("value1")
                     .build();
-            assertEquals("value1", Validation.validateParameter(cmd, 0, NORMAL));
+            assertEquals(new Parameter(NORMAL, "value1"), Validation.validateParameter(cmd, 0, NORMAL));
         }
 
         @Test
@@ -44,14 +45,16 @@ public class ValidationTest {
                     .setImperative("command")
                     .addParameter(ADDITIVE, "value1")
                     .build();
-            assertEquals("value1", Validation.validateParameter(cmdAdditive, 0, NORMAL, ADDITIVE));
+            assertEquals(new Parameter(ADDITIVE, "value1"),
+                    Validation.validateParameter(cmdAdditive, 0, NORMAL, ADDITIVE));
 
             // Case: "command value2" (expecting NORMAL or ADDITIVE at index 0)
             BareCommand cmdNormal = new BareCommandBuilder()
                     .setImperative("command")
                     .addParameter(NORMAL, "value2")
                     .build();
-            assertEquals("value2", Validation.validateParameter(cmdNormal, 0, NORMAL, ADDITIVE));
+            assertEquals(new Parameter(NORMAL, "value2"),
+                    Validation.validateParameter(cmdNormal, 0, NORMAL, ADDITIVE));
         }
 
         @Test
@@ -62,13 +65,17 @@ public class ValidationTest {
                     .addParameter("value1")
                     .addParameter(SUBTRACTIVE, "value2")
                     .build();
-            assertEquals("value2", Validation.validateParameter(cmd, 1, SUBTRACTIVE));
+            assertEquals(new Parameter(SUBTRACTIVE, "value2"),
+                    Validation.validateParameter(cmd, 1, SUBTRACTIVE));
         }
 
         @Test
         public void validateParameter_missingParameter_throwsValidationException() {
             // Case: "command value1" (but expecting param at index 1)
-            BareCommand cmd = new BareCommandBuilder().setImperative("command").addParameter("value1").build();
+            BareCommand cmd = new BareCommandBuilder()
+                    .setImperative("command")
+                    .addParameter("value1")
+                    .build();
 
             ValidationException e = assertThrows(ValidationException.class, () -> {
                 Validation.validateParameter(cmd, 1, NORMAL);
@@ -125,7 +132,7 @@ public class ValidationTest {
             BareCommand cmd = new BareCommandBuilder()
                     .setImperative("command")
                     .build();
-            List<String> result = Validation.validateVariableParameters(cmd, 0, NORMAL);
+            List<Parameter> result = Validation.validateVariableParameters(cmd, 0, NORMAL);
             assertEquals(List.of(), result);
         }
 
@@ -136,7 +143,7 @@ public class ValidationTest {
                     .setImperative("command")
                     .addParameter("value1")
                     .build();
-            List<String> result = Validation.validateVariableParameters(cmd, 1, NORMAL);
+            List<Parameter> result = Validation.validateVariableParameters(cmd, 1, NORMAL);
             assertEquals(List.of(), result);
         }
 
@@ -147,8 +154,8 @@ public class ValidationTest {
                     .setImperative("command")
                     .addParameter("value1")
                     .build();
-            List<String> result = Validation.validateVariableParameters(cmd, 0, NORMAL);
-            assertEquals(List.of("value1"), result);
+            List<Parameter> result = Validation.validateVariableParameters(cmd, 0, NORMAL);
+            assertEquals(List.of(new Parameter(NORMAL, "value1")), result);
         }
 
         @Test
@@ -160,8 +167,9 @@ public class ValidationTest {
                     .addParameter("v2")
                     .addParameter("v3")
                     .build();
-            List<String> result = Validation.validateVariableParameters(cmd, 0, NORMAL);
-            assertEquals(List.of("v1", "v2", "v3"), result);
+            List<Parameter> result = Validation.validateVariableParameters(cmd, 0, NORMAL);
+            assertEquals(List.of(new Parameter(NORMAL, "v1"), new Parameter(NORMAL, "v2"),
+                    new Parameter(NORMAL, "v3")), result);
         }
 
         @Test
@@ -173,8 +181,8 @@ public class ValidationTest {
                     .addParameter("v2")
                     .addParameter("v3")
                     .build();
-            List<String> result = Validation.validateVariableParameters(cmd, 1, NORMAL);
-            assertEquals(List.of("v2", "v3"), result);
+            List<Parameter> result = Validation.validateVariableParameters(cmd, 1, NORMAL);
+            assertEquals(List.of(new Parameter(NORMAL, "v2"), new Parameter(NORMAL, "v3")), result);
         }
 
         @Test
@@ -186,8 +194,10 @@ public class ValidationTest {
                     .addParameter(ADDITIVE, "opt")
                     .addParameter(SUBTRACTIVE, "sub")
                     .build();
-            List<String> result = Validation.validateVariableParameters(cmd, 0, NORMAL, ADDITIVE, SUBTRACTIVE);
-            assertEquals(List.of("v1", "opt", "sub"), result);
+            List<Parameter> result = Validation.validateVariableParameters(cmd, 0,
+                    NORMAL, ADDITIVE, SUBTRACTIVE);
+            assertEquals(List.of(new Parameter(NORMAL, "v1"), new Parameter(ADDITIVE, "opt"),
+                    new Parameter(SUBTRACTIVE, "sub")), result);
         }
 
         @Test
@@ -244,9 +254,9 @@ public class ValidationTest {
                     .addParameter("v1")
                     .addParameter("v2")
                     .build();
-            List<String> result = Validation.validateVariableParametersWithMinimumMultiplicity(
+            List<Parameter> result = Validation.validateVariableParametersWithMinimumMultiplicity(
                     cmd, 0, 2, NORMAL);
-            assertEquals(List.of("v1", "v2"), result);
+            assertEquals(List.of(new Parameter(NORMAL, "v1"), new Parameter(NORMAL, "v2")), result);
         }
 
         @Test
@@ -258,9 +268,10 @@ public class ValidationTest {
                     .addParameter("v2")
                     .addParameter("v3")
                     .build();
-            List<String> result = Validation.validateVariableParametersWithMinimumMultiplicity(
+            List<Parameter> result = Validation.validateVariableParametersWithMinimumMultiplicity(
                     cmd, 0, 2, NORMAL);
-            assertEquals(List.of("v1", "v2", "v3"), result);
+            assertEquals(List.of(new Parameter(NORMAL, "v1"), new Parameter(NORMAL, "v2"),
+                    new Parameter(NORMAL, "v3")), result);
         }
 
         @Test
@@ -272,8 +283,9 @@ public class ValidationTest {
                     .addParameter("v1")
                     .addParameter("v2")
                     .build();
-            List<String> result = Validation.validateVariableParametersWithMinimumMultiplicity(cmd, 1, 2, NORMAL);
-            assertEquals(List.of("v1", "v2"), result);
+            List<Parameter> result = Validation.validateVariableParametersWithMinimumMultiplicity(
+                    cmd, 1, 2, NORMAL);
+            assertEquals(List.of(new Parameter(NORMAL, "v1"), new Parameter(NORMAL, "v2")), result);
         }
 
         @Test
@@ -282,7 +294,8 @@ public class ValidationTest {
             BareCommand cmd = new BareCommandBuilder()
                     .setImperative("command")
                     .build();
-            List<String> result = Validation.validateVariableParametersWithMinimumMultiplicity(cmd, 0, 0, NORMAL);
+            List<Parameter> result = Validation.validateVariableParametersWithMinimumMultiplicity(
+                    cmd, 0, 0, NORMAL);
             assertEquals(List.of(), result);
         }
 
@@ -293,9 +306,9 @@ public class ValidationTest {
                     .setImperative("command")
                     .addParameter("v1")
                     .build();
-            List<String> result = Validation.validateVariableParametersWithMinimumMultiplicity(
+            List<Parameter> result = Validation.validateVariableParametersWithMinimumMultiplicity(
                     cmd, 0, 0, NORMAL);
-            assertEquals(List.of("v1"), result);
+            assertEquals(List.of(new Parameter(NORMAL, "v1")), result);
         }
 
         @Test

@@ -72,6 +72,19 @@ public class BareCommand {
         public boolean isSubtractive() {
             return this.kind == ParameterKind.SUBTRACTIVE;
         }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+
+            if (other instanceof Parameter param) {
+                return this.value.equals(param.value) && this.kind.equals(param.kind);
+            }
+
+            return false;
+        }
     }
 
     /**

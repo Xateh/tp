@@ -36,10 +36,10 @@ public class Validation {
      * @param bareCommand    BareCommand to extract parameter from.
      * @param parameterKinds Kinds of parameter to expect.
      * @param position       Position from which to retrieve parameter.
-     * @return String in validated parameter.
+     * @return Validated parameter.
      * @throws ValidationException When the parameter is either missing or of invalid kind.
      */
-    public static String validateParameter(BareCommand bareCommand, int position, ParameterKind... parameterKinds)
+    public static Parameter validateParameter(BareCommand bareCommand, int position, ParameterKind... parameterKinds)
             throws ValidationException {
         requireNonNull(bareCommand);
         assert position >= 0;
@@ -57,7 +57,7 @@ public class Validation {
                     position, Arrays.toString(parameterKinds), parameter.getKind()));
         }
 
-        return parameter.getValue();
+        return parameter;
     }
 
     /**
@@ -68,18 +68,18 @@ public class Validation {
      * @param bareCommand    BareCommand to extract parameter from.
      * @param parameterKinds Kinds of parameter to expect.
      * @param startPosition  Position from which to retrieve rest of parameters.
-     * @return Strings in validated parameters.
+     * @return List of validated parameters.
      * @throws ValidationException When the parameters, if any, are of invalid kind.
      */
-    public static List<String> validateVariableParameters(BareCommand bareCommand, int startPosition,
-                                                          ParameterKind... parameterKinds)
+    public static List<Parameter> validateVariableParameters(BareCommand bareCommand, int startPosition,
+                                                             ParameterKind... parameterKinds)
             throws ValidationException {
         requireNonNull(bareCommand);
         assert startPosition >= 0;
 
         int parameterCount = bareCommand.parameterCount();
 
-        ArrayList<String> parameters = new ArrayList<>();
+        ArrayList<Parameter> parameters = new ArrayList<>();
 
         for (int i = startPosition; i < parameterCount; i++) {
             Parameter parameter = bareCommand.getParameter(i);
@@ -89,7 +89,7 @@ public class Validation {
                         i, Arrays.toString(parameterKinds), parameter.getKind()));
             }
 
-            parameters.add(parameter.getValue());
+            parameters.add(parameter);
         }
 
         return parameters;
@@ -102,16 +102,16 @@ public class Validation {
      * @param bareCommand    BareCommand to extract parameter from.
      * @param parameterKinds Kinds of parameter to expect.
      * @param startPosition  Position from which to retrieve rest of parameters.
-     * @return Strings in validated parameters.
+     * @return List of validated parameters.
      * @throws ValidationException When there are insufficient parameters or parameters are of invalid kind.
      */
-    public static List<String> validateVariableParametersWithMinimumMultiplicity(
+    public static List<Parameter> validateVariableParametersWithMinimumMultiplicity(
             BareCommand bareCommand, int startPosition, int minimumMultiplicity, ParameterKind... parameterKinds)
             throws ValidationException {
         requireNonNull(bareCommand);
         assert startPosition >= 0;
 
-        List<String> parameters = validateVariableParameters(bareCommand, startPosition, parameterKinds);
+        List<Parameter> parameters = validateVariableParameters(bareCommand, startPosition, parameterKinds);
 
         if (parameters.size() < minimumMultiplicity) {
             throw new ValidationException(String.format(MESSAGE_INSUFFICIENT_PARAMETERS_VARIABLE,
