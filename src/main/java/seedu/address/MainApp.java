@@ -22,8 +22,10 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.util.SampleDataUtil;
+import seedu.address.session.SessionData;
 import seedu.address.storage.AddressBookStorage;
 import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonSessionStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.Storage;
 import seedu.address.storage.StorageManager;
@@ -57,14 +59,33 @@ public class MainApp extends Application {
 
         UserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(config.getUserPrefsFilePath());
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
-        AddressBookStorage addressBookStorage = new JsonAddressBookStorage(userPrefs.getAddressBookFilePath());
-        storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        Path addressBookPath = userPrefs.getAddressBookFilePath();
+        AddressBookStorage addressBookStorage = new JsonAddressBookStorage(addressBookPath);
+        Path sessionDir = deriveSessionDirectory(addressBookPath);
+        JsonSessionStorage sessionStorage = new JsonSessionStorage(sessionDir);
+        storage = new StorageManager(addressBookStorage, userPrefsStorage, sessionStorage);
 
         model = initModelManager(storage, userPrefs);
 
-        logic = new LogicManager(model, storage);
+        Optional<SessionData> restoredSession = Optional.empty();
+        try {
+            restoredSession = storage.readSession();
+        } catch (DataLoadingException e) {
+            logger.warning("Session files could not be read. Starting without restoring session. "
+                    + e.getMessage());
+        }
+
+        logic = new LogicManager(model, storage, restoredSession);
 
         ui = new UiManager(logic);
+    }
+
+    private Path deriveSessionDirectory(Path addressBookPath) {
+        Path parent = addressBookPath.getParent();
+        if (parent == null) {
+            return Path.of("sessions");
+        }
+        return parent.resolve("sessions");
     }
 
     /**
@@ -181,6 +202,11 @@ public class MainApp extends Application {
             storage.saveUserPrefs(model.getUserPrefs());
         } catch (IOException e) {
             logger.severe("Failed to save preferences " + StringUtil.getDetails(e));
+        }
+        try {
+            storage.saveSession(logic.getCurrentSessionData());
+        } catch (IOException e) {
+            logger.severe("Failed to save session " + StringUtil.getDetails(e));
         }
     }
 }

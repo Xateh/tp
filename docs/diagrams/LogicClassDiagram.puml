@@ -17,6 +17,12 @@ Class "<<interface>>\nLogic" as Logic
 Class LogicManager
 }
 
+package "Session" as SessionPackage {
+Class SessionRecorder
+Class SessionData
+Class SessionCommand
+}
+
 package Model {
 Class HiddenModel #FFFFFF
 }
@@ -37,6 +43,8 @@ LogicManager .left.> Command : <<call>>
 LogicManager --> Model
 LogicManager --> Storage
 Storage --[hidden] Model
+LogicManager --> SessionRecorder
+SessionRecorder ..> SessionData
 Command .[hidden]up.> Storage
 Command .right.> Model
 note right of XYZCommand: XYZCommand = AddCommand, \nFindCommand, etc

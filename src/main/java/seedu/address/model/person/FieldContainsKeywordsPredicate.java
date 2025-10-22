@@ -59,6 +59,11 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
         this.customKeys = customKeys;
     }
 
+    /** Returns the keywords used by this predicate. */
+    public List<String> getKeywords() {
+        return List.copyOf(keywords);
+    }
+
     /**
      * Tests whether any of the specified {@code keywords} matches at least one of the selected
      * {@link Person} fields, including both built-in and user-defined custom fields.
