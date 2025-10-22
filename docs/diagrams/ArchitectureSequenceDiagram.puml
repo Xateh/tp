@@ -27,8 +27,13 @@ storage -[STORAGE_COLOR]> storage : Save to file
 activate storage STORAGE_COLOR_T1
 storage --[STORAGE_COLOR]> storage
 deactivate storage
-
 storage --[STORAGE_COLOR]> logic
+deactivate storage
+
+note over logic,storage: At shutdown, Logic requests session snapshot
+logic -[LOGIC_COLOR]> storage : saveSession(sessionData)
+activate storage STORAGE_COLOR
+storage -[STORAGE_COLOR]> storage : Save session file
 deactivate storage
 
 logic --[LOGIC_COLOR]> ui
