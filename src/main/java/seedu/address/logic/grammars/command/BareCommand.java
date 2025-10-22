@@ -21,46 +21,147 @@ import seedu.address.logic.grammars.command.parser.ast.visitors.CommandExtractor
  */
 public class BareCommand {
     private final String imperative;
-    private final String[] parameters;
+    private final List<Parameter> parameters;
     private final Map<String, List<String>> options;
 
-    private BareCommand(String imperative, String[] parameters, Map<String, List<String>> options) {
+    private BareCommand(String imperative, List<Parameter> parameters, Map<String, List<String>> options) {
         this.imperative = imperative;
         this.parameters = parameters;
         this.options = options;
     }
 
     /**
+     * Parameter class that stores the parameter kind and value.
+     */
+    public static class Parameter {
+        private final ParameterKind kind;
+        private final String value;
+
+        /**
+         * Enumeration of all possible parameter kinds.
+         */
+        public enum ParameterKind {
+            NORMAL, ADDITIVE, SUBTRACTIVE
+        }
+
+        /**
+         * Constructs a new {@code Parameter}.
+         *
+         * @param kind  Kind of parameter.
+         * @param value Value of parameter.
+         */
+        public Parameter(ParameterKind kind, String value) {
+            this.kind = kind;
+            this.value = value;
+        }
+
+        public ParameterKind getKind() {
+            return kind;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public boolean isNormal() {
+            return this.kind == ParameterKind.NORMAL;
+        }
+
+        public boolean isAdditive() {
+            return this.kind == ParameterKind.ADDITIVE;
+        }
+
+        public boolean isSubtractive() {
+            return this.kind == ParameterKind.SUBTRACTIVE;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+
+            if (other instanceof Parameter param) {
+                return this.value.equals(param.value) && this.kind.equals(param.kind);
+            }
+
+            return false;
+        }
+    }
+
+    /**
      * Builder for commands.
      */
     public static class BareCommandBuilder {
+        private static final String MESSAGE_UNDECLARED_IMPERATIVE = "Imperative not declared; build illegal.";
+
         private String imperative;
-        private final ArrayList<String> parameters = new ArrayList<>();
+        private final ArrayList<Parameter> parameters = new ArrayList<>();
         private final HashMap<String, ArrayList<String>> options = new HashMap<>();
 
         public BareCommandBuilder() {
         }
 
-        public void setImperative(String imperative) {
+        /**
+         * Sets the imperative of the command to be built.
+         *
+         * @param imperative Imperative to set.
+         * @return This builder with the set imperative.
+         */
+        public BareCommandBuilder setImperative(String imperative) {
             this.imperative = imperative;
+            return this;
         }
 
-        public void addParameter(String parameter) {
-            this.parameters.add(parameter);
+        /**
+         * Adds a parameter to the command to be built.
+         *
+         * @param parameterKind  Kind of parameter.
+         * @param parameterValue Value of parameter.
+         * @return This builder with the added parameter.
+         */
+        public BareCommandBuilder addParameter(Parameter.ParameterKind parameterKind, String parameterValue) {
+            this.parameters.add(new Parameter(parameterKind, parameterValue));
+            return this;
         }
 
-        public void setOption(String optionKey) {
+        /**
+         * Adds a normal parameter to the command to be built.
+         *
+         * @param parameterValue Value of normal parameter.
+         * @return This builder with the added normal parameter.
+         */
+        public BareCommandBuilder addParameter(String parameterValue) {
+            this.addParameter(Parameter.ParameterKind.NORMAL, parameterValue);
+            return this;
+        }
+
+        /**
+         * Sets an option in the command to be built. Typically used for boolean options.
+         *
+         * @param optionKey Key of option.
+         * @return This builder with the set option.
+         */
+        public BareCommandBuilder setOption(String optionKey) {
             if (!this.options.containsKey(optionKey)) {
                 this.options.put(optionKey, new ArrayList<>());
             }
+            return this;
         }
 
-        public void setOption(String optionKey, String optionValue) {
+        /**
+         * Sets an option in the command to be built. Typically used for key-value options.
+         *
+         * @param optionKey   Key of option.
+         * @param optionValue Value of option.
+         * @return This builder with the set option.
+         */
+        public BareCommandBuilder setOption(String optionKey, String optionValue) {
             if (!this.options.containsKey(optionKey)) {
                 this.options.put(optionKey, new ArrayList<>());
             }
-
             this.options.get(optionKey).add(optionValue);
+            return this;
         }
 
         /**
@@ -69,8 +170,12 @@ public class BareCommand {
          * @return Built command.
          */
         public BareCommand build() {
+            if (this.imperative == null) {
+                throw new IllegalStateException(MESSAGE_UNDECLARED_IMPERATIVE);
+            }
+
             String imperative = this.imperative;
-            String[] parameters = this.parameters.toArray(String[]::new);
+            List<Parameter> parameters = this.parameters.stream().toList();
             Map<String, List<String>> options = new HashMap<>();
             for (Map.Entry<String, ArrayList<String>> option : this.options.entrySet()) {
                 options.put(option.getKey(), option.getValue().stream().toList());
@@ -98,12 +203,16 @@ public class BareCommand {
         return this.imperative;
     }
 
-    public String getParameter(int index) {
-        return this.parameters[index];
+    public Parameter getParameter(int index) {
+        return this.parameters.get(index);
     }
 
-    public String[] getAllParameters() {
+    public List<Parameter> getAllParameters() {
         return this.parameters;
+    }
+
+    public int parameterCount() {
+        return this.parameters.size();
     }
 
     /**

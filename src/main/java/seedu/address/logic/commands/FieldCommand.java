@@ -39,7 +39,6 @@ public class FieldCommand extends Command {
         if (pairs.isEmpty()) {
             throw new IllegalArgumentException(MESSAGE_AT_LEAST_ONE_PAIR);
         }
-
         Map<String, String> sanitized = new LinkedHashMap<>();
         for (Map.Entry<String, String> entry : pairs.entrySet()) {
             String key = normalize(entry.getKey());

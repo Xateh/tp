@@ -24,7 +24,8 @@ public class EditCommandExtractor {
     public static final String OPTION_KEY_ADDRESS = "address";
     public static final String OPTION_KEY_TAG = "tag";
 
-    private EditCommandExtractor() {}
+    private EditCommandExtractor() {
+    }
 
     /**
      * Extracts command parameters and options from the given Command object. Performs input validation as well.
@@ -34,13 +35,8 @@ public class EditCommandExtractor {
      * @throws ValidationException When the command parameters fail to validate.
      */
     public static EditCommand extract(BareCommand bareCommand) throws ValidationException {
-        String[] params = bareCommand.getAllParameters();
-
         // extract index
-        if (params.length <= 0) {
-            throw new ValidationException(MESSAGE_INDEX_UNSPECIFIED);
-        }
-        Index index = Validation.validateIndex(params[0]);
+        Index index = Validation.validateIndex(bareCommand, 0);
 
         // extract edit details
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
@@ -63,7 +59,7 @@ public class EditCommandExtractor {
             }
             if (bareCommand.hasOption(OPTION_KEY_TAG)) {
                 editPersonDescriptor.setTags(
-                    ParserUtil.parseTags(bareCommand.getOptionAllValues(OPTION_KEY_TAG).get()));
+                        ParserUtil.parseTags(bareCommand.getOptionAllValues(OPTION_KEY_TAG).get()));
             }
         } catch (ParseException e) {
             throw new ValidationException(e.getMessage());
