@@ -31,7 +31,7 @@ public class CommandParserTest {
     }
 
     @Test
-    public void parse_imperativeAndParameters_success() {
+    public void parse_imperativeAndNormalParameters_success() {
         String ingest = "test param1 param2 param3";
 
         AstNode.Command root = assertDoesNotThrow(() -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
@@ -42,11 +42,42 @@ public class CommandParserTest {
                 │  └─ Word ("test")
                 ├─ ParameterList
                 │  ├─ Parameter
-                │  │  └─ Text ("param1")
+                │  │  └─ NormalParameter
+                │  │     └─ Text ("param1")
                 │  ├─ Parameter
-                │  │  └─ Text ("param2")
+                │  │  └─ NormalParameter
+                │  │     └─ Text ("param2")
                 │  └─ Parameter
-                │     └─ Text ("param3")
+                │     └─ NormalParameter
+                │        └─ Text ("param3")
+                └─ OptionList\
+                """;
+
+        String tree = new AstPrinter().print(root);
+
+        assertEquals(expected, tree);
+    }
+
+    @Test
+    public void parse_imperativeAndVariantParameters_success() {
+        String ingest = "test param1 +param2 -param3";
+
+        AstNode.Command root = assertDoesNotThrow(() -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
+
+        String expected = """
+                Command
+                ├─ Imperative
+                │  └─ Word ("test")
+                ├─ ParameterList
+                │  ├─ Parameter
+                │  │  └─ NormalParameter
+                │  │     └─ Text ("param1")
+                │  ├─ Parameter
+                │  │  └─ AdditiveParameter
+                │  │     └─ Text ("param2")
+                │  └─ Parameter
+                │     └─ SubtractiveParameter
+                │        └─ Text ("param3")
                 └─ OptionList\
                 """;
 
@@ -95,7 +126,8 @@ public class CommandParserTest {
                 │  └─ Word ("event")
                 ├─ ParameterList
                 │  └─ Parameter
-                │     └─ Text ("create")
+                │     └─ NormalParameter
+                │        └─ Text ("create")
                 └─ OptionList
                    ├─ Option
                    │  └─ OptionName
@@ -130,8 +162,22 @@ public class CommandParserTest {
     }
 
     @Test
-    public void parse_invalidTokenWhenTextExpectedInParameter_throwsException() {
+    public void parse_invalidTokenWhenTextExpectedInNormalParameter_throwsException() {
         String ingest = "test :";
+
+        assertThrows(ParserException.class, () -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
+    }
+
+    @Test
+    public void parse_invalidTokenWhenTextExpectedInAdditiveParameter_throwsException() {
+        String ingest = "test +:";
+
+        assertThrows(ParserException.class, () -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
+    }
+
+    @Test
+    public void parse_invalidTokenWhenTextExpectedInSubtractiveParameter_throwsException() {
+        String ingest = "test -:";
 
         assertThrows(ParserException.class, () -> CommandParser.parseCommand(CommandLexer.lexCommand(ingest)));
     }

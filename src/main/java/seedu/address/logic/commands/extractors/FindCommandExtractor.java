@@ -1,6 +1,7 @@
 package seedu.address.logic.commands.extractors;
 
-import java.util.Arrays;
+import static seedu.address.logic.grammars.command.BareCommand.Parameter.ParameterKind;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,11 +32,9 @@ public final class FindCommandExtractor {
      */
     public static FindCommand extract(BareCommand bareCommand) throws ValidationException {
         // extract keywords from parameters
-        String[] params = bareCommand.getAllParameters();
-        if (params == null || params.length == 0) {
-            throw new ValidationException(MESSAGE_KEYWORD_UNSPECIFIED);
-        }
-        List<String> keywords = Arrays.asList(params);
+        List<String> keywords = Validation.validateVariableParametersWithMinimumMultiplicity(
+                        bareCommand, 0, 1, ParameterKind.NORMAL)
+                .stream().map(BareCommand.Parameter::getValue).toList();
 
         // Determine which fields to search using options provided
         boolean optName = bareCommand.hasOption("name");

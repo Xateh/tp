@@ -14,7 +14,7 @@ public abstract class AstNode {
     /**
      * Command AST node.
      */
-    public static class Command extends AstNode {
+    public static final class Command extends AstNode {
         private final Imperative imperative;
         private final ParameterList parameterList;
         private final OptionList optionList;
@@ -53,7 +53,7 @@ public abstract class AstNode {
     /**
      * Imperative AST node.
      */
-    public static class Imperative extends AstNode {
+    public static final class Imperative extends AstNode {
         private final Word word;
 
         /**
@@ -78,7 +78,7 @@ public abstract class AstNode {
     /**
      * Parameter List AST node.
      */
-    public static class ParameterList extends AstNode {
+    public static final class ParameterList extends AstNode {
         private final ArrayList<Parameter> parameters;
 
         /**
@@ -103,20 +103,28 @@ public abstract class AstNode {
     /**
      * Parameter AST node.
      */
-    public static class Parameter extends AstNode {
-        private final Text text;
+    public static final class Parameter extends AstNode {
+        private final ParameterVariant parameter;
+
+        /**
+         * Variants of Parameter.
+         */
+        public abstract static sealed class ParameterVariant extends AstNode
+                permits NormalParameter, AdditiveParameter, SubtractiveParameter {
+        }
 
         /**
          * Constructs a new Parameter node.
          *
-         * @param text Text node.
+         * @param parameter Parameter Variant node: one of {@code NormalParameter}, {@code AdditiveParameter}, or
+         *                  {@code SubtractiveParameter}.
          */
-        public Parameter(Text text) {
-            this.text = text;
+        public Parameter(ParameterVariant parameter) {
+            this.parameter = parameter;
         }
 
-        public Text getText() {
-            return text;
+        public ParameterVariant getParameterVariant() {
+            return parameter;
         }
 
         @Override
@@ -126,9 +134,84 @@ public abstract class AstNode {
     }
 
     /**
+     * Normal Parameter AST node.
+     */
+    public static final class NormalParameter extends Parameter.ParameterVariant {
+        private final Text text;
+
+        /**
+         * Constructs a new NormalParameter node.
+         *
+         * @param text Text node.
+         */
+        public NormalParameter(Text text) {
+            this.text = text;
+        }
+
+        public Text getText() {
+            return text;
+        }
+
+        @Override
+        public <R> R accept(AstVisitor<R> visitor) {
+            return visitor.visitNormalParameter(this);
+        }
+    }
+
+    /**
+     * Additive Parameter AST node.
+     */
+    public static final class AdditiveParameter extends Parameter.ParameterVariant {
+        private final Text text;
+
+        /**
+         * Constructs a new AdditiveParameter node.
+         *
+         * @param text Text node.
+         */
+        public AdditiveParameter(Text text) {
+            this.text = text;
+        }
+
+        public Text getText() {
+            return text;
+        }
+
+        @Override
+        public <R> R accept(AstVisitor<R> visitor) {
+            return visitor.visitAdditiveParameter(this);
+        }
+    }
+
+    /**
+     * Subtractive Parameter AST node.
+     */
+    public static final class SubtractiveParameter extends Parameter.ParameterVariant {
+        private final Text text;
+
+        /**
+         * Constructs a new SubtractiveParameter node.
+         *
+         * @param text Text node.
+         */
+        public SubtractiveParameter(Text text) {
+            this.text = text;
+        }
+
+        public Text getText() {
+            return text;
+        }
+
+        @Override
+        public <R> R accept(AstVisitor<R> visitor) {
+            return visitor.visitSubtractiveParameter(this);
+        }
+    }
+
+    /**
      * OptionList AST node.
      */
-    public static class OptionList extends AstNode {
+    public static final class OptionList extends AstNode {
         private final ArrayList<Option> options;
 
         /**
@@ -153,7 +236,7 @@ public abstract class AstNode {
     /**
      * Option AST node.
      */
-    public static class Option extends AstNode {
+    public static final class Option extends AstNode {
         private final OptionName optionName;
         private final OptionValue optionValue;
 
@@ -189,7 +272,7 @@ public abstract class AstNode {
     /**
      * Option Name AST node.
      */
-    public static class OptionName extends AstNode {
+    public static final class OptionName extends AstNode {
         private final Word word;
 
         /**
@@ -214,7 +297,7 @@ public abstract class AstNode {
     /**
      * Option Value AST node.
      */
-    public static class OptionValue extends AstNode {
+    public static final class OptionValue extends AstNode {
         private final Text text;
 
         /**
@@ -239,7 +322,7 @@ public abstract class AstNode {
     /**
      * Text AST node.
      */
-    public static class Text extends AstNode {
+    public static final class Text extends AstNode {
         private final Token token;
 
         /**
@@ -264,7 +347,7 @@ public abstract class AstNode {
     /**
      * Word AST node.
      */
-    public static class Word extends AstNode {
+    public static final class Word extends AstNode {
         private final Token token;
 
         /**
