@@ -1,6 +1,7 @@
 package seedu.address.model.history;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -65,5 +66,20 @@ class CommandHistoryTest {
         CommandHistory history = new CommandHistory(List.of("list"));
         List<String> entries = history.getEntries();
         assertThrows(UnsupportedOperationException.class, () -> entries.add("another"));
+    }
+
+    @Test
+    void equals_sameEntriesAndLimit_returnsTrue() {
+        CommandHistory first = new CommandHistory(List.of("list", "add n/Amy"), 5);
+        CommandHistory second = new CommandHistory(List.of("list", "add n/Amy"), 5);
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
+    void equals_differentLimits_returnsFalse() {
+        CommandHistory limited = new CommandHistory(List.of("list"), 3);
+        CommandHistory moreLimited = new CommandHistory(List.of("list"), 2);
+        assertFalse(limited.equals(moreLimited));
     }
 }

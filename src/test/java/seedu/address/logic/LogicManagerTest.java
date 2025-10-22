@@ -1,6 +1,7 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.HistoryCommand;
@@ -161,6 +163,56 @@ public class LogicManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void constructor_existingCommandHistory_populatesModelHistory() throws Exception {
+        Path abPath = temporaryFolder.resolve("existingHistoryAb.json");
+        Path prefsPath = temporaryFolder.resolve("existingHistoryPrefs.json");
+        Path historyPath = temporaryFolder.resolve("existingHistoryHistory.json");
+        Path sessionDir = temporaryFolder.resolve("existingHistorySessions");
+
+        CommandHistory storedHistory = new CommandHistory(List.of("list", "find Alice"));
+
+        StorageManager storage = new StorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(historyPath),
+                new JsonSessionStorage(sessionDir)) {
+            @Override
+            public Optional<CommandHistory> readCommandHistory() {
+                return Optional.of(storedHistory);
+            }
+        };
+
+        Model testModel = new ModelManager();
+        new LogicManager(testModel, storage);
+
+        assertEquals(storedHistory.getEntries(), testModel.getCommandHistory().getEntries());
+    }
+
+    @Test
+    public void constructor_commandHistoryLoadFailure_initialisesEmptyHistory() throws Exception {
+        Path abPath = temporaryFolder.resolve("loadFailureAb.json");
+        Path prefsPath = temporaryFolder.resolve("loadFailurePrefs.json");
+        Path historyPath = temporaryFolder.resolve("loadFailureHistory.json");
+        Path sessionDir = temporaryFolder.resolve("loadFailureSessions");
+
+        StorageManager storage = new StorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(historyPath),
+                new JsonSessionStorage(sessionDir)) {
+            @Override
+            public Optional<CommandHistory> readCommandHistory() throws DataLoadingException {
+                throw new DataLoadingException(DUMMY_IO_EXCEPTION);
+            }
+        };
+
+        Model testModel = new ModelManager();
+        new LogicManager(testModel, storage);
+
+        assertTrue(testModel.getCommandHistory().isEmpty());
     }
 
     /**
