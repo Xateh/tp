@@ -40,14 +40,6 @@ class FieldCommandExtractorTest {
     }
 
     @Test
-    void extract_missingIndex_throwsValidationException() throws Exception {
-        BareCommand bare = BareCommand.parse("field /company:\"Goldman Sachs\"");
-        ValidationException ex = assertThrows(ValidationException.class, () ->
-                FieldCommandExtractor.extract(bare));
-        assertEquals(FieldCommandExtractor.MESSAGE_INDEX_UNSPECIFIED, ex.getMessage());
-    }
-
-    @Test
     void extract_invalidIndex_throwsValidationException() throws Exception {
         BareCommand bare = BareCommand.parse("field x /k:v");
         ValidationException ex = assertThrows(ValidationException.class, () ->
@@ -61,19 +53,6 @@ class FieldCommandExtractorTest {
         ValidationException ex = assertThrows(ValidationException.class, () ->
                 FieldCommandExtractor.extract(bare));
         assertEquals(FieldCommand.MESSAGE_AT_LEAST_ONE_PAIR, ex.getMessage());
-    }
-
-    @Test
-    void extract_wrongImperative_throwsValidationException() {
-        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
-        builder.setImperative("notfield");
-        builder.addParameter("1");
-        builder.setOption("k", "v");
-        BareCommand bare = builder.build();
-
-        ValidationException ex = assertThrows(ValidationException.class, () ->
-                FieldCommandExtractor.extract(bare));
-        assertEquals("Wrong imperative for FieldCommand", ex.getMessage());
     }
 
     @Test

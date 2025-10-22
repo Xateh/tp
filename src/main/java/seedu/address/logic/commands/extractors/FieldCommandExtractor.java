@@ -1,8 +1,5 @@
 package seedu.address.logic.commands.extractors;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,20 +23,9 @@ public final class FieldCommandExtractor {
      *
      * @param bareCommand command parsed by the grammar system.
      * @return a {@link FieldCommand} that can be executed.
-     * @throws ValidationException if the command parameters fail validation.
      */
     public static FieldCommand extract(BareCommand bareCommand) throws ValidationException {
-        requireNonNull(bareCommand);
-
-        if (!FieldCommand.COMMAND_WORD.equalsIgnoreCase(bareCommand.getImperative())) {
-            throw new ValidationException(MESSAGE_WRONG_IMPERATIVE);
-        }
-
-        List<String> params = Arrays.asList(bareCommand.getAllParameters());
-        if (params.isEmpty()) {
-            throw new ValidationException(MESSAGE_INDEX_UNSPECIFIED);
-        }
-        Index index = Validation.validateIndex(params.get(0));
+        Index index = Validation.validateIndex(bareCommand, 0);
 
         Map<String, List<String>> options = bareCommand.getAllOptions();
         if (options.isEmpty()) {
@@ -48,24 +34,14 @@ public final class FieldCommandExtractor {
 
         Map<String, String> pairs = new LinkedHashMap<>();
         for (Map.Entry<String, List<String>> entry : options.entrySet()) {
-            String normalizedKey = normalize(entry.getKey());
             List<String> values = entry.getValue();
             String firstValue = (values == null || values.isEmpty()) ? "" : values.get(0);
-            String normalizedValue = normalize(firstValue);
-
-            if (normalizedKey.isEmpty()) {
-                throw new ValidationException(FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK);
-            }
-            if (normalizedValue.isEmpty()) {
-                throw new ValidationException(FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK);
-            }
-            pairs.put(normalizedKey, normalizedValue);
+            pairs.put(entry.getKey(), firstValue);
         }
-
-        return new FieldCommand(index, pairs);
-    }
-
-    private static String normalize(String input) {
-        return input == null ? "" : input.trim();
+        try {
+            return new FieldCommand(index, pairs);
+        } catch (IllegalArgumentException e) {
+            throw new ValidationException(e.getMessage());
+        }
     }
 }
