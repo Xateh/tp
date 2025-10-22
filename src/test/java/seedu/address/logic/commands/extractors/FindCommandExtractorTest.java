@@ -60,10 +60,8 @@ public class FindCommandExtractorTest {
 
         FindCommand expected = new FindCommand(expectedPredicate);
         FindCommand actualTag = FindCommandExtractor.extract(BareCommand.parse("find friend /tag"));
-        FindCommand actualTags = FindCommandExtractor.extract(BareCommand.parse("find friend /tags"));
 
         assertEquals(expected, actualTag);
-        assertEquals(expected, actualTags);
     }
 
     @Test
@@ -174,7 +172,7 @@ public class FindCommandExtractorTest {
 
         FindCommand expected = new FindCommand(expectedPredicate);
         FindCommand actual = FindCommandExtractor.extract(
-                BareCommand.parse("find friend /tags /department /office"));
+                BareCommand.parse("find friend /tag /department /office"));
 
         assertEquals(expected, actual);
     }

@@ -41,7 +41,7 @@ public final class FindCommandExtractor {
         boolean optPhone = bareCommand.hasOption("phone");
         boolean optEmail = bareCommand.hasOption("email");
         boolean optAddress = bareCommand.hasOption("address");
-        boolean optTag = bareCommand.hasOption("tags") || bareCommand.hasOption("tag");
+        boolean optTag = bareCommand.hasOption("tag");
         List<String> keysToRemove = List.of("name", "phone", "email", "address", "tags", "tag");
         Map<String, String> map = bareCommand.getAllOptions();
         Set<String> customKeys = map.keySet().stream()
