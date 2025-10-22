@@ -7,6 +7,7 @@ import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.exceptions.ResolutionException;
 import seedu.address.logic.commands.extractors.CommandExtractor;
 import seedu.address.logic.commands.extractors.DeleteCommandExtractor;
+import seedu.address.logic.commands.extractors.FindCommandExtractor;
 import seedu.address.logic.commands.extractors.FieldCommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
 
@@ -16,6 +17,7 @@ import seedu.address.logic.commands.extractors.TagCommandExtractor;
 public enum Bindings {
     FIELD("field", FieldCommandExtractor::extract),
     TAG("tag", TagCommandExtractor::extract),
+    FIND("find", FindCommandExtractor::extract),
     DELETE("delete", DeleteCommandExtractor::extract);
 
     private static final String MESSAGE_NO_MATCHING_BINDING = "Unable to find a valid matching command.";
