@@ -2,6 +2,7 @@ package seedu.address.logic.commands.extractors;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,11 +35,11 @@ public final class FieldCommandExtractor {
             throw new ValidationException(MESSAGE_WRONG_IMPERATIVE);
         }
 
-        String[] params = bareCommand.getAllParameters();
-        if (params.length == 0) {
+        List<String> params = Arrays.asList(bareCommand.getAllParameters());
+        if (params.isEmpty()) {
             throw new ValidationException(MESSAGE_INDEX_UNSPECIFIED);
         }
-        Index index = Validation.validateIndex(params[0]);
+        Index index = Validation.validateIndex(params.get(0));
 
         Map<String, List<String>> options = bareCommand.getAllOptions();
         if (options.isEmpty()) {
