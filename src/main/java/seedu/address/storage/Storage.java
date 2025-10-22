@@ -9,11 +9,12 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.history.CommandHistory;
+import seedu.address.session.SessionData;
 
 /**
  * API of the Storage component
  */
-public interface Storage extends AddressBookStorage, UserPrefsStorage, CommandHistoryStorage {
+public interface Storage extends AddressBookStorage, UserPrefsStorage, SessionStorage, CommandHistoryStorage {
 
     @Override
     Optional<UserPrefs> readUserPrefs() throws DataLoadingException;
@@ -35,5 +36,13 @@ public interface Storage extends AddressBookStorage, UserPrefsStorage, CommandHi
 
     @Override
     void saveCommandHistory(CommandHistory commandHistory) throws IOException;
+
+    void saveSession(SessionData sessionData) throws IOException;
+
+    @Override
+    Optional<SessionData> readSession() throws DataLoadingException;
+
+    @Override
+    Path getSessionDirectory();
 
 }

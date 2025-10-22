@@ -83,9 +83,10 @@ Options are optional settings to customise your command. They always come _after
 When you look at the help for a command, you'll see this notation:
 
 - **Field Types:**
-    - `<string>`: Text that can be a single `word` or `"text with spaces"`.
-    - `<word>`: Text that must be a single `word` (without quotes).
-    - `<index>`: A positive number (like `1`, `2`, `3`) corresponding to an item in a list.
+    - `(string)`: Text that can be a single `word` or `"text with spaces"`.
+    - `(word)`: Text that must be a single `word` (without quotes).
+    - `(index)`: A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered
+      list displayed.
 - **Multiplicity (How many?):**
     - `<item>`: Exactly one is required.
     - `<item>?`: Zero or one (it's optional).
@@ -271,13 +272,16 @@ Examples:
 
 Deletes the specified person from the address book.
 
-Format: `delete INDEX`
+Format: `delete <index>`
 
-* Deletes the person at the specified `INDEX`.
-* The index refers to the index number shown in the displayed person list.
-* The index **must be a positive integer** 1, 2, 3, …​
+* Deletes the person at the specified `<index>`.
 
-Examples:
+**Parameters**
+
+- `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit
+
+**Examples**
+
 * `list` followed by `delete 2` deletes the 2nd person in the address book.
 * `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
 
@@ -296,6 +300,16 @@ Format: `exit`
 ### Saving the data
 
 AddressBook data are saved in the hard disk automatically after any command that changes the data. There is no need to save manually.
+
+#### Session snapshots
+
+In addition to the main address book file, AssetSphere writes a snapshot of your current session (recent commands, active `find` keywords, and window layout) every time the app exits normally. These JSON files live beside the main data file inside a `sessions/` sub-folder, for example:
+
+```
+[JAR file location]/data/sessions/session-2025-10-18T12-34-56-789-Asia-Singapore.json
+```
+
+At start-up AssetSphere loads the most recent valid snapshot so that the app opens with the same filters and window placement you last used. You can safely delete older session files if you want to reclaim disk space; the app will automatically create a fresh snapshot the next time you close it.
 
 ### Editing the data file
 

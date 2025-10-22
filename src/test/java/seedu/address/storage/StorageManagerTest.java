@@ -4,7 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +18,8 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.history.CommandHistory;
+import seedu.address.session.SessionCommand;
+import seedu.address.session.SessionData;
 
 public class StorageManagerTest {
 
@@ -25,10 +30,16 @@ public class StorageManagerTest {
 
     @BeforeEach
     public void setUp() {
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(getTempFilePath("ab"));
-        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(getTempFilePath("prefs"));
-        JsonCommandHistoryStorage commandHistoryStorage = new JsonCommandHistoryStorage(getTempFilePath("history"));
-        storageManager = new StorageManager(addressBookStorage, userPrefsStorage, commandHistoryStorage);
+        JsonAddressBookStorage addressBookStorage =
+                new JsonAddressBookStorage(getTempFilePath("ab"));
+        JsonUserPrefsStorage userPrefsStorage =
+                new JsonUserPrefsStorage(getTempFilePath("prefs"));
+        JsonCommandHistoryStorage commandHistoryStorage =
+                new JsonCommandHistoryStorage(getTempFilePath("history"));
+        JsonSessionStorage sessionStorage =
+                new JsonSessionStorage(getTempFilePath("sessions"));
+        storageManager = new StorageManager(addressBookStorage, userPrefsStorage,
+                commandHistoryStorage, sessionStorage);
     }
 
     private Path getTempFilePath(String fileName) {
@@ -80,6 +91,35 @@ public class StorageManagerTest {
         storageManager.saveCommandHistory(original);
         CommandHistory retrieved = storageManager.readCommandHistory().get();
         assertEquals(original, retrieved);
+    }
+
+    @Test
+    public void sessionReadSave() throws Exception {
+        SessionData olderSession = new SessionData(
+                Instant.parse("2025-10-14T00:00:00Z"),
+                storageManager.getAddressBookFilePath(),
+                List.of("Alice"),
+                List.of(new SessionCommand(Instant.parse("2025-10-14T00:00:00Z"), "list")),
+                new GuiSettings());
+        SessionData newerSession = new SessionData(
+                Instant.parse("2025-10-15T00:00:00Z"),
+                storageManager.getAddressBookFilePath(),
+                List.of("Bob"),
+                List.of(new SessionCommand(Instant.parse("2025-10-15T00:00:00Z"), "find Bob")),
+                new GuiSettings());
+
+        storageManager.saveSession(olderSession);
+        storageManager.saveSession(newerSession);
+
+        SessionData retrieved = storageManager.readSession().get();
+        assertEquals(newerSession.getSavedAt(), retrieved.getSavedAt());
+        assertEquals(newerSession.getSearchKeywords(), retrieved.getSearchKeywords());
+
+        long fileCount;
+        try (var stream = Files.list(storageManager.getSessionDirectory())) {
+            fileCount = stream.count();
+        }
+        assertEquals(2, fileCount);
     }
 
 }

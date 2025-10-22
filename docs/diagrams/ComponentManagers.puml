@@ -28,4 +28,6 @@ StorageManager .up.|> Storage
 
 LogicManager --> Model
 LogicManager --> Storage
+LogicManager --> SessionRecorder
+StorageManager --> SessionStorage
 @enduml
