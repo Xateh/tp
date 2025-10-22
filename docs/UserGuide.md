@@ -47,27 +47,60 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
 <box type="info" seamless>
 
-**Notes about the command format:**<br>
+#### Basic Command Structure
 
-* Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
-  e.g. in `add n/NAME`, `NAME` is a parameter which can be used as `add n/John Doe`.
+**NOTE TO REVIEWERS**: This part of the UG contains the updated command syntax that the app will eventually use. However, not all of the rest of the UG has been updated to be aligned with this new syntax. This **will be fixed** in a later version.
 
-* Items in square brackets are optional.<br>
-  e.g `n/NAME [t/TAG]` can be used as `n/John Doe t/friend` or as `n/John Doe`.
+All commands follow the same simple format:
 
-* Items with `…`​ after them can be used multiple times including zero times.<br>
-  e.g. `[t/TAG]…​` can be used as ` ` (i.e. 0 times), `t/friend`, `t/friend t/family` etc.
+`command <parameters…> <options…>`
 
-* Items with `+` after them can be used one or more times. <br>
-  e.g. `tag INDEX TAG+` can be used as `tag 1 friend cool`
+1. **Command:** The action you want to perform (e.g., `add`, `list`, `delete`).
+2. **Parameters:** Inputs the command _needs_ to work. These are usually **required**, and their **order matters**.
+3. **Options:** Optional settings that change _how_ the command works. They always start with a slash (`/`) and can be in **any order**, but must come _after_ all parameters.
 
-* Parameters can be in any order.<br>
-  e.g. if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
+**Parameters**
 
-* Extraneous parameters for commands that do not take in parameters (such as `help`, `list`, `exit` and `clear`) will be ignored.<br>
-  e.g. if the command specifies `help 123`, it will be interpreted as `help`.
+Parameters are the main inputs for a command.
+- **Order is Key:** You must provide them in the specific order shown in the command's help text.
+- **Handling Spaces:** If your parameter includes spaces, you **must** wrap it in straight quotes (`""`).
+    - `add "New task"` (This is one parameter: "New task")
+    - `add New task` (This is two parameters: "New" and "task")
+- **Parameter Types:** Some commands use special prefixes for parameters:
+    - **Normal:** `"My task"`
+    - **Additive:** `+tag` (Used to add an item, like a tag)
+    - **Subtractive:** `-tag` (Used to remove an item, like a tag)
 
-* If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
+**Options**
+
+Options are optional settings to customise your command. They always come _after_ all parameters. There are two types of options:
+1. **Name-only (Flag):** Used to turn a setting on.
+    - **Example:** `list /all` (The `/all` flag might show completed items)
+2. **Name-Value Pair:** Used to provide a specific value for a setting. Use a colon (`:`) to separate the name and value.
+    - **Example:** `add "Finish report" /priority:high`
+    - If the value has spaces, wrap the value in quotes: `add "New event" /due:"tomorrow at 5"`
+
+When you look at the help for a command, you'll see this notation:
+
+- **Field Types:**
+    - `(string)`: Text that can be a single `word` or `"text with spaces"`.
+    - `(word)`: Text that must be a single `word` (without quotes).
+    - `(index)`: A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered
+      list displayed.
+- **Multiplicity (How many?):**
+    - `<item>`: Exactly one is required.
+    - `<item>?`: Zero or one (it's optional).
+    - `<item>+`: One or more are required.
+    - `<item>*`: Zero or more (it's optional and you can provide many).
+
+**Example:** `tag <index>+ <tag>+` means you must provide at least one index, followed by at least one tag.
+
+**Extraneous Parameters and Options**
+
+By default:
+- the number of parameters are fixed for commands and should be strictly adhered to. Using an number of parameters that does not conform to the requirements of the command format is **undefined behaviour**. Some commands may gracefully handle extraneous parameters if it is sensible to do so, but this behaviour _should not be relied on_.
+- extraneous options are *always* ignored.
+
 </box>
 
 ### Viewing help : `help`
@@ -143,38 +176,96 @@ Format: `untag INDEX t/TAG`
 Examples:
 * `list` followed by `untag 2 t/friends` removes the `friends` tag from the 2nd person in the address book.
 
+### Adding information to a person: `infoedit`
+
+Edits information about a person given its index.
+
+Format: `infoedit INDEX`
+
+* Displays an editable text box for the person at the given `INDEX` in the displayed list.
+* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
+* If there is existing information attached to the person, it will be shown and editable in the text box.
+
+Examples:
+* `list` followed by `infoedit 2` will bring up an editable text box for the 2nd person in the address book.
+
+### Viewing information of a person: `infoview`
+
+View information about a person given its index.
+
+Format: `infoview INDEX`
+
+* Displays all the given information of the person at the `INDEX` specified.
+* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
+
+Examples:
+* `list` followed by `infoview 2` will display available information about the 2nd person in the address book.
+
+### Setting a custom field on a person : `field`
+
+Sets or updates one or more **custom field values** for the specified person in the address book.
+
+Format: `field INDEX /KEY:VALUE [/KEY:VALUE]…`
+
+* Updates the person at the specified `INDEX`. The index refers to the number shown in the current list. The index **must be a positive integer** 1, 2, 3, …​
+* Each `/KEY:VALUE` pair targets a previously defined custom field (`KEY`).
+* You may provide **one or multiple** `/KEY:VALUE` pairs in a single command.
+* If a `VALUE` contains spaces, wrap it in double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
+* If a `KEY` is unknown (not defined), the command fails with an error.
+
+**Examples:**
+* `field 5 /linkedInUsername:alextan /rate:120` — Sets two fields on the 5th person in one command.
+* `field 3 /notes:"Met at FinTech conf 2025"` — Adds a note with spaces to the 3rd person.
+* `field 7 /birthday:"1999-02-01"` — Sets a field on the 7th person in one command.
+* `field 7 /birthday:"1999-02-10"` — Updates the field with `KEY` `birthday` on the 7th person.
+
 ### Locating persons by name: `find`
 
 Finds persons whose fields contain any of the given keywords.
 
-Format: `find KEYWORD [MORE_KEYWORDS]`
+Format: `find <keyword>+ [/<field>]*`
 
-* The search is case-insensitive. e.g `hans` will match `Hans`
-* The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`
+If no specific field is provided, all built-in fields will be searched.
+* The search is case-insensitive. e.g `hans` will match `Hans`.
+* The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`.
 * All the fields are searched.
-* Only full words will be matched e.g. `Han` will not match `Hans`
+* Only full words will be matched e.g. `Han` will not match `Hans`.
 * Persons matching at least one keyword on any one field will be returned (i.e. `OR` search).
   e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
 
 Examples:
-* `find John` returns `john` and `John Doe`
+* `find John` returns `john` and `John Doe`.
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
-* `find 99999999` returns all persons whose phone number is `99999999`
-* `find test.dummy@gmail.com` returns all persons whose email is `test.dummy@gmail.com`
-* `find friend` returns all persons tagged with `"friend"`
+* `find 99999999` returns all persons whose phone number is `99999999`.
+* `find test.dummy@gmail.com` returns all persons whose email is `test.dummy@gmail.com`.
+* `find friend` returns all persons tagged with `"friend"`.
+
+You can limit the search to specific fields by adding options after your keywords.
+Each field option starts with / followed by the field name.
+* The same rules for searching applies as per the case of searching all built in fields. (see above)
+* Now, only those persons matching at least one keyword on any one specified field will be returned.
+
+Examples:
+* `find John /name` returns persons whose name contains `john`.
+* `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
+* `find 99999999 /phone` returns all persons whose phone number is `99999999`.
+* `find test /name /email` returns all persons whose name or email contains the word `test`.
 
 ### Deleting a person : `delete`
 
 Deletes the specified person from the address book.
 
-Format: `delete INDEX`
+Format: `delete <index>`
 
-* Deletes the person at the specified `INDEX`.
-* The index refers to the index number shown in the displayed person list.
-* The index **must be a positive integer** 1, 2, 3, …​
+* Deletes the person at the specified `<index>`.
 
-Examples:
+**Parameters**
+
+- `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit
+
+**Examples**
+
 * `list` followed by `delete 2` deletes the 2nd person in the address book.
 * `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
 
@@ -230,11 +321,15 @@ _Details coming soon ..._
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**List**   | `list`
+**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
 **Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
-**Clear**  | `clear`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Edit Info** | `infoedit INDEX` <br> e.g., `infoedit 2`
+**View Info** | `infoview INDEX` <br> e.g., `infoview 2`
+**Field**  | `field INDEX /KEY:VALUE` <br> e.g., `field 2 /company:"BlackRock"`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
-**List**   | `list`
+**Delete** | `delete INDEX`<br> e.g., `delete 3`
+**Clear**  | `clear`
+**Exit**  | `exit`  
 **Help**   | `help`
