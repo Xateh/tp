@@ -7,8 +7,8 @@ import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.exceptions.ResolutionException;
 import seedu.address.logic.commands.extractors.CommandExtractor;
 import seedu.address.logic.commands.extractors.DeleteCommandExtractor;
-import seedu.address.logic.commands.extractors.FindCommandExtractor;
 import seedu.address.logic.commands.extractors.FieldCommandExtractor;
+import seedu.address.logic.commands.extractors.FindCommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
 
 /**

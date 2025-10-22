@@ -33,7 +33,7 @@ public class DecoderTest {
         Command fieldCommand = Decoder.decode(BareCommand.parse("field 1 /k:v"));
         assertEquals(FieldCommand.class, fieldCommand.getClass());
     }
- 
+
     @Test
     public void decode_findCommandNoOptionsExactMatch_success() throws
             LexerException, ParserException, ResolutionException, ValidationException {
