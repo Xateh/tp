@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.collections.ObservableList;
@@ -18,10 +19,13 @@ import seedu.address.logic.grammars.command.lexer.LexerException;
 import seedu.address.logic.grammars.command.parser.ParserException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.logic.session.SessionRecorder;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.history.CommandHistory;
+import seedu.address.model.person.FieldContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
+import seedu.address.session.SessionData;
 import seedu.address.storage.Storage;
 
 /**
@@ -38,16 +42,30 @@ public class LogicManager implements Logic {
     private final Model model;
     private final Storage storage;
     private final AddressBookParser addressBookParser;
+    private final SessionRecorder sessionRecorder;
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
      */
     public LogicManager(Model model, Storage storage) {
+        this(model, storage, Optional.empty());
+    }
+
+    /**
+     * Constructs a {@code LogicManager} that optionally restores state from a previous session snapshot.
+     *
+     * @param model backing model instance
+     * @param storage storage layer used for persistence
+     * @param initialSession previously saved session data to restore, if any
+     */
+    public LogicManager(Model model, Storage storage, Optional<SessionData> initialSession) {
         this.model = model;
         this.storage = storage;
         CommandHistory initialHistory = loadCommandHistory(storage);
         this.addressBookParser = new AddressBookParser();
         this.model.setCommandHistory(initialHistory);
+        sessionRecorder = new SessionRecorder(initialSession);
+        initialSession.ifPresent(this::restoreSessionState);
     }
 
     @Override
@@ -64,8 +82,8 @@ public class LogicManager implements Logic {
                 CommandResult result = fc.execute(model);
                 String feedback = result.getFeedbackToUser();
 
-                persistAddressBook();
-                persistCommandHistory(commandText);
+                saveAddressBookSnapshot();
+                saveToCommandHistory(commandText);
                 return new CommandResult(feedback);
             }
         } catch (LexerException | ParserException ex) {
@@ -74,8 +92,10 @@ public class LogicManager implements Logic {
         var command = addressBookParser.parseCommand(commandText);
         CommandResult commandResult = command.execute(model);
 
-        persistAddressBook();
-        persistCommandHistory(commandText);
+        saveAddressBookSnapshot();
+        saveToCommandHistory(commandText);
+
+        sessionRecorder.afterSuccessfulCommand(commandText, command);
 
         return commandResult;
     }
@@ -92,7 +112,7 @@ public class LogicManager implements Logic {
 
     @Override
     public List<String> getCommandHistorySnapshot() {
-        return model.getCommandHistory().asUnmodifiableList();
+        return model.getCommandHistory().getEntries();
     }
 
     private CommandHistory loadCommandHistory(Storage storage) {
@@ -105,7 +125,7 @@ public class LogicManager implements Logic {
         }
     }
 
-    private void persistAddressBook() throws CommandException {
+    private void saveAddressBookSnapshot() throws CommandException {
         try {
             storage.saveAddressBook(model.getAddressBook());
         } catch (AccessDeniedException e) {
@@ -116,7 +136,7 @@ public class LogicManager implements Logic {
         }
     }
 
-    private void persistCommandHistory(String commandText) throws CommandException {
+    private void saveToCommandHistory(String commandText) throws CommandException {
         CommandHistory commandHistory = model.getCommandHistory();
         commandHistory.add(commandText);
         try {
@@ -142,5 +162,16 @@ public class LogicManager implements Logic {
     @Override
     public void setGuiSettings(GuiSettings guiSettings) {
         model.setGuiSettings(guiSettings);
+    }
+
+    @Override
+    public SessionData getCurrentSessionData() {
+        return sessionRecorder.buildSnapshot(getAddressBookFilePath(), model.getGuiSettings());
+    }
+
+    private void restoreSessionState(SessionData sessionData) {
+        if (!sessionData.getSearchKeywords().isEmpty()) {
+            model.updateFilteredPersonList(new FieldContainsKeywordsPredicate(sessionData.getSearchKeywords()));
+        }
     }
 }

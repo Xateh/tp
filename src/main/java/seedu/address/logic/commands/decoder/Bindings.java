@@ -5,8 +5,10 @@ import java.util.function.Predicate;
 
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.exceptions.ResolutionException;
-import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.commands.extractors.CommandExtractor;
+import seedu.address.logic.commands.extractors.DeleteCommandExtractor;
+import seedu.address.logic.commands.extractors.EditCommandExtractor;
+import seedu.address.logic.commands.extractors.FindCommandExtractor;
 import seedu.address.logic.commands.extractors.HistoryCommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
 
@@ -14,8 +16,11 @@ import seedu.address.logic.commands.extractors.TagCommandExtractor;
  * Enumeration containing bindings for all imperatives and their respective command extractors.
  */
 public enum Bindings {
-    HISTORY("history", HistoryCommandExtractor::extract),
-    TAG("tag", TagCommandExtractor::extract);
+    FIND("find", FindCommandExtractor::extract),
+    DELETE("delete", DeleteCommandExtractor::extract),
+    EDIT("edit", EditCommandExtractor::extract),
+    TAG("tag", TagCommandExtractor::extract),
+    HISTORY("history", HistoryCommandExtractor::extract);
 
     private static final String MESSAGE_NO_MATCHING_BINDING = "Unable to find a valid matching command.";
     private static final String MESSAGE_AMBIGUOUS_BINDING = "Resolved command is ambiguous.";
@@ -32,7 +37,7 @@ public enum Bindings {
      * Returns {@code CommandExtractor}s corresponding to commands whose imperatives match a provided predicate.
      *
      * @param predicate Predicate used to test for matching imperatives.
-     * @return CommandExtractors corresponding to the imperatives that match the predicate.
+     * @return {@code CommandExtractor}s corresponding to the imperatives that match the predicate.
      */
     public static CommandExtractor<?>[] resolveBindings(Predicate<String> predicate) {
         return Arrays.stream(Bindings.values())
@@ -45,8 +50,8 @@ public enum Bindings {
      * predicate.
      *
      * @param predicate Predicate used to test for matching imperative.
-     * @return CommandExtractor corresponding to the imperatives that match the predicate.
-     * @throws ValidationException When no commands are resolved to or there are multiple resolved commands.
+     * @return {@code CommandExtractor} corresponding to the imperatives that match the predicate.
+     * @throws ResolutionException no commands are resolved to or there are multiple resolved commands.
      */
     public static CommandExtractor<?> resolveExactBinding(Predicate<String> predicate) throws ResolutionException {
         CommandExtractor<?>[] extractors = Arrays.stream(Bindings.values())

@@ -1,7 +1,6 @@
 package seedu.address.logic.commands.extractors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -23,28 +22,20 @@ public class HistoryCommandExtractorTest {
     }
 
     @Test
-    public void extract_historyWithParameters_throwsValidationException() throws LexerException,
-            ParserException {
-        assertThrows(ValidationException.class, () ->
-            HistoryCommandExtractor.extract(BareCommand.parse("history extra")));
+    public void extract_historyWithParameters_returnsHistoryCommand() throws LexerException,
+            ParserException, ValidationException {
+        HistoryCommand command = HistoryCommandExtractor.extract(BareCommand.parse("history extra"));
+        assertEquals(HistoryCommand.class, command.getClass());
     }
 
     @Test
-    public void extract_historyWithOptions_throwsValidationException() {
+    public void extract_historyWithOptions_returnsHistoryCommand() throws ValidationException {
         BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
         builder.setImperative(HistoryCommand.COMMAND_WORD);
         builder.setOption("limit", "5");
         BareCommand bareCommand = builder.build();
 
-        assertThrows(ValidationException.class, () -> HistoryCommandExtractor.extract(bareCommand));
-    }
-
-    @Test
-    public void extract_wrongImperative_throwsValidationException() {
-        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
-        builder.setImperative("tag");
-        BareCommand bareCommand = builder.build();
-
-        assertThrows(ValidationException.class, () -> HistoryCommandExtractor.extract(bareCommand));
+        HistoryCommand command = HistoryCommandExtractor.extract(bareCommand);
+        assertEquals(HistoryCommand.class, command.getClass());
     }
 }

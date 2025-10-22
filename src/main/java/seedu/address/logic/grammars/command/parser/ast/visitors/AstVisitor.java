@@ -41,6 +41,30 @@ public interface AstVisitor<R> {
     R visitParameter(AstNode.Parameter node);
 
     /**
+     * Visits a NormalParameter AST node.
+     *
+     * @param node NormalParameter AST node.
+     * @return Value produced after visiting.
+     */
+    R visitNormalParameter(AstNode.NormalParameter node);
+
+    /**
+     * Visits an AdditiveParameter AST node.
+     *
+     * @param node AdditiveParameter AST node.
+     * @return Value produced after visiting.
+     */
+    R visitAdditiveParameter(AstNode.AdditiveParameter node);
+
+    /**
+     * Visits a SubtractiveParameter AST node.
+     *
+     * @param node SubtractiveParameter AST node.
+     * @return Value produced after visiting.
+     */
+    R visitSubtractiveParameter(AstNode.SubtractiveParameter node);
+
+    /**
      * Visits an OptionList AST node.
      *
      * @param node OptionList AST node.

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.model.Model;
 import seedu.address.model.history.CommandHistory;
 
@@ -19,29 +18,12 @@ public class HistoryCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Displays the list of commands previously entered.";
     public static final String MESSAGE_EMPTY_HISTORY = "Command history is empty.";
     public static final String MESSAGE_SUCCESS = "Command history:\n%s";
-    public static final String MESSAGE_ARGUMENTS_NOT_SUPPORTED = COMMAND_WORD
-            + " does not accept parameters or options.";
-
-    /**
-     * Creates a HistoryCommand from a parsed {@link BareCommand}.
-     *
-     * @throws IllegalArgumentException if the command contains unexpected arguments or options.
-     */
-    public HistoryCommand(BareCommand bareCommand) {
-        requireNonNull(bareCommand);
-        if (!COMMAND_WORD.equalsIgnoreCase(bareCommand.getImperative())) {
-            throw new IllegalArgumentException("Wrong imperative for HistoryCommand");
-        }
-        if (bareCommand.getAllParameters().length > 0 || !bareCommand.getAllOptions().isEmpty()) {
-            throw new IllegalArgumentException(MESSAGE_ARGUMENTS_NOT_SUPPORTED);
-        }
-    }
 
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
         CommandHistory commandHistory = requireNonNull(model.getCommandHistory());
-        List<String> entries = commandHistory.asUnmodifiableList();
+        List<String> entries = commandHistory.getEntries();
         if (entries.isEmpty()) {
             return new CommandResult(MESSAGE_EMPTY_HISTORY);
         }

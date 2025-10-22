@@ -11,6 +11,7 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.history.CommandHistory;
+import seedu.address.session.SessionData;
 
 /**
  * Manages storage of AddressBook data in local storage.
@@ -21,15 +22,17 @@ public class StorageManager implements Storage {
     private final AddressBookStorage addressBookStorage;
     private final UserPrefsStorage userPrefsStorage;
     private final CommandHistoryStorage commandHistoryStorage;
+    private final SessionStorage sessionStorage;
 
     /**
      * Creates a {@code StorageManager} with the given storages.
      */
-    public StorageManager(AddressBookStorage addressBookStorage,
-            UserPrefsStorage userPrefsStorage, CommandHistoryStorage commandHistoryStorage) {
+    public StorageManager(AddressBookStorage addressBookStorage, UserPrefsStorage userPrefsStorage,
+            CommandHistoryStorage commandHistoryStorage, SessionStorage sessionStorage) {
         this.addressBookStorage = addressBookStorage;
         this.userPrefsStorage = userPrefsStorage;
         this.commandHistoryStorage = commandHistoryStorage;
+        this.sessionStorage = sessionStorage;
     }
 
     // ================ UserPrefs methods ==============================
@@ -97,6 +100,23 @@ public class StorageManager implements Storage {
     public void saveCommandHistory(CommandHistory commandHistory) throws IOException {
         logger.fine("Attempting to write command history to data file: " + getCommandHistoryFilePath());
         commandHistoryStorage.saveCommandHistory(commandHistory);
+    }
+
+    // ================ Session methods ==============================
+
+    @Override
+    public Optional<SessionData> readSession() throws DataLoadingException {
+        return sessionStorage.readSession();
+    }
+
+    @Override
+    public void saveSession(SessionData sessionData) throws IOException {
+        sessionStorage.saveSession(sessionData);
+    }
+
+    @Override
+    public Path getSessionDirectory() {
+        return sessionStorage.getSessionDirectory();
     }
 
 }

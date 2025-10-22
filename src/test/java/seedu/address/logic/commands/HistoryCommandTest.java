@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
-import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
@@ -23,7 +22,7 @@ public class HistoryCommandTest {
     @Test
     public void execute_emptyHistory_returnsEmptyMessage() {
         CommandHistory history = new CommandHistory();
-        HistoryCommand command = new HistoryCommand(historyBareCommand());
+        HistoryCommand command = new HistoryCommand();
         CommandResult result = command.execute(new ModelStub(history));
         assertEquals(HistoryCommand.MESSAGE_EMPTY_HISTORY, result.getFeedbackToUser());
     }
@@ -33,17 +32,11 @@ public class HistoryCommandTest {
         CommandHistory history = new CommandHistory();
         history.add("list");
         history.add("add n/Amy");
-        HistoryCommand command = new HistoryCommand(historyBareCommand());
+        HistoryCommand command = new HistoryCommand();
         CommandResult result = command.execute(new ModelStub(history));
         String expectedHistory = String.join(System.lineSeparator(), "1. list", "2. add n/Amy");
         String expected = String.format(HistoryCommand.MESSAGE_SUCCESS, expectedHistory);
         assertEquals(expected, result.getFeedbackToUser());
-    }
-
-    private static BareCommand historyBareCommand() {
-        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
-        builder.setImperative(HistoryCommand.COMMAND_WORD);
-        return builder.build();
     }
 
     private static class ModelStub implements Model {
