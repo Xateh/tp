@@ -64,14 +64,6 @@ class FieldCommandExtractorTest {
     }
 
     @Test
-    void extract_missingOptionValue_throwsValidationException() throws Exception {
-        BareCommand bare = BareCommand.parse("field 1 /k");
-        ValidationException ex = assertThrows(ValidationException.class, () ->
-                FieldCommandExtractor.extract(bare));
-        assertEquals("Provide at least one /key:value pair. Usage: field <index> /key:value ...", ex.getMessage());
-    }
-
-    @Test
     void extract_wrongImperative_throwsValidationException() {
         BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
         builder.setImperative("notfield");

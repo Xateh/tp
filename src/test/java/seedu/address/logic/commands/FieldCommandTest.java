@@ -3,6 +3,8 @@ package seedu.address.logic.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.logic.commands.FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK;
+import static seedu.address.logic.commands.FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -128,7 +130,7 @@ class FieldCommandTest {
         pairs.put("   ", "v"); // trims to empty -> validate fails
         FieldCommand cmd = new FieldCommand(1, pairs);
         CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
-        assertEquals("Field name cannot be blank.", ex.getMessage());
+        assertEquals(MESSAGE_NAME_CANNOT_BE_BLANK, ex.getMessage());
     }
 
     @Test
@@ -137,7 +139,7 @@ class FieldCommandTest {
         pairs.put("k", "   "); // trims to empty -> validate fails
         FieldCommand cmd = new FieldCommand(1, pairs);
         CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
-        assertEquals("Field value cannot be blank.", ex.getMessage());
+        assertEquals(MESSAGE_VALUE_CANNOT_BE_BLANK, ex.getMessage());
     }
 
     @Test
@@ -146,7 +148,7 @@ class FieldCommandTest {
         pairs.put(null, "v"); // null -> normalizeKey returns ""
         FieldCommand cmd = new FieldCommand(1, pairs);
         CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
-        assertEquals("Field name cannot be blank.", ex.getMessage());
+        assertEquals(MESSAGE_NAME_CANNOT_BE_BLANK, ex.getMessage());
     }
 
     @Test
@@ -155,7 +157,7 @@ class FieldCommandTest {
         pairs.put("k", null); // null -> normalizeValue returns ""
         FieldCommand cmd = new FieldCommand(1, pairs);
         CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
-        assertEquals("Field value cannot be blank.", ex.getMessage());
+        assertEquals(MESSAGE_VALUE_CANNOT_BE_BLANK, ex.getMessage());
     }
 }
 

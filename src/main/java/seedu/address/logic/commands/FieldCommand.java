@@ -23,6 +23,8 @@ public class FieldCommand extends Command {
             + ": Adds or updates custom fields for the person identified by the index number.\n"
             + "Parameters: INDEX (must be a positive integer) /KEY:VALUE...\n"
             + "Example: " + COMMAND_WORD + " 1 /company:\"Goldman Sachs\"";
+    public static final String MESSAGE_VALUE_CANNOT_BE_BLANK = "Field value cannot be blank.";
+    public static final String MESSAGE_NAME_CANNOT_BE_BLANK = "Field name cannot be blank.";
     private final int oneBasedIndex;
     private final Map<String, String> pairs;
 
