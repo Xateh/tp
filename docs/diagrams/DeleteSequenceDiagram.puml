@@ -3,8 +3,8 @@
 skinparam ArrowFontStyle plain
 
 box Logic LOGIC_COLOR_T1
-participant ":LogicManager" as LogicManager LOGIC_COLOR
-participant ":Decoder" as Decoder LOGIC_COLOR
+participant "lm:LogicManager" as LogicManager LOGIC_COLOR
+participant "d:Decoder" as Decoder LOGIC_COLOR
 participant "d:DeleteCommand" as DeleteCommand LOGIC_COLOR
 participant "r:CommandResult" as CommandResult LOGIC_COLOR
 end box
