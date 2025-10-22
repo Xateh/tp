@@ -15,6 +15,7 @@ import seedu.address.commons.util.ConfigUtil;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
+import seedu.address.logic.commands.InfoEditCommand;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -64,7 +65,9 @@ public class MainApp extends Application {
 
         logic = new LogicManager(model, storage);
 
+        // Create UiManager and set it up with InfoEditCommand
         ui = new UiManager(logic);
+        InfoEditCommand.setUiManager((UiManager) ui);
     }
 
     /**
