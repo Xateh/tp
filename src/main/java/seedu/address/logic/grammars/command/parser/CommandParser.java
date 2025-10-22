@@ -1,11 +1,14 @@
 package seedu.address.logic.grammars.command.parser;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.grammars.command.lexer.Token;
 import seedu.address.logic.grammars.command.lexer.TokenType;
 import seedu.address.logic.grammars.command.lexer.TokenisedCommand;
 import seedu.address.logic.grammars.command.parser.ast.AstNode;
+import seedu.address.logic.grammars.command.parser.ast.visitors.AstPrinter;
 
 /**
  * LL(1) parser for commands. Recognises the following context-free grammar (Level 2) consisting of tokens obtained from
@@ -32,6 +35,8 @@ import seedu.address.logic.grammars.command.parser.ast.AstNode;
  * </pre>
  */
 public class CommandParser {
+    private static final Logger logger = LogsCenter.getLogger(CommandParser.class);
+
     private final TokenisedCommand tokenisedCommand;
     private int currentTokenIndex = 0;
 
@@ -53,8 +58,15 @@ public class CommandParser {
         try {
             root = parser.parseCommand();
         } catch (ProductionApplicationException e) {
-            throw new ParserException(e.getParserError());
+            ParserException parserException = new ParserException(e.getParserError());
+
+            logger.severe(parserException.getMessage());
+
+            throw parserException;
         }
+
+        logger.info("Parser successfully parsed tokenised command. Produced AST:");
+        logger.info(new AstPrinter().print(root));
 
         return root;
     }

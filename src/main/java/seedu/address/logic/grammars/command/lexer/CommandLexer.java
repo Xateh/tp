@@ -1,7 +1,9 @@
 package seedu.address.logic.grammars.command.lexer;
 
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.grammars.command.utils.Location;
 
 /**
@@ -20,6 +22,8 @@ import seedu.address.logic.grammars.command.utils.Location;
  * </pre>
  */
 public class CommandLexer {
+    private static final Logger logger = LogsCenter.getLogger(CommandLexer.class);
+
     private final String ingest;
     private final ArrayList<Token> tokens = new ArrayList<>();
 
@@ -240,10 +244,19 @@ public class CommandLexer {
     private void error(LexerErrorType type) throws LexerException {
         String offendingLiteral = this.ingest.substring(start, current);
         LexerError lexerError = new LexerError(type, this.ingest, offendingLiteral, new Location(start, current));
-        throw new LexerException(lexerError);
+        LexerException lexerException = new LexerException(lexerError);
+
+        logger.severe(lexerException.getMessage());
+
+        throw lexerException;
     }
 
     private TokenisedCommand toTokenisedCommand() {
-        return new TokenisedCommand(this.ingest, this.tokens);
+        TokenisedCommand tokenisedCommand = new TokenisedCommand(this.ingest, this.tokens);
+
+        logger.info("Lexer successfully lexed input command. Produced tokens:");
+        logger.info(tokenisedCommand.toString());
+
+        return tokenisedCommand;
     }
 }
