@@ -32,7 +32,7 @@ public class BareCommandTest {
         BareCommand cmd = assertDoesNotThrow(() -> BareCommand.parse(cmdString));
 
         assertEquals("test", cmd.getImperative());
-        assertEquals(0, cmd.getAllParameters().length);
+        assertEquals(0, cmd.getAllParameters().size());
     }
 
     @Test
@@ -42,7 +42,7 @@ public class BareCommandTest {
         BareCommand cmd = assertDoesNotThrow(() -> BareCommand.parse(cmdString));
 
         assertEquals("test", cmd.getImperative());
-        assertEquals(3, cmd.getAllParameters().length);
+        assertEquals(3, cmd.getAllParameters().size());
         assertTrue(cmd.getParameter(0).isNormal());
         assertEquals("param0", cmd.getParameter(0).getValue());
         assertTrue(cmd.getParameter(1).isAdditive());
@@ -58,7 +58,7 @@ public class BareCommandTest {
         BareCommand cmd = assertDoesNotThrow(() -> BareCommand.parse(cmdString));
 
         assertEquals("test", cmd.getImperative());
-        assertEquals(0, cmd.getAllParameters().length);
+        assertEquals(0, cmd.getAllParameters().size());
         assertEquals("long value", cmd.getOptionValue("opt1"));
         assertEquals("single", cmd.getOptionValue("opt2"));
     }
@@ -70,7 +70,7 @@ public class BareCommandTest {
         BareCommand cmd = assertDoesNotThrow(() -> BareCommand.parse(cmdString));
 
         assertEquals("complex", cmd.getImperative());
-        assertEquals(3, cmd.getAllParameters().length);
+        assertEquals(3, cmd.getAllParameters().size());
         assertTrue(cmd.getParameter(0).isNormal());
         assertEquals("param0", cmd.getParameter(0).getValue());
         assertTrue(cmd.getParameter(1).isAdditive());

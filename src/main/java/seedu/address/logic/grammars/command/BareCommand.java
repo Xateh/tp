@@ -3,6 +3,7 @@ package seedu.address.logic.grammars.command;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import seedu.address.logic.grammars.command.lexer.CommandLexer;
@@ -18,10 +19,10 @@ import seedu.address.logic.grammars.command.parser.ast.visitors.CommandExtractor
  */
 public class BareCommand {
     private final String imperative;
-    private final Parameter[] parameters;
+    private final List<Parameter> parameters;
     private final Map<String, String> options;
 
-    private BareCommand(String imperative, Parameter[] parameters, Map<String, String> options) {
+    private BareCommand(String imperative, List<Parameter> parameters, Map<String, String> options) {
         this.imperative = imperative;
         this.parameters = parameters;
         this.options = options;
@@ -44,7 +45,7 @@ public class BareCommand {
         /**
          * Constructs a new {@code Parameter}.
          *
-         * @param kind Kind of parameter.
+         * @param kind  Kind of parameter.
          * @param value Value of parameter.
          */
         public Parameter(ParameterKind kind, String value) {
@@ -111,10 +112,10 @@ public class BareCommand {
          */
         public BareCommand build() {
             String imperative = this.imperative;
-            Parameter[] parameters = this.parameters.toArray(Parameter[]::new);
+            List<Parameter> parameters = this.parameters.stream().toList();
             // Allows nulls (for flag-style options), but prevents external mutation
             Map<String, String> options =
-                Collections.unmodifiableMap(new LinkedHashMap<>(this.options));
+                    Collections.unmodifiableMap(new LinkedHashMap<>(this.options));
             return new BareCommand(imperative, parameters, options);
         }
     }
@@ -138,11 +139,15 @@ public class BareCommand {
     }
 
     public Parameter getParameter(int index) {
-        return this.parameters[index];
+        return this.parameters.get(index);
     }
 
-    public Parameter[] getAllParameters() {
+    public List<Parameter> getAllParameters() {
         return this.parameters;
+    }
+
+    public int parameterCount() {
+        return this.parameters.size();
     }
 
     /**

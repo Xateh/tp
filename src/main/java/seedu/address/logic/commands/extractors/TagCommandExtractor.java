@@ -1,6 +1,9 @@
 package seedu.address.logic.commands.extractors;
 
+import static seedu.address.logic.grammars.command.BareCommand.Parameter.ParameterKind;
+
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
@@ -14,12 +17,12 @@ import seedu.address.model.tag.Tag;
  */
 public class TagCommandExtractor {
     // Messages for extraction
-    public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
     public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_TAGS_UNSPECIFIED = "At least one tag must be specified.";
 
-    private TagCommandExtractor() {}
+    private TagCommandExtractor() {
+    }
 
     /**
      * Extracts command parameters from the given Command object. Performs input validation as well.
@@ -29,30 +32,30 @@ public class TagCommandExtractor {
      * @throws ValidationException When the command parameters fail to validate.
      */
     public static TagCommand extract(BareCommand bareCommand) throws ValidationException {
-        BareCommand.Parameter[] params = bareCommand.getAllParameters();
-
         // extract index
-        if (params.length <= 0) {
-            throw new ValidationException(MESSAGE_INDEX_UNSPECIFIED);
-        }
+        String param0 = Validation.validateParameter(bareCommand, 0, ParameterKind.NORMAL);
         Index index;
         try {
-            index = Index.fromOneBased(Integer.parseInt(params[0].getValue()));
+            index = Index.fromOneBased(Integer.parseInt(param0));
         } catch (NumberFormatException e) {
             // only thrown by Integer::parseInt
-            throw new ValidationException(String.format(MESSAGE_INDEX_FAILED_TO_PARSE, params[0]));
+            throw new ValidationException(String.format(MESSAGE_INDEX_FAILED_TO_PARSE, param0));
         } catch (IndexOutOfBoundsException e) {
             // only thrown by Index::fromOneBased
-            throw new ValidationException(String.format(MESSAGE_INDEX_OUT_OF_RANGE, params[0]));
+            throw new ValidationException(String.format(MESSAGE_INDEX_OUT_OF_RANGE, param0));
         }
 
         // extract tags
-        if (params.length <= 1) {
-            throw new ValidationException(MESSAGE_TAGS_UNSPECIFIED);
-        }
         Set<Tag> tags = new HashSet<>();
-        for (int i = 1; i < params.length; i++) {
-            tags.add(new Tag(params[i].getValue()));
+        List<String> varParams;
+        try {
+            varParams = Validation.validateVariableParametersWithMinimumMultiplicity(
+                    bareCommand, 1, 1, ParameterKind.NORMAL);
+            for (String varParam : varParams) {
+                tags.add(new Tag(varParam));
+            }
+        } catch (ValidationException e) {
+            throw new ValidationException(e.getMessage() + "\n" + MESSAGE_TAGS_UNSPECIFIED);
         }
 
         return new TagCommand(index, tags);
