@@ -85,26 +85,58 @@ public class BareCommand {
         public BareCommandBuilder() {
         }
 
+        /**
+         * Sets the imperative of the command to be built.
+         *
+         * @param imperative Imperative to set.
+         * @return This builder with the set imperative.
+         */
         public BareCommandBuilder setImperative(String imperative) {
             this.imperative = imperative;
             return this;
         }
 
+        /**
+         * Adds a parameter to the command to be built.
+         *
+         * @param parameterKind  Kind of parameter.
+         * @param parameterValue Value of parameter.
+         * @return This builder with the added parameter.
+         */
         public BareCommandBuilder addParameter(Parameter.ParameterKind parameterKind, String parameterValue) {
             this.parameters.add(new Parameter(parameterKind, parameterValue));
             return this;
         }
 
+        /**
+         * Adds a normal parameter to the command to be built.
+         *
+         * @param parameterValue Value of normal parameter.
+         * @return This builder with the added normal parameter.
+         */
         public BareCommandBuilder addParameter(String parameterValue) {
             this.addParameter(Parameter.ParameterKind.NORMAL, parameterValue);
             return this;
         }
 
+        /**
+         * Sets an option in the command to be built. Typically used for boolean options.
+         *
+         * @param optionName Name of option.
+         * @return This builder with the set option.
+         */
         public BareCommandBuilder setOption(String optionName) {
             this.options.put(optionName, null);
             return this;
         }
 
+        /**
+         * Sets an option in the command to be built. Typically used for key-value options.
+         *
+         * @param optionName  Name of option.
+         * @param optionValue Value of option.
+         * @return This builder with the set option.
+         */
         public BareCommandBuilder setOption(String optionName, String optionValue) {
             this.options.put(optionName, optionValue);
             return this;
