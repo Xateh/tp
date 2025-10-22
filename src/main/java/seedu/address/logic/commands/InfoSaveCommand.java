@@ -15,19 +15,19 @@ import seedu.address.model.person.Person;
 
 /**
  * Saves the edited information for a person.
+ * This command is created directly by the UI, not through command parsing.
  */
 public class InfoSaveCommand extends Command {
 
-    public static final String COMMAND_WORD = "infosave";
     public static final String MESSAGE_SUCCESS = "Saved info for Person: %1$s";
 
     private final Index index;
     private final Info info;
 
     /**
-     * Constructor for internal save command
-     * @param index is Index of contact
-     * @param info is the specified information associated to the contact
+     * Constructor for direct injection from UI
+     * @param index Index of contact
+     * @param info The information to save
      */
     public InfoSaveCommand(Index index, Info info) {
         this.index = index;
@@ -58,21 +58,12 @@ public class InfoSaveCommand extends Command {
         return new CommandResult(String.format(MESSAGE_SUCCESS, Messages.format(editedPerson)));
     }
 
-    public Index getIndex() {
-        return index;
-    }
-
-    public Info getInfo() {
-        return info;
-    }
-
     @Override
     public boolean equals(Object other) {
         if (other == this) {
             return true;
         }
 
-        // instanceof handles nulls
         if (!(other instanceof InfoSaveCommand)) {
             return false;
         }
