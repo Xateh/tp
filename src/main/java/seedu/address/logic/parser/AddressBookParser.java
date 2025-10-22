@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -14,8 +15,12 @@ import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.UntagCommand;
+import seedu.address.logic.commands.decoder.Decoder;
+import seedu.address.logic.commands.exceptions.ResolutionException;
 import seedu.address.logic.commands.exceptions.ValidationException;
-import seedu.address.logic.commands.extractors.FieldCommandExtractor;
+import seedu.address.logic.grammars.command.BareCommand;
+import seedu.address.logic.grammars.command.lexer.LexerException;
+import seedu.address.logic.grammars.command.parser.ParserException;
 import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
@@ -72,13 +77,15 @@ public class AddressBookParser {
 
         default:
             try {
-                return FieldCommandExtractor.decode(userInput);
+                return Decoder.decode(BareCommand.parse(userInput));
             } catch (ValidationException e) {
                 throw new ParseException(e.getMessage(), e);
-            } catch (ParseException e) {
-                logger.finer("This user input caused a ParseException: " + userInput);
-                throw e;
+            } catch (LexerException | ParserException | ResolutionException e) {
+                System.out.println(e.getMessage());
             }
+
+            logger.finer("This user input caused a ParseException: " + userInput);
+            throw new ParseException(MESSAGE_UNKNOWN_COMMAND);
         }
     }
 
