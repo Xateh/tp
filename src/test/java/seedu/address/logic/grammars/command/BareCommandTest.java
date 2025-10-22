@@ -85,8 +85,20 @@ public class BareCommandTest {
     }
 
     @Test
+    public void parse_commandWithRepeatedBooleanOptions_success() {
+        String cmdString = "complex /opt /opt";
+
+        BareCommand cmd = assertDoesNotThrow(() -> BareCommand.parse(cmdString));
+
+        assertTrue(cmd.hasOption("opt"));
+        assertTrue(cmd.getOptionValue("opt").isEmpty());
+        assertFalse(cmd.hasOption("nonopt"));
+        assertTrue(cmd.getOptionValue("nonopt").isEmpty());
+    }
+
+    @Test
     public void parse_complexCommand_success() {
-        String cmdString = "complex param0 param1 /opt1:\"long value\" /opt2:\"single\"/ opt3";
+        String cmdString = "complex param0 param1 /opt1:\"long value\" /opt2:\"single\"/ opt3 /opt3";
 
         BareCommand cmd = assertDoesNotThrow(() -> BareCommand.parse(cmdString));
 
@@ -99,6 +111,8 @@ public class BareCommandTest {
         assertTrue(cmd.getOptionValue("opt2").isPresent());
         assertEquals("single", cmd.getOptionValue("opt2").get());
         assertTrue(cmd.hasOption("opt3"));
+        assertTrue(cmd.getOptionValue("opt3").isEmpty());
         assertFalse(cmd.hasOption("opt4"));
+        assertTrue(cmd.getOptionValue("opt4").isEmpty());
     }
 }
