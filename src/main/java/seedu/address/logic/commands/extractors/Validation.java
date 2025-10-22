@@ -12,10 +12,11 @@ public class Validation {
     public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
 
-    private Validation() {}
+    private Validation() {
+    }
 
     /**
-     * Validate the {@code Index} input field type for commands.
+     * Validates the {@code Index} input field type for commands.
      *
      * @param input String to validate.
      * @return {@code Index} after validation.

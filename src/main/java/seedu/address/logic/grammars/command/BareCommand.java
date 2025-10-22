@@ -132,8 +132,7 @@ public class BareCommand {
      * specified.
      *
      * @param key The option key to look for.
-     * @return An {@code Optional} containing a {@code List} of all the values associated with the given key, if they
-     *         exist.
+     * @return An {@code Optional} containing a {@code List} of all the values associated with the given key.
      */
     public Optional<List<String>> getOptionAllValues(String key) {
         requireNonNull(key);
@@ -156,6 +155,25 @@ public class BareCommand {
     public boolean hasOption(String key) {
         requireNonNull(key);
         return this.options.containsKey(key);
+    }
+
+    /**
+     * Returns the multiplicity of the option. The multiplicity of an option is the number of values specified together
+     * with the option, or -1 if it was never specified as both a boolean and a key-value option.
+     *
+     * @param key The option key to look for.
+     * @return The multiplicity of the option.
+     */
+    public int getOptionMultiplicity(String key) {
+        requireNonNull(key);
+
+        List<String> values = this.options.get(key);
+
+        if (values == null) {
+            return -1;
+        } else {
+            return values.size();
+        }
     }
 
     /*
