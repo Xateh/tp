@@ -1,9 +1,12 @@
 package seedu.address.logic.grammars.command;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import seedu.address.logic.grammars.command.lexer.CommandLexer;
 import seedu.address.logic.grammars.command.lexer.LexerException;
@@ -14,14 +17,14 @@ import seedu.address.logic.grammars.command.parser.ast.AstNode;
 import seedu.address.logic.grammars.command.parser.ast.visitors.CommandExtractor;
 
 /**
- * Command class that stores the various command tokens in an easily-queryable manner.
+ * Command class that stores the various command tokens in an easily-queryable manner. Immutable class.
  */
 public class BareCommand {
     private final String imperative;
     private final String[] parameters;
-    private final Map<String, String> options;
+    private final Map<String, List<String>> options;
 
-    private BareCommand(String imperative, String[] parameters, Map<String, String> options) {
+    private BareCommand(String imperative, String[] parameters, Map<String, List<String>> options) {
         this.imperative = imperative;
         this.parameters = parameters;
         this.options = options;
@@ -33,7 +36,7 @@ public class BareCommand {
     public static class BareCommandBuilder {
         private String imperative;
         private final ArrayList<String> parameters = new ArrayList<>();
-        private final Map<String, String> options = new LinkedHashMap<>();
+        private final HashMap<String, ArrayList<String>> options = new HashMap<>();
 
         public BareCommandBuilder() {
         }
@@ -46,12 +49,18 @@ public class BareCommand {
             this.parameters.add(parameter);
         }
 
-        public void setOption(String optionName) {
-            this.options.put(optionName, null);
+        public void setOption(String optionKey) {
+            if (!this.options.containsKey(optionKey)) {
+                this.options.put(optionKey, new ArrayList<>());
+            }
         }
 
-        public void setOption(String optionName, String optionValue) {
-            this.options.put(optionName, optionValue);
+        public void setOption(String optionKey, String optionValue) {
+            if (!this.options.containsKey(optionKey)) {
+                this.options.put(optionKey, new ArrayList<>());
+            }
+
+            this.options.get(optionKey).add(optionValue);
         }
 
         /**
@@ -62,9 +71,11 @@ public class BareCommand {
         public BareCommand build() {
             String imperative = this.imperative;
             String[] parameters = this.parameters.toArray(String[]::new);
-            // Allows nulls (for flag-style options), but prevents external mutation
-            Map<String, String> options =
-                Collections.unmodifiableMap(new LinkedHashMap<>(this.options));
+            Map<String, List<String>> options = new HashMap<>();
+            for (Map.Entry<String, ArrayList<String>> option : this.options.entrySet()) {
+                options.put(option.getKey(), option.getValue().stream().toList());
+            }
+
             return new BareCommand(imperative, parameters, options);
         }
     }
@@ -96,29 +107,79 @@ public class BareCommand {
     }
 
     /**
-     * Returns the value associated with the key, if provided as an option.
+     * Returns an {@code Optional} containing the value associated with the key, if provided as an option. If the option
+     * was specified multiple times, this returns the first specified option value. For this to return a nonempty
+     * Optional, the option must have been specified at least once with a value.
      *
      * @param key The option key to look for.
-     * @return The value associated with the given key, or returns null if the key was not specified.
+     * @return An {@code Optional} containing the first value associated with the given key if it exists.
      */
-    public String getOptionValue(String key) {
-        return this.options.get(key);
+    public Optional<String> getOptionValue(String key) {
+        requireNonNull(key);
+
+        List<String> values = this.options.get(key);
+        if (values == null || values.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(values.get(0));
     }
 
     /**
-     * Returns whether the key was defined as an option; typically used for boolean flags.
+     * Returns an {@code Optional} containing all values associated with the key, if provided as an option. Callers must
+     * be prepared to accept any number (including 0) of values, if the option was defined. For this to return a
+     * nonempty Optional, the option must have been specified at least once, regardless of the number of values
+     * specified.
+     *
+     * @param key The option key to look for.
+     * @return An {@code Optional} containing a {@code List} of all the values associated with the given key.
+     */
+    public Optional<List<String>> getOptionAllValues(String key) {
+        requireNonNull(key);
+
+        List<String> values = this.options.get(key);
+        if (values == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(values);
+    }
+
+    /**
+     * Returns whether the key was defined as an option; typically used for boolean flags. For this to return true, the
+     * option must have been specified at least once, regardless of the number of values specified.
      *
      * @param key The option key to look for.
      * @return True if the option key was specified/defined, else returns false.
      */
     public boolean hasOption(String key) {
+        requireNonNull(key);
         return this.options.containsKey(key);
+    }
+
+    /**
+     * Returns the multiplicity of the option. The multiplicity of an option is the number of values specified together
+     * with the option, or -1 if it was never specified as both a boolean and a key-value option.
+     *
+     * @param key The option key to look for.
+     * @return The multiplicity of the option.
+     */
+    public int getOptionMultiplicity(String key) {
+        requireNonNull(key);
+
+        List<String> values = this.options.get(key);
+
+        if (values == null) {
+            return -1;
+        } else {
+            return values.size();
+        }
     }
 
     /*
      * Returns a read-only view of all option key→value pairs.
      */
-    public Map<String, String> getAllOptions() {
+    public Map<String, List<String>> getAllOptions() {
         return this.options;
     }
 }
