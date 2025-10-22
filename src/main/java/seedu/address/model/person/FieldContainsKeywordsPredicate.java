@@ -28,11 +28,6 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
         this(keywords, true, true, true, true, true, Set.of());
     }
 
-    /** Returns the keywords used by this predicate. */
-    public List<String> getKeywords() {
-        return List.copyOf(keywords);
-    }
-
     /**
      * Constructs a {@code FieldContainsKeywordsPredicate} with specified search field flags.
      * <p>
@@ -62,6 +57,11 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
         this.searchAddress = searchAddress;
         this.searchTag = searchTag;
         this.customKeys = customKeys;
+    }
+
+    /** Returns the keywords used by this predicate. */
+    public List<String> getKeywords() {
+        return List.copyOf(keywords);
     }
 
     /**
