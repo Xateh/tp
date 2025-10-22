@@ -9,23 +9,33 @@ import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
+import seedu.address.ui.UiManager;
 
 /**
  * Opens the information editor for a person identified by the index number used in the displayed person list.
  */
 public class InfoEditCommand extends Command {
 
-    public static final String COMMAND_WORD = "infoedit";
+    public static final String COMMAND_WORD = "info";
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Edits the info of the person identified by the index number.\n"
             + "Parameters: INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 1";
-    public static final String MESSAGE_INFO_EDIT_SUCCESS = "Editing info for Person: %1$s";
+    public static final String MESSAGE_INFO_EDIT_SUCCESS = "Opening info editor for Person: %1$s";
 
+    private static UiManager uiManager; // Static reference to UiManager
     private final Index targetIndex;
 
     public InfoEditCommand(Index targetIndex) {
         this.targetIndex = targetIndex;
+    }
+
+    /**
+     * Sets the UiManager instance for this command to use.
+     * This should be called during application initialization.
+     */
+    public static void setUiManager(UiManager uiManager) {
+        InfoEditCommand.uiManager = uiManager;
     }
 
     @Override
@@ -39,8 +49,14 @@ public class InfoEditCommand extends Command {
 
         Person personToEdit = lastShownList.get(targetIndex.getZeroBased());
 
-        // Return CommandResult that triggers the info editor
-        return new CommandResult(String.format(MESSAGE_INFO_EDIT_SUCCESS, Messages.format(personToEdit)), personToEdit);
+        // Call UiManager directly to show the info editor
+        if (uiManager != null) {
+            uiManager.showInfoEditor(personToEdit, targetIndex.getZeroBased());
+        } else {
+            throw new CommandException("UI Manager not initialized. Cannot open info editor.");
+        }
+
+        return new CommandResult(String.format(MESSAGE_INFO_EDIT_SUCCESS, Messages.format(personToEdit)));
     }
 
     @Override

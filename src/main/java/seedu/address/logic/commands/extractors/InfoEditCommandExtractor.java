@@ -12,7 +12,6 @@ public class InfoEditCommandExtractor {
     public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
     public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
-    public static final String MESSAGE_TOO_MANY_PARAMETERS = "Too many parameters provided for infoedit command.";
 
     private InfoEditCommandExtractor() {}
 
@@ -30,9 +29,7 @@ public class InfoEditCommandExtractor {
             throw new ValidationException(MESSAGE_INDEX_UNSPECIFIED);
         }
 
-        if (params.length > 1) {
-            throw new ValidationException(MESSAGE_TOO_MANY_PARAMETERS);
-        }
+        // Removed excess parameter check - excess parameters are ignored per specification
 
         Index index;
         try {
