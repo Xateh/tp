@@ -85,24 +85,29 @@ public class BareCommand {
         public BareCommandBuilder() {
         }
 
-        public void setImperative(String imperative) {
+        public BareCommandBuilder setImperative(String imperative) {
             this.imperative = imperative;
+            return this;
         }
 
-        public void addParameter(Parameter.ParameterKind parameterKind, String parameterValue) {
+        public BareCommandBuilder addParameter(Parameter.ParameterKind parameterKind, String parameterValue) {
             this.parameters.add(new Parameter(parameterKind, parameterValue));
+            return this;
         }
 
-        public void addParameter(String parameterValue) {
+        public BareCommandBuilder addParameter(String parameterValue) {
             this.addParameter(Parameter.ParameterKind.NORMAL, parameterValue);
+            return this;
         }
 
-        public void setOption(String optionName) {
+        public BareCommandBuilder setOption(String optionName) {
             this.options.put(optionName, null);
+            return this;
         }
 
-        public void setOption(String optionName, String optionValue) {
+        public BareCommandBuilder setOption(String optionName, String optionValue) {
             this.options.put(optionName, optionValue);
+            return this;
         }
 
         /**
