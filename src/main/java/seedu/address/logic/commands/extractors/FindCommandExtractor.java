@@ -16,6 +16,10 @@ import seedu.address.model.person.FieldContainsKeywordsPredicate;
  * Extractor that builds {@code FindCommand}s.
  */
 public final class FindCommandExtractor {
+
+    public static final String MESSAGE_KEYWORD_UNSPECIFIED =
+            "Please provide at least one keyword. Example: find alice /name";
+
     private FindCommandExtractor() {
     }
 
@@ -39,7 +43,7 @@ public final class FindCommandExtractor {
         boolean optAddress = bareCommand.hasOption("address");
         boolean optTag = bareCommand.hasOption("tag");
         List<String> keysToRemove = List.of("name", "phone", "email", "address", "tags", "tag");
-        Map<String, String> map = bareCommand.getAllOptions();
+        Map<String, List<String>> map = bareCommand.getAllOptions();
         Set<String> customKeys = map.keySet().stream()
                 .map(k -> k != null ? k.trim().toLowerCase() : "")
                 .filter(k -> !keysToRemove.contains(k))

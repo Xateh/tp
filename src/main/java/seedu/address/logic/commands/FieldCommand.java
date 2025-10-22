@@ -41,9 +41,9 @@ public class FieldCommand extends Command {
         }
         // Collect /key:value options
         Map<String, String> tmp = new LinkedHashMap<>();
-        for (Map.Entry<String, String> entry : c.getAllOptions().entrySet()) {
+        for (Map.Entry<String, List<String>> entry : c.getAllOptions().entrySet()) {
             String k = entry.getKey();
-            String v = entry.getValue();
+            String v = entry.getValue().get(0);
             if (v != null) {
                 tmp.put(k, v);
             }

@@ -20,6 +20,7 @@ public class TagCommandExtractor {
     // Messages for extraction
     public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
+    public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
     public static final String MESSAGE_TAGS_UNSPECIFIED = "At least one tag must be specified.";
 
     private TagCommandExtractor() {
@@ -34,17 +35,7 @@ public class TagCommandExtractor {
      */
     public static TagCommand extract(BareCommand bareCommand) throws ValidationException {
         // extract index
-        String param0 = Validation.validateParameter(bareCommand, 0, ParameterKind.NORMAL).getValue();
-        Index index;
-        try {
-            index = Index.fromOneBased(Integer.parseInt(param0));
-        } catch (NumberFormatException e) {
-            // only thrown by Integer::parseInt
-            throw new ValidationException(String.format(MESSAGE_INDEX_FAILED_TO_PARSE, param0));
-        } catch (IndexOutOfBoundsException e) {
-            // only thrown by Index::fromOneBased
-            throw new ValidationException(String.format(MESSAGE_INDEX_OUT_OF_RANGE, param0));
-        }
+        Index index = Validation.validateIndex(bareCommand, 0);
 
         // extract tags
         Set<Tag> tags = new HashSet<>();

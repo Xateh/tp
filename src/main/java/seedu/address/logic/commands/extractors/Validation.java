@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.grammars.command.BareCommand;
 
@@ -26,6 +27,8 @@ public class Validation {
                     + "index %2$s, got %3$s.";
     public static final String MESSAGE_INCORRECT_PARAMETER_KIND =
             "Unexpected parameter kind at index $1%s: expected one of $2%s, got $3%s.";
+    public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
+    public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
 
     private Validation() {
     }
@@ -121,4 +124,39 @@ public class Validation {
         return parameters;
     }
 
+    /**
+     * Validates the {@code Index} input field type for commands.
+     *
+     * @param input String to validate.
+     * @return {@code Index} after validation.
+     * @throws ValidationException When the input fails to validate.
+     */
+    public static Index validateIndex(String input) throws ValidationException {
+        requireNonNull(input);
+        Index index;
+        try {
+            index = Index.fromOneBased(Integer.parseInt(input));
+        } catch (NumberFormatException e) {
+            // only thrown by Integer::parseInt
+            throw new ValidationException(String.format(MESSAGE_INDEX_FAILED_TO_PARSE, input));
+        } catch (IndexOutOfBoundsException e) {
+            // only thrown by Index::fromOneBased
+            throw new ValidationException(String.format(MESSAGE_INDEX_OUT_OF_RANGE, input));
+        }
+        return index;
+    }
+
+    /**
+     * Validates the {@code Index} input field type for commands.
+     *
+     * @param bareCommand BareCommand to extract parameter from.
+     * @param position    Position from which to retrieve index.
+     * @return {@code Index} after validation.
+     * @throws ValidationException When the input fails to validate.
+     */
+    public static Index validateIndex(BareCommand bareCommand, int position) throws ValidationException {
+        requireNonNull(bareCommand);
+        return Validation.validateIndex(
+                Validation.validateParameter(bareCommand, 0, ParameterKind.NORMAL).getValue());
+    }
 }
