@@ -130,7 +130,8 @@ public class BareCommandTest {
 
     @Test
     public void parse_complexCommand_success() {
-        String cmdString = "complex param0 +param1 -param2 /opt1:\"long value\" /opt2:\"single\"/ opt3 /opt3 /opt2:another /opt4 /opt4:value";
+        String cmdString = "complex param0 +param1 -param2 /opt1:\"long value\" /opt2:\"single\"/ opt3 /opt3 "
+                + "/opt2:another /opt4 /opt4:value";
 
         BareCommand cmd = assertDoesNotThrow(() -> BareCommand.parse(cmdString));
 

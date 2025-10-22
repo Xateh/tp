@@ -1,5 +1,6 @@
 package seedu.address.logic.commands.extractors;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static seedu.address.logic.grammars.command.BareCommand.Parameter;
@@ -11,6 +12,7 @@ import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.logic.grammars.command.BareCommand.BareCommandBuilder;
@@ -357,6 +359,54 @@ public class ValidationTest {
             // Exception comes from the inner validateVariableParameters call
             assertEquals(String.format(Validation.MESSAGE_INCORRECT_PARAMETER_KIND,
                     1, Arrays.toString(new ParameterKind[]{NORMAL}), ADDITIVE), e.getMessage());
+        }
+    }
+
+    @Nested
+    class ValidateIndexTests {
+        @Test
+        public void validateIndex_validIndex_success() throws ValidationException {
+            BareCommand cmd = new BareCommandBuilder()
+                    .setImperative("command")
+                    .addParameter("1")
+                    .build();
+            Index expected = Index.fromOneBased(1);
+
+            Index index = assertDoesNotThrow(() -> Validation.validateIndex(cmd, 0));
+            assertEquals(expected, index);
+        }
+
+        @Test
+        public void validateIndex_largeValidIndex_success() throws ValidationException {
+            BareCommand cmd = new BareCommandBuilder()
+                    .setImperative("command")
+                    .addParameter("100")
+                    .build();
+            Index expected = Index.fromOneBased(100);
+
+            Index index = assertDoesNotThrow(() -> Validation.validateIndex(cmd, 0));
+            assertEquals(expected, index);
+        }
+
+
+        @Test
+        public void validateIndex_invalidIndexOutOfRange_throwsException() {
+            BareCommand cmd = new BareCommandBuilder()
+                    .setImperative("command")
+                    .addParameter("0")
+                    .build();
+
+            assertThrows(ValidationException.class, () -> Validation.validateIndex(cmd, 0));
+        }
+
+        @Test
+        public void validateIndex_invalidIndexNotAnInteger_throwsException() {
+            BareCommand cmd = new BareCommandBuilder()
+                    .setImperative("command")
+                    .addParameter("as")
+                    .build();
+
+            assertThrows(ValidationException.class, () -> Validation.validateIndex(cmd, 0));
         }
     }
 }
