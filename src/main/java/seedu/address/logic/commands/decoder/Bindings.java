@@ -10,6 +10,7 @@ import seedu.address.logic.commands.extractors.DeleteCommandExtractor;
 import seedu.address.logic.commands.extractors.EditCommandExtractor;
 import seedu.address.logic.commands.extractors.FieldCommandExtractor;
 import seedu.address.logic.commands.extractors.FindCommandExtractor;
+import seedu.address.logic.commands.extractors.HistoryCommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
 
 /**
@@ -17,10 +18,11 @@ import seedu.address.logic.commands.extractors.TagCommandExtractor;
  */
 public enum Bindings {
     FIELD("field", FieldCommandExtractor::extract),
-    TAG("tag", TagCommandExtractor::extract),
     FIND("find", FindCommandExtractor::extract),
     DELETE("delete", DeleteCommandExtractor::extract),
-    EDIT("edit", EditCommandExtractor::extract);
+    EDIT("edit", EditCommandExtractor::extract),
+    TAG("tag", TagCommandExtractor::extract),
+    HISTORY("history", HistoryCommandExtractor::extract);
 
     private static final String MESSAGE_NO_MATCHING_BINDING = "Unable to find a valid matching command.";
     private static final String MESSAGE_AMBIGUOUS_BINDING = "Resolved command is ambiguous.";

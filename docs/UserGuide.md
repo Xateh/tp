@@ -133,6 +133,22 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
+### Viewing command history : `history`
+Displays the list of commands previously entered.
+
+Format: `history`
+
+Examples:
+* `history` — displays a numbered list of past commands in the format `N. COMMAND_TEXT` (oldest first).
+
+  Example output:
+
+  ```
+  1. add n/John Doe p/98765432
+  2. list
+  3. delete 2
+  ```
+
 ### Editing a person : `edit`
 
 Edits an existing person in the address book.
@@ -307,6 +323,31 @@ At start-up AssetSphere loads the most recent valid snapshot so that the app ope
 
 AddressBook data are saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
 
+Caution:
+
+- Do not edit the JSON file while the application is running. If the file becomes malformed, the app may discard the data or fail to load it correctly.
+
+### Finding the command history file
+Command history data are saved automatically as a JSON file `[JAR file location]/data/commandhistory.json`. Advanced users are welcome to update data directly by editing that data file.
+
+The file is in JSON format and contains an array of recorded commands. Example structure:
+
+  ```json
+  {
+    "commandhistory": {
+      "commands": [
+        "add n/John Doe p/98765432",
+        "list",
+        "delete 2"
+      ]
+    }
+  }
+  ```
+
+Caution:
+
+- Do not edit the JSON file while the application is running. If the file becomes malformed, the app may discard the history or fail to load it correctly.
+
 <box type="warning" seamless>
 
 **Caution:**
@@ -347,6 +388,7 @@ Action     | Format, Examples
 **View Info** | `infoview INDEX` <br> e.g., `infoview 2`
 **Field**  | `field INDEX /KEY:VALUE` <br> e.g., `field 2 /company:"BlackRock"`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**History** | `history`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Clear**  | `clear`
 **Exit**  | `exit`  

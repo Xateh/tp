@@ -10,6 +10,7 @@ import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.history.CommandHistory;
 import seedu.address.session.SessionData;
 
 /**
@@ -20,15 +21,17 @@ public class StorageManager implements Storage {
     private static final Logger logger = LogsCenter.getLogger(StorageManager.class);
     private final AddressBookStorage addressBookStorage;
     private final UserPrefsStorage userPrefsStorage;
+    private final CommandHistoryStorage commandHistoryStorage;
     private final SessionStorage sessionStorage;
 
     /**
-     * Creates a {@code StorageManager} with the given {@code AddressBookStorage} and {@code UserPrefStorage}.
+     * Creates a {@code StorageManager} with the given storages.
      */
     public StorageManager(AddressBookStorage addressBookStorage, UserPrefsStorage userPrefsStorage,
-            SessionStorage sessionStorage) {
+            CommandHistoryStorage commandHistoryStorage, SessionStorage sessionStorage) {
         this.addressBookStorage = addressBookStorage;
         this.userPrefsStorage = userPrefsStorage;
+        this.commandHistoryStorage = commandHistoryStorage;
         this.sessionStorage = sessionStorage;
     }
 
@@ -77,6 +80,26 @@ public class StorageManager implements Storage {
     public void saveAddressBook(ReadOnlyAddressBook addressBook, Path filePath) throws IOException {
         logger.fine("Attempting to write to data file: " + filePath);
         addressBookStorage.saveAddressBook(addressBook, filePath);
+    }
+
+    // ================ CommandHistory methods ==========================
+
+    @Override
+    public Path getCommandHistoryFilePath() {
+        return commandHistoryStorage.getCommandHistoryFilePath();
+    }
+
+    @Override
+    public Optional<CommandHistory> readCommandHistory()
+            throws DataLoadingException {
+        logger.fine("Attempting to read command history from file: " + getCommandHistoryFilePath());
+        return commandHistoryStorage.readCommandHistory();
+    }
+
+    @Override
+    public void saveCommandHistory(CommandHistory commandHistory) throws IOException {
+        logger.fine("Attempting to write command history to data file: " + getCommandHistoryFilePath());
+        commandHistoryStorage.saveCommandHistory(commandHistory);
     }
 
     // ================ Session methods ==============================
