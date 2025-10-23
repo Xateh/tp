@@ -19,41 +19,41 @@ public class InfoEditCommandExtractorTest {
     public void parse_validArgs_returnsInfoEditCommand() throws LexerException, ParserException, ValidationException {
         // valid index
         assertEquals(new InfoEditCommand(INDEX_FIRST_PERSON),
-                InfoEditCommandExtractor.extract(BareCommand.parse("infoedit 1")));
+                InfoEditCommandExtractor.extract(BareCommand.parse("info 1")));
 
         assertEquals(new InfoEditCommand(INDEX_SECOND_PERSON),
-                InfoEditCommandExtractor.extract(BareCommand.parse("infoedit 2")));
+                InfoEditCommandExtractor.extract(BareCommand.parse("info 2")));
 
         // larger index
         assertEquals(new InfoEditCommand(INDEX_FIRST_PERSON.fromOneBased(10)),
-                InfoEditCommandExtractor.extract(BareCommand.parse("infoedit 10")));
+                InfoEditCommandExtractor.extract(BareCommand.parse("info 10")));
     }
 
     @Test
     public void parse_invalidArgs_throwsValidationException() throws LexerException, ParserException {
         // no parameters
         assertThrows(ValidationException.class, () ->
-                InfoEditCommandExtractor.extract(BareCommand.parse("infoedit")));
+                InfoEditCommandExtractor.extract(BareCommand.parse("info")));
 
         // invalid index
         assertThrows(ValidationException.class, () ->
-                InfoEditCommandExtractor.extract(BareCommand.parse("infoedit 0")));
-        assertThrows(LexerException.class, () ->
-                InfoEditCommandExtractor.extract(BareCommand.parse("infoedit -1")));
+                InfoEditCommandExtractor.extract(BareCommand.parse("info 0")));
         assertThrows(ValidationException.class, () ->
-                InfoEditCommandExtractor.extract(BareCommand.parse("infoedit a")));
+                InfoEditCommandExtractor.extract(BareCommand.parse("info -1")));
         assertThrows(ValidationException.class, () ->
-                InfoEditCommandExtractor.extract(BareCommand.parse("infoedit abc")));
+                InfoEditCommandExtractor.extract(BareCommand.parse("info a")));
+        assertThrows(ValidationException.class, () ->
+                InfoEditCommandExtractor.extract(BareCommand.parse("info abc")));
 
         // too many parameters
         assertThrows(ValidationException.class, () ->
-                InfoEditCommandExtractor.extract(BareCommand.parse("infoedit 1 extra")));
+                InfoEditCommandExtractor.extract(BareCommand.parse("info 1 extra")));
     }
 
     @Test
     public void parse_leadingTrailingWhitespace_success() throws LexerException, ParserException, ValidationException {
         // should handle whitespace gracefully
         assertEquals(new InfoEditCommand(INDEX_FIRST_PERSON),
-                InfoEditCommandExtractor.extract(BareCommand.parse("infoedit   1   ")));
+                InfoEditCommandExtractor.extract(BareCommand.parse("info   1   ")));
     }
 }
