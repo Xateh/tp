@@ -3,10 +3,12 @@ package seedu.address.logic.grammars.command;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import seedu.address.logic.grammars.command.lexer.CommandLexer;
 import seedu.address.logic.grammars.command.lexer.LexerException;
@@ -285,10 +287,22 @@ public class BareCommand {
         }
     }
 
+    /**
+     * Returns a list of specified option keys that do not fall into some prespecified list of options. Used to retrieve
+     * variable options.
+     *
+     * @param ignoreKeys Option keys to ignore.
+     * @return List of specified option keys that are not ignored.
+     */
+    public List<String> getVariableOptionKeys(String... ignoreKeys) {
+        Set<String> ignoreSet = Set.of(ignoreKeys);
+        return this.options.keySet().stream().filter(key -> !ignoreSet.contains(key)).toList();
+    }
+
     /*
      * Returns a read-only view of all option key→value pairs.
      */
     public Map<String, List<String>> getAllOptions() {
-        return this.options;
+        return Collections.unmodifiableMap(options);
     }
 }
