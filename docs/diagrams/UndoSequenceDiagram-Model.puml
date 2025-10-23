@@ -3,8 +3,8 @@
 skinparam ArrowFontStyle plain
 
 box Model MODEL_COLOR_T1
-participant ":Model" as Model MODEL_COLOR
-participant ":VersionedAddressBook" as VersionedAddressBook MODEL_COLOR
+participant "m:Model" as Model MODEL_COLOR
+participant "vab:VersionedAddressBook" as VersionedAddressBook MODEL_COLOR
 end box
 
 [-> Model : undoAddressBook()

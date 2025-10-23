@@ -10,6 +10,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.person.Person;
+import seedu.address.session.SessionData;
 
 /**
  * API of the Logic component
@@ -53,4 +54,9 @@ public interface Logic {
      * Returns the model for direct command execution.
      */
     Model getModel();
+
+    /**
+     * Returns a snapshot of the current session data for persistence.
+     */
+    SessionData getCurrentSessionData();
 }

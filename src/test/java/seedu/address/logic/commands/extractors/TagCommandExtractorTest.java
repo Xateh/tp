@@ -17,7 +17,7 @@ import seedu.address.model.tag.Tag;
 
 public class TagCommandExtractorTest {
     @Test
-    public void parse_validArgs_returnsTagCommand() throws LexerException, ParserException, ValidationException {
+    public void extract_validArgs_returnsTagCommand() throws LexerException, ParserException, ValidationException {
         // single tag
         Set<Tag> expectedSingleTag = Set.of(new Tag("friend"));
         assertEquals(new TagCommand(INDEX_FIRST_PERSON, expectedSingleTag),
@@ -30,7 +30,7 @@ public class TagCommandExtractorTest {
     }
 
     @Test
-    public void parse_invalidArgs_throwsParseException() throws LexerException, ParserException, ValidationException {
+    public void extract_invalidArgs_throwsException() throws LexerException, ParserException, ValidationException {
         // no index
         assertThrows(ValidationException.class, () ->
                 TagCommandExtractor.extract(BareCommand.parse("tag")));
@@ -49,7 +49,7 @@ public class TagCommandExtractorTest {
     }
 
     @Test
-    public void parse_duplicateTags_removedAutomatically() throws LexerException, ParserException, ValidationException {
+    public void extract_duplicateTags_removed() throws LexerException, ParserException, ValidationException {
         // duplicate tags should be handled by Set automatically
         Set<Tag> expectedTags = Set.of(new Tag("friend"));
         assertEquals(new TagCommand(INDEX_FIRST_PERSON, expectedTags),

@@ -20,6 +20,8 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Person;
 import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonCommandHistoryStorage;
+import seedu.address.storage.JsonSessionStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
 import seedu.address.testutil.PersonBuilder;
@@ -37,10 +39,14 @@ class LogicManagerFieldCommandTest {
     void executeField_succeedsAndSaves() throws Exception {
         Path abPath = temp.resolve("ab.json");
         Path prefsPath = temp.resolve("prefs.json");
+        Path historyPath = temp.resolve("history.json");
+        Path sessionDir = temp.resolve("sessions");
 
         StorageManager storage = new StorageManager(
                 new JsonAddressBookStorage(abPath),
-                new JsonUserPrefsStorage(prefsPath));
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(historyPath),
+                new JsonSessionStorage(sessionDir));
 
         Model model = baseModelWithOnePerson();
         Logic logic = new LogicManager(model, storage);
@@ -59,6 +65,8 @@ class LogicManagerFieldCommandTest {
         StorageManager throwing = new SaveThrowingStorage(
                 temp.resolve("ab.json"),
                 temp.resolve("prefs.json"),
+                temp.resolve("history.json"),
+                temp.resolve("sessions"),
                 new AccessDeniedException("denied"));
 
         Model model = baseModelWithOnePerson();
@@ -74,6 +82,8 @@ class LogicManagerFieldCommandTest {
         StorageManager throwing = new SaveThrowingStorage(
                 temp.resolve("ab.json"),
                 temp.resolve("prefs.json"),
+                temp.resolve("history.json"),
+                temp.resolve("sessions"),
                 new IOException("io"));
 
         Model model = baseModelWithOnePerson();
@@ -88,10 +98,14 @@ class LogicManagerFieldCommandTest {
     void executeMalformedFieldFallsThroughToLegacyParser() throws Exception {
         Path abPath = temp.resolve("ab.json");
         Path prefsPath = temp.resolve("prefs.json");
+        Path historyPath = temp.resolve("history.json");
+        Path sessionDir = temp.resolve("sessions");
 
         StorageManager storage = new StorageManager(
                 new JsonAddressBookStorage(abPath),
-                new JsonUserPrefsStorage(prefsPath));
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(historyPath),
+                new JsonSessionStorage(sessionDir));
         Model model = baseModelWithOnePerson();
         Logic logic = new LogicManager(model, storage);
 
@@ -115,8 +129,11 @@ class LogicManagerFieldCommandTest {
     private static final class SaveThrowingStorage extends StorageManager {
         private final IOException toThrow;
 
-        SaveThrowingStorage(Path abPath, Path prefsPath, IOException toThrow) {
-            super(new JsonAddressBookStorage(abPath), new JsonUserPrefsStorage(prefsPath));
+        SaveThrowingStorage(Path abPath, Path prefsPath, Path historyPath, Path sessionDir, IOException toThrow) {
+            super(new JsonAddressBookStorage(abPath),
+                    new JsonUserPrefsStorage(prefsPath),
+                    new JsonCommandHistoryStorage(historyPath),
+                    new JsonSessionStorage(sessionDir));
             this.toThrow = toThrow;
         }
 

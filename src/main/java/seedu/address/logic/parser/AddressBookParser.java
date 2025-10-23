@@ -11,10 +11,7 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
-import seedu.address.logic.commands.DeleteCommand;
-import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ExitCommand;
-import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.UntagCommand;
@@ -63,17 +60,8 @@ public class AddressBookParser {
         case AddCommand.COMMAND_WORD:
             return new AddCommandParser().parse(arguments);
 
-        case EditCommand.COMMAND_WORD:
-            return new EditCommandParser().parse(arguments);
-
-        case DeleteCommand.COMMAND_WORD:
-            return new DeleteCommandParser().parse(arguments);
-
         case ClearCommand.COMMAND_WORD:
             return new ClearCommand();
-
-        case FindCommand.COMMAND_WORD:
-            return new FindCommandParser().parse(arguments);
 
         case ListCommand.COMMAND_WORD:
             return new ListCommand();
@@ -90,7 +78,9 @@ public class AddressBookParser {
         default:
             try {
                 return Decoder.decode(BareCommand.parse(userInput));
-            } catch (LexerException | ParserException | ValidationException | ResolutionException e) {
+            } catch (ValidationException e) {
+                throw new ParseException(e.getMessage(), e);
+            } catch (LexerException | ParserException | ResolutionException e) {
                 System.out.println(e.getMessage());
             }
 

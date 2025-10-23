@@ -3,8 +3,8 @@
 skinparam ArrowFontStyle plain
 
 box Logic LOGIC_COLOR_T1
-participant ":LogicManager" as LogicManager LOGIC_COLOR
-participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant "lm:LogicManager" as LogicManager LOGIC_COLOR
+participant "abp:AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant "u:UndoCommand" as UndoCommand LOGIC_COLOR
 end box
 

@@ -16,19 +16,16 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.ClearCommand;
-import seedu.address.logic.commands.DeleteCommand;
-import seedu.address.logic.commands.EditCommand;
-import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
+import seedu.address.logic.commands.HistoryCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.TagCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.FieldContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
 import seedu.address.model.tag.Tag;
-import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
 import seedu.address.testutil.PersonUtil;
 
@@ -47,22 +44,6 @@ public class AddressBookParserTest {
     public void parseCommand_clear() throws Exception {
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD) instanceof ClearCommand);
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD + " 3") instanceof ClearCommand);
-    }
-
-    @Test
-    public void parseCommand_delete() throws Exception {
-        DeleteCommand command = (DeleteCommand) parser.parseCommand(
-                DeleteCommand.COMMAND_WORD + " " + INDEX_FIRST_PERSON.getOneBased());
-        assertEquals(new DeleteCommand(INDEX_FIRST_PERSON), command);
-    }
-
-    @Test
-    public void parseCommand_edit() throws Exception {
-        Person person = new PersonBuilder().build();
-        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(person).build();
-        EditCommand command = (EditCommand) parser.parseCommand(EditCommand.COMMAND_WORD + " "
-                + INDEX_FIRST_PERSON.getOneBased() + " " + PersonUtil.getEditPersonDescriptorDetails(descriptor));
-        assertEquals(new EditCommand(INDEX_FIRST_PERSON, descriptor), command);
     }
 
     @Test
@@ -86,6 +67,12 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_history() throws Exception {
+        assertTrue(parser.parseCommand(HistoryCommand.COMMAND_WORD) instanceof HistoryCommand);
+        assertTrue(parser.parseCommand(HistoryCommand.COMMAND_WORD + "   ") instanceof HistoryCommand);
+    }
+
+    @Test
     public void parseCommand_list() throws Exception {
         assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD) instanceof ListCommand);
         assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD + " 3") instanceof ListCommand);
@@ -102,7 +89,7 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_unrecognisedInput_throwsParseException() {
         assertThrows(ParseException.class, String.format(MESSAGE_INVALID_COMMAND_FORMAT, HelpCommand.MESSAGE_USAGE), ()
-            -> parser.parseCommand(""));
+                -> parser.parseCommand(""));
     }
 
     @Test

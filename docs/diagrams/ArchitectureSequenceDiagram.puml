@@ -3,7 +3,7 @@
 skinparam ArrowFontStyle plain
 
 Actor User as user USER_COLOR
-Participant ":UI" as ui UI_COLOR
+Participant "ui:UI" as ui UI_COLOR
 Participant ":Logic" as logic LOGIC_COLOR
 Participant ":Model" as model MODEL_COLOR
 Participant ":Storage" as storage STORAGE_COLOR
@@ -27,8 +27,13 @@ storage -[STORAGE_COLOR]> storage : Save to file
 activate storage STORAGE_COLOR_T1
 storage --[STORAGE_COLOR]> storage
 deactivate storage
-
 storage --[STORAGE_COLOR]> logic
+deactivate storage
+
+note over logic,storage: At shutdown, Logic requests session snapshot
+logic -[LOGIC_COLOR]> storage : saveSession(sessionData)
+activate storage STORAGE_COLOR
+storage -[STORAGE_COLOR]> storage : Save session file
 deactivate storage
 
 logic --[LOGIC_COLOR]> ui
