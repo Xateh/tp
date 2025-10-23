@@ -17,6 +17,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.history.CommandHistory;
 import seedu.address.session.SessionCommand;
 import seedu.address.session.SessionData;
 
@@ -29,10 +30,16 @@ public class StorageManagerTest {
 
     @BeforeEach
     public void setUp() {
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(getTempFilePath("ab"));
-        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(getTempFilePath("prefs"));
-        JsonSessionStorage sessionStorage = new JsonSessionStorage(getTempFilePath("sessions"));
-        storageManager = new StorageManager(addressBookStorage, userPrefsStorage, sessionStorage);
+        JsonAddressBookStorage addressBookStorage =
+                new JsonAddressBookStorage(getTempFilePath("ab"));
+        JsonUserPrefsStorage userPrefsStorage =
+                new JsonUserPrefsStorage(getTempFilePath("prefs"));
+        JsonCommandHistoryStorage commandHistoryStorage =
+                new JsonCommandHistoryStorage(getTempFilePath("history"));
+        JsonSessionStorage sessionStorage =
+                new JsonSessionStorage(getTempFilePath("sessions"));
+        storageManager = new StorageManager(addressBookStorage, userPrefsStorage,
+                commandHistoryStorage, sessionStorage);
     }
 
     private Path getTempFilePath(String fileName) {
@@ -69,6 +76,21 @@ public class StorageManagerTest {
     @Test
     public void getAddressBookFilePath() {
         assertNotNull(storageManager.getAddressBookFilePath());
+    }
+
+    @Test
+    public void getCommandHistoryFilePath() {
+        assertNotNull(storageManager.getCommandHistoryFilePath());
+    }
+
+    @Test
+    public void commandHistoryReadSave() throws Exception {
+        CommandHistory original = new CommandHistory();
+        original.add("list");
+        original.add("add n/Bob");
+        storageManager.saveCommandHistory(original);
+        CommandHistory retrieved = storageManager.readCommandHistory().get();
+        assertEquals(original, retrieved);
     }
 
     @Test

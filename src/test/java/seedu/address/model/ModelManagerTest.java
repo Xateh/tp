@@ -15,6 +15,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.history.CommandHistory;
 import seedu.address.model.person.FieldContainsKeywordsPredicate;
 import seedu.address.testutil.AddressBookBuilder;
 
@@ -94,6 +95,19 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void setCommandHistory_nullCommandHistory_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.setCommandHistory(null));
+    }
+
+    @Test
+    public void setCommandHistory_validCommandHistory_setsHistory() {
+        CommandHistory history = new CommandHistory();
+        history.add("list");
+        modelManager.setCommandHistory(history);
+        assertEquals(history, modelManager.getCommandHistory());
+    }
+
+    @Test
     public void equals() {
         AddressBook addressBook = new AddressBookBuilder().withPerson(ALICE).withPerson(BENSON).build();
         AddressBook differentAddressBook = new AddressBook();
@@ -128,5 +142,12 @@ public class ModelManagerTest {
         UserPrefs differentUserPrefs = new UserPrefs();
         differentUserPrefs.setAddressBookFilePath(Paths.get("differentFilePath"));
         assertFalse(modelManager.equals(new ModelManager(addressBook, differentUserPrefs)));
+
+        // different command history -> returns false
+        ModelManager withHistory = new ModelManager(addressBook, userPrefs);
+        CommandHistory history = new CommandHistory();
+        history.add("list");
+        withHistory.setCommandHistory(history);
+        assertFalse(modelManager.equals(withHistory));
     }
 }

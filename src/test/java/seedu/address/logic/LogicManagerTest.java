@@ -1,6 +1,7 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
@@ -22,8 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.HistoryCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -31,9 +34,11 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.history.CommandHistory;
 import seedu.address.model.person.Person;
 import seedu.address.session.SessionData;
 import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonCommandHistoryStorage;
 import seedu.address.storage.JsonSessionStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
@@ -55,8 +60,11 @@ public class LogicManagerTest {
                 new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
         JsonUserPrefsStorage userPrefsStorage =
                 new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
+        JsonCommandHistoryStorage commandHistoryStorage =
+                new JsonCommandHistoryStorage(temporaryFolder.resolve("commandHistory.json"));
         JsonSessionStorage sessionStorage = new JsonSessionStorage(temporaryFolder.resolve("sessions"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage, sessionStorage);
+        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage,
+                commandHistoryStorage, sessionStorage);
         logic = new LogicManager(model, storage);
     }
 
@@ -79,6 +87,15 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_historyCommand_displaysRecordedCommands() throws Exception {
+        logic.execute(ListCommand.COMMAND_WORD);
+        CommandResult result = logic.execute(HistoryCommand.COMMAND_WORD);
+        String expectedHistory = String.format("1. %s", ListCommand.COMMAND_WORD);
+        assertEquals(String.format(HistoryCommand.MESSAGE_SUCCESS, expectedHistory),
+                result.getFeedbackToUser());
+    }
+
+    @Test
     public void execute_storageThrowsIoException_throwsCommandException() {
         assertCommandFailureForExceptionFromStorage(DUMMY_IO_EXCEPTION, String.format(
                 LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()));
@@ -91,8 +108,111 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_commandHistorySaveIoException_throwsCommandException() {
+        Path abPath = temporaryFolder.resolve("historyFailAb.json");
+        Path prefsPath = temporaryFolder.resolve("historyFailPrefs.json");
+        Path historyPath = temporaryFolder.resolve("historyFailHistory.json");
+        Path sessionDir = temporaryFolder.resolve("historyFailSessions");
+
+        StorageManager storage = new StorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(historyPath),
+                new JsonSessionStorage(sessionDir)) {
+            @Override
+            public void saveCommandHistory(seedu.address.model.history.CommandHistory commandHistory)
+                    throws IOException {
+                throw DUMMY_IO_EXCEPTION;
+            }
+        };
+
+        logic = new LogicManager(model, storage);
+
+        assertCommandFailure(ListCommand.COMMAND_WORD, CommandException.class,
+                String.format(LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()),
+                new ModelManager(model.getAddressBook(), new UserPrefs()));
+    }
+
+    @Test
+    public void execute_commandHistorySaveAccessDenied_throwsCommandException() {
+        Path abPath = temporaryFolder.resolve("historyDeniedAb.json");
+        Path prefsPath = temporaryFolder.resolve("historyDeniedPrefs.json");
+        Path historyPath = temporaryFolder.resolve("historyDeniedHistory.json");
+        Path sessionDir = temporaryFolder.resolve("historyDeniedSessions");
+        AccessDeniedException denied = new AccessDeniedException(historyPath.toString());
+
+        StorageManager storage = new StorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(historyPath),
+                new JsonSessionStorage(sessionDir)) {
+            @Override
+            public void saveCommandHistory(seedu.address.model.history.CommandHistory commandHistory)
+                    throws IOException {
+                throw denied;
+            }
+        };
+
+        logic = new LogicManager(model, storage);
+
+        assertCommandFailure(ListCommand.COMMAND_WORD, CommandException.class,
+                String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, historyPath),
+                new ModelManager(model.getAddressBook(), new UserPrefs()));
+    }
+
+    @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void constructor_existingCommandHistory_populatesModelHistory() throws Exception {
+        Path abPath = temporaryFolder.resolve("existingHistoryAb.json");
+        Path prefsPath = temporaryFolder.resolve("existingHistoryPrefs.json");
+        Path historyPath = temporaryFolder.resolve("existingHistoryHistory.json");
+        Path sessionDir = temporaryFolder.resolve("existingHistorySessions");
+
+        CommandHistory storedHistory = new CommandHistory(List.of("list", "find Alice"));
+
+        StorageManager storage = new StorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(historyPath),
+                new JsonSessionStorage(sessionDir)) {
+            @Override
+            public Optional<CommandHistory> readCommandHistory() {
+                return Optional.of(storedHistory);
+            }
+        };
+
+        Model testModel = new ModelManager();
+        new LogicManager(testModel, storage);
+
+        assertEquals(storedHistory.getEntries(), testModel.getCommandHistory().getEntries());
+    }
+
+    @Test
+    public void constructor_commandHistoryLoadFailure_initialisesEmptyHistory() throws Exception {
+        Path abPath = temporaryFolder.resolve("loadFailureAb.json");
+        Path prefsPath = temporaryFolder.resolve("loadFailurePrefs.json");
+        Path historyPath = temporaryFolder.resolve("loadFailureHistory.json");
+        Path sessionDir = temporaryFolder.resolve("loadFailureSessions");
+
+        StorageManager storage = new StorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(historyPath),
+                new JsonSessionStorage(sessionDir)) {
+            @Override
+            public Optional<CommandHistory> readCommandHistory() throws DataLoadingException {
+                throw new DataLoadingException(DUMMY_IO_EXCEPTION);
+            }
+        };
+
+        Model testModel = new ModelManager();
+        new LogicManager(testModel, storage);
+
+        assertTrue(testModel.getCommandHistory().isEmpty());
     }
 
     /**
@@ -106,6 +226,7 @@ public class LogicManagerTest {
             Model expectedModel) throws CommandException, ParseException {
         CommandResult result = logic.execute(inputCommand);
         assertEquals(expectedMessage, result.getFeedbackToUser());
+        syncCommandHistory(expectedModel, model);
         assertEquals(expectedModel, model);
     }
 
@@ -145,6 +266,7 @@ public class LogicManagerTest {
     private void assertCommandFailure(String inputCommand, Class<? extends Throwable> expectedException,
             String expectedMessage, Model expectedModel) {
         assertThrows(expectedException, expectedMessage, () -> logic.execute(inputCommand));
+        syncCommandHistory(expectedModel, model);
         assertEquals(expectedModel, model);
     }
 
@@ -155,10 +277,10 @@ public class LogicManagerTest {
      * @param expectedMessage the message expected inside exception thrown by the Logic component
      */
     private void assertCommandFailureForExceptionFromStorage(IOException e, String expectedMessage) {
-        Path prefPath = temporaryFolder.resolve("ExceptionUserPrefs.json");
+        Path addressBookPath = temporaryFolder.resolve("ExceptionAddressBook.json");
 
         // Inject LogicManager with an AddressBookStorage that throws the IOException e when saving
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(prefPath) {
+        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(addressBookPath) {
             @Override
             public void saveAddressBook(ReadOnlyAddressBook addressBook, Path filePath)
                     throws IOException {
@@ -168,8 +290,12 @@ public class LogicManagerTest {
 
         JsonUserPrefsStorage userPrefsStorage =
                 new JsonUserPrefsStorage(temporaryFolder.resolve("ExceptionUserPrefs.json"));
-        JsonSessionStorage sessionStorage = new JsonSessionStorage(temporaryFolder.resolve("sessions"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage, sessionStorage);
+        JsonCommandHistoryStorage commandHistoryStorage =
+                new JsonCommandHistoryStorage(temporaryFolder.resolve("ExceptionCommandHistory.json"));
+        JsonSessionStorage sessionStorage =
+                new JsonSessionStorage(temporaryFolder.resolve("ExceptionSessions"));
+        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage,
+                commandHistoryStorage, sessionStorage);
 
         logic = new LogicManager(model, storage);
 
@@ -180,6 +306,11 @@ public class LogicManagerTest {
         ModelManager expectedModel = new ModelManager();
         expectedModel.addPerson(expectedPerson);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
+    }
+
+    private void syncCommandHistory(Model expectedModel, Model actualModel) {
+        CommandHistory historySnapshot = new CommandHistory(actualModel.getCommandHistory().getEntries());
+        expectedModel.setCommandHistory(historySnapshot);
     }
 
     @Test
@@ -211,8 +342,11 @@ public class LogicManagerTest {
                 new JsonAddressBookStorage(temporaryFolder.resolve("restoreAddressBook.json"));
         JsonUserPrefsStorage userPrefsStorage =
                 new JsonUserPrefsStorage(temporaryFolder.resolve("restorePrefs.json"));
+        JsonCommandHistoryStorage commandHistoryStorage =
+                new JsonCommandHistoryStorage(temporaryFolder.resolve("restoreHistory.json"));
         JsonSessionStorage sessionStorage = new JsonSessionStorage(temporaryFolder.resolve("restoreSessions"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage, sessionStorage);
+        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage,
+                commandHistoryStorage, sessionStorage);
 
         SessionData previousSession = new SessionData(
                 Instant.parse("2025-10-14T00:00:00Z"),
