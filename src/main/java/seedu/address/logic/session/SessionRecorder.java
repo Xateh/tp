@@ -11,6 +11,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.session.SessionCommand;
 import seedu.address.session.SessionData;
 
@@ -57,8 +58,8 @@ public class SessionRecorder {
     }
 
     /** Creates an immutable snapshot of the current session state. */
-    public SessionData buildSnapshot(Path addressBookPath, GuiSettings guiSettings) {
+    public SessionData buildSnapshot(Path addressBookPath, ReadOnlyAddressBook addressBook, GuiSettings guiSettings) {
         return new SessionData(Instant.now(), addressBookPath,
-                searchKeywords, commandHistory, guiSettings);
+                addressBook, searchKeywords, commandHistory, guiSettings);
     }
 }

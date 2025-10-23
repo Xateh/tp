@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.exceptions.IllegalValueException;
+import seedu.address.model.AddressBook;
 import seedu.address.session.SessionCommand;
 import seedu.address.session.SessionData;
 
@@ -24,9 +25,11 @@ class JsonSerializableSession {
 
     private static final String MESSAGE_MISSING_FIELD = "Session file is missing the '%s' field.";
 
+    @SuppressWarnings("unused")
     private final String formatVersion;
     private final String savedAt;
     private final String addressBookPath;
+    private final JsonSerializableAddressBook addressBook;
     private final List<String> searchKeywords;
     private final List<JsonSessionCommand> commandHistory;
     private final JsonGuiSettings guiSettings;
@@ -35,12 +38,14 @@ class JsonSerializableSession {
     JsonSerializableSession(@JsonProperty("formatVersion") String formatVersion,
             @JsonProperty("savedAt") String savedAt,
             @JsonProperty("addressBookPath") String addressBookPath,
+            @JsonProperty("addressBook") JsonSerializableAddressBook addressBook,
             @JsonProperty("searchKeywords") List<String> searchKeywords,
             @JsonProperty("commandHistory") List<JsonSessionCommand> commandHistory,
             @JsonProperty("guiSettings") JsonGuiSettings guiSettings) {
         this.formatVersion = formatVersion;
         this.savedAt = savedAt;
         this.addressBookPath = addressBookPath;
+        this.addressBook = addressBook;
         this.searchKeywords = searchKeywords != null ? new ArrayList<>(searchKeywords) : new ArrayList<>();
         this.commandHistory = commandHistory != null ? new ArrayList<>(commandHistory) : new ArrayList<>();
         this.guiSettings = guiSettings;
@@ -50,6 +55,7 @@ class JsonSerializableSession {
         this.formatVersion = source.getFormatVersion();
         this.savedAt = source.getSavedAt().toString();
         this.addressBookPath = source.getAddressBookPath().toString();
+        this.addressBook = new JsonSerializableAddressBook(source.getAddressBook());
         this.searchKeywords = new ArrayList<>(source.getSearchKeywords());
         this.commandHistory = source.getCommandHistory().stream()
                 .map(JsonSessionCommand::new)
@@ -66,6 +72,10 @@ class JsonSerializableSession {
             throw new IllegalValueException(String.format(MESSAGE_MISSING_FIELD, "addressBookPath"));
         }
 
+        if (addressBook == null) {
+            throw new IllegalValueException(String.format(MESSAGE_MISSING_FIELD, "addressBook"));
+        }
+
         if (guiSettings == null) {
             throw new IllegalValueException(String.format(MESSAGE_MISSING_FIELD, "guiSettings"));
         }
@@ -77,7 +87,8 @@ class JsonSerializableSession {
             throw new IllegalValueException("Invalid timestamp format for savedAt: " + savedAt);
         }
 
-        Path sessionAddressBookPath = Paths.get(addressBookPath);
+    Path sessionAddressBookPath = Paths.get(addressBookPath);
+    AddressBook modelAddressBook = addressBook.toModelType();
 
         List<SessionCommand> modelCommands = new ArrayList<>();
         for (JsonSessionCommand command : commandHistory) {
@@ -86,7 +97,8 @@ class JsonSerializableSession {
 
         GuiSettings modelGuiSettings = guiSettings.toModelType();
 
-        return new SessionData(parsedSavedAt, sessionAddressBookPath, searchKeywords, modelCommands, modelGuiSettings);
+        return new SessionData(parsedSavedAt, sessionAddressBookPath, modelAddressBook,
+                searchKeywords, modelCommands, modelGuiSettings);
     }
 
     private static class JsonSessionCommand {

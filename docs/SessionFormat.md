@@ -1,6 +1,6 @@
 # Session Save Format
 
-This document specifies a JSON-based format for persisting an AddressBook session. A *session* captures the transient state that is normally lost when the application exits, such as command history, the most recent search filter, and the last window layout. The information is complementary to the existing `addressbook.json` data file and `preferences.json` user preferences file.
+This document specifies a JSON-based format for persisting an AddressBook session. A *session* captures the transient state that is normally lost when the application exits, such as command history, the most recent search filter, and the last window layout. The information is complementary to the existing `addressbook.json` data file and `data/preferences.json` user preferences file.
 
 ## File Location and Naming
 

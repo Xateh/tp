@@ -76,12 +76,14 @@ public class StorageManagerTest {
         SessionData olderSession = new SessionData(
                 Instant.parse("2025-10-14T00:00:00Z"),
                 storageManager.getAddressBookFilePath(),
+        getTypicalAddressBook(),
                 List.of("Alice"),
                 List.of(new SessionCommand(Instant.parse("2025-10-14T00:00:00Z"), "list")),
                 new GuiSettings());
         SessionData newerSession = new SessionData(
                 Instant.parse("2025-10-15T00:00:00Z"),
                 storageManager.getAddressBookFilePath(),
+        getTypicalAddressBook(),
                 List.of("Bob"),
                 List.of(new SessionCommand(Instant.parse("2025-10-15T00:00:00Z"), "find Bob")),
                 new GuiSettings());
@@ -92,6 +94,7 @@ public class StorageManagerTest {
         SessionData retrieved = storageManager.readSession().get();
         assertEquals(newerSession.getSavedAt(), retrieved.getSavedAt());
         assertEquals(newerSession.getSearchKeywords(), retrieved.getSearchKeywords());
+        assertEquals(newerSession.getAddressBook(), retrieved.getAddressBook());
 
         long fileCount;
         try (var stream = Files.list(storageManager.getSessionDirectory())) {

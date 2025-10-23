@@ -1,7 +1,9 @@
 package seedu.address;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -125,9 +127,8 @@ public class MainApp extends Application {
      */
     protected Config initConfig(Path configFilePath) {
         Config initializedConfig;
-        Path configFilePathUsed;
-
-        configFilePathUsed = Config.DEFAULT_CONFIG_FILE;
+        Path configFilePathUsed = Config.DEFAULT_CONFIG_FILE;
+        boolean usingDefaultLocation = configFilePath == null;
 
         if (configFilePath != null) {
             logger.info("Custom Config file specified " + configFilePath);
@@ -136,21 +137,39 @@ public class MainApp extends Application {
 
         logger.info("Using config file : " + configFilePathUsed);
 
+        Optional<Config> configOptional = Optional.empty();
         try {
-            Optional<Config> configOptional = ConfigUtil.readConfig(configFilePathUsed);
-            if (!configOptional.isPresent()) {
-                logger.info("Creating new config file " + configFilePathUsed);
-            }
-            initializedConfig = configOptional.orElse(new Config());
+            configOptional = ConfigUtil.readConfig(configFilePathUsed);
         } catch (DataLoadingException e) {
             logger.warning("Config file at " + configFilePathUsed + " could not be loaded."
                     + " Using default config properties.");
-            initializedConfig = new Config();
         }
 
-        //Update config file in case it was missing to begin with or there are new/unused fields
+        Path legacyConfigPath = Paths.get("config.json");
+        boolean loadedFromLegacyPath = false;
+        if (usingDefaultLocation && !configOptional.isPresent() && Files.exists(legacyConfigPath)) {
+            logger.info("Found legacy config file at " + legacyConfigPath + ". Migrating to " + configFilePathUsed);
+            try {
+                configOptional = ConfigUtil.readConfig(legacyConfigPath);
+                loadedFromLegacyPath = configOptional.isPresent();
+            } catch (DataLoadingException legacyException) {
+                logger.warning("Legacy config file at " + legacyConfigPath + " could not be loaded."
+                        + " Using default config properties.");
+            }
+        }
+
+        if (!configOptional.isPresent()) {
+            logger.info("Creating new config file " + configFilePathUsed);
+        }
+
+        initializedConfig = configOptional.orElse(new Config());
+        applyDataDirectoryDefaults(initializedConfig);
+
         try {
             ConfigUtil.saveConfig(initializedConfig, configFilePathUsed);
+            if (loadedFromLegacyPath && usingDefaultLocation) {
+                logger.info("Saved migrated config to " + configFilePathUsed);
+            }
         } catch (IOException e) {
             logger.warning("Failed to save config file : " + StringUtil.getDetails(e));
         }
@@ -169,6 +188,13 @@ public class MainApp extends Application {
         UserPrefs initializedPrefs;
         try {
             Optional<UserPrefs> prefsOptional = storage.readUserPrefs();
+            if (!prefsOptional.isPresent()
+                    && prefsFilePath.equals(Paths.get("data", "preferences.json"))
+                    && Files.exists(Paths.get("preferences.json"))) {
+                logger.info("Found legacy preferences file at preferences.json. Migrating to " + prefsFilePath);
+                JsonUserPrefsStorage legacyStorage = new JsonUserPrefsStorage(Paths.get("preferences.json"));
+                prefsOptional = legacyStorage.readUserPrefs();
+            }
             if (!prefsOptional.isPresent()) {
                 logger.info("Creating new preference file " + prefsFilePath);
             }
@@ -207,6 +233,13 @@ public class MainApp extends Application {
             storage.saveSession(logic.getCurrentSessionData());
         } catch (IOException e) {
             logger.severe("Failed to save session " + StringUtil.getDetails(e));
+        }
+    }
+
+    private void applyDataDirectoryDefaults(Config config) {
+        Path prefsPath = config.getUserPrefsFilePath();
+        if (prefsPath == null || prefsPath.equals(Paths.get("preferences.json"))) {
+            config.setUserPrefsFilePath(Paths.get("data", "preferences.json"));
         }
     }
 }

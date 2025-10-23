@@ -88,6 +88,7 @@ public class JsonUtil {
         requireNonNull(filePath);
         requireNonNull(jsonFile);
 
+        FileUtil.createParentDirsOfFile(filePath);
         serializeObjectToJsonFile(filePath, jsonFile);
     }
 

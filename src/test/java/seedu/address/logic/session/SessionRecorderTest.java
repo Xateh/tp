@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.AddressBook;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListCommand;
@@ -30,7 +31,7 @@ public class SessionRecorderTest {
     @Test
     public void constructor_noArguments_createsEmptyRecorder() {
         SessionRecorder recorder = new SessionRecorder();
-        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
 
         assertTrue(snapshot.getCommandHistory().isEmpty());
         assertTrue(snapshot.getSearchKeywords().isEmpty());
@@ -39,7 +40,7 @@ public class SessionRecorderTest {
     @Test
     public void constructor_withEmptySession_createsEmptyRecorder() {
         SessionRecorder recorder = new SessionRecorder(Optional.empty());
-        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
 
         assertTrue(snapshot.getCommandHistory().isEmpty());
         assertTrue(snapshot.getSearchKeywords().isEmpty());
@@ -53,16 +54,17 @@ public class SessionRecorderTest {
                 new SessionCommand(Instant.parse("2024-01-01T10:05:00Z"), "list")
         );
         List<String> existingKeywords = Arrays.asList("alice", "bob");
-        SessionData existingSession = new SessionData(
-                Instant.parse("2024-01-01T10:10:00Z"),
-                DEFAULT_PATH,
-                existingKeywords,
-                existingHistory,
-                DEFAULT_GUI_SETTINGS
-        );
+    SessionData existingSession = new SessionData(
+        Instant.parse("2024-01-01T10:10:00Z"),
+        DEFAULT_PATH,
+        new AddressBook(),
+        existingKeywords,
+        existingHistory,
+        DEFAULT_GUI_SETTINGS
+    );
 
         SessionRecorder recorder = new SessionRecorder(Optional.of(existingSession));
-        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+    SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
 
         assertEquals(2, snapshot.getCommandHistory().size());
         assertEquals("add n/John", snapshot.getCommandHistory().get(0).getCommandText());
@@ -77,7 +79,7 @@ public class SessionRecorderTest {
 
         recorder.afterSuccessfulCommand("add n/John Doe", addCommand);
 
-        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
         assertEquals(1, snapshot.getCommandHistory().size());
         assertEquals("add n/John Doe", snapshot.getCommandHistory().get(0).getCommandText());
     }
@@ -92,7 +94,7 @@ public class SessionRecorderTest {
         recorder.afterSuccessfulCommand("list", listCommand);
         recorder.afterSuccessfulCommand("add n/Jane Doe", addCommand);
 
-        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
         assertEquals(3, snapshot.getCommandHistory().size());
         assertEquals("add n/John Doe", snapshot.getCommandHistory().get(0).getCommandText());
         assertEquals("list", snapshot.getCommandHistory().get(1).getCommandText());
@@ -107,7 +109,7 @@ public class SessionRecorderTest {
 
         recorder.afterSuccessfulCommand("find alice bob", findCommand);
 
-        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
         assertEquals(keywords, snapshot.getSearchKeywords());
         assertEquals(1, snapshot.getCommandHistory().size());
     }
@@ -122,14 +124,14 @@ public class SessionRecorderTest {
         recorder.afterSuccessfulCommand("find alice bob", findCommand);
 
         // Verify keywords are set
-        SessionData snapshot1 = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+        SessionData snapshot1 = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
         assertEquals(keywords, snapshot1.getSearchKeywords());
 
         // Now execute list command which should clear keywords
         ListCommand listCommand = new ListCommand();
         recorder.afterSuccessfulCommand("list", listCommand);
 
-        SessionData snapshot2 = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+        SessionData snapshot2 = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
         assertTrue(snapshot2.getSearchKeywords().isEmpty());
         assertEquals(2, snapshot2.getCommandHistory().size());
     }
@@ -146,7 +148,7 @@ public class SessionRecorderTest {
         FindCommand findCommand2 = new FindCommand(new FieldContainsKeywordsPredicate(keywords2));
         recorder.afterSuccessfulCommand("find bob charlie", findCommand2);
 
-        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+        SessionData snapshot = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
         assertEquals(keywords2, snapshot.getSearchKeywords());
         assertEquals(2, snapshot.getCommandHistory().size());
     }
@@ -160,7 +162,7 @@ public class SessionRecorderTest {
         Path customPath = Paths.get("custom", "path.json");
         GuiSettings customSettings = new GuiSettings(1024, 768, 100, 100);
 
-        SessionData snapshot = recorder.buildSnapshot(customPath, customSettings);
+        SessionData snapshot = recorder.buildSnapshot(customPath, new AddressBook(), customSettings);
 
         assertNotNull(snapshot.getSavedAt());
         assertEquals(customPath, snapshot.getAddressBookPath());
@@ -174,9 +176,9 @@ public class SessionRecorderTest {
         AddCommand addCommand = new AddCommand(new PersonBuilder().build());
         recorder.afterSuccessfulCommand("add n/John", addCommand);
 
-        SessionData snapshot1 = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+        SessionData snapshot1 = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
         Thread.sleep(10); // Small delay to ensure different timestamps
-        SessionData snapshot2 = recorder.buildSnapshot(DEFAULT_PATH, DEFAULT_GUI_SETTINGS);
+        SessionData snapshot2 = recorder.buildSnapshot(DEFAULT_PATH, new AddressBook(), DEFAULT_GUI_SETTINGS);
 
         // Timestamps should be different
         assertTrue(snapshot2.getSavedAt().isAfter(snapshot1.getSavedAt())

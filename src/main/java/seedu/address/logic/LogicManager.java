@@ -137,10 +137,11 @@ public class LogicManager implements Logic {
 
     @Override
     public SessionData getCurrentSessionData() {
-        return sessionRecorder.buildSnapshot(getAddressBookFilePath(), model.getGuiSettings());
+        return sessionRecorder.buildSnapshot(getAddressBookFilePath(), model.getAddressBook(), model.getGuiSettings());
     }
 
     private void restoreSessionState(SessionData sessionData) {
+        model.setAddressBook(sessionData.getAddressBook());
         if (!sessionData.getSearchKeywords().isEmpty()) {
             model.updateFilteredPersonList(new FieldContainsKeywordsPredicate(sessionData.getSearchKeywords()));
         }

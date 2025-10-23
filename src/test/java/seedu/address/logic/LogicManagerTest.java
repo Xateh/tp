@@ -217,6 +217,7 @@ public class LogicManagerTest {
         SessionData previousSession = new SessionData(
                 Instant.parse("2025-10-14T00:00:00Z"),
                 storage.getAddressBookFilePath(),
+        model.getAddressBook(),
                 List.of("Alice"),
                 List.of(),
                 new GuiSettings());

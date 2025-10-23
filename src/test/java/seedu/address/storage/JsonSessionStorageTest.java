@@ -18,8 +18,10 @@ import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.exceptions.DataLoadingException;
+import seedu.address.model.AddressBook;
 import seedu.address.session.SessionCommand;
 import seedu.address.session.SessionData;
+import seedu.address.testutil.PersonBuilder;
 
 class JsonSessionStorageTest {
 
@@ -56,6 +58,7 @@ class JsonSessionStorageTest {
         assertTrue(result.isPresent());
         assertEquals(newer.getSavedAt(), result.get().getSavedAt());
         assertEquals(List.of("Bob"), result.get().getSearchKeywords());
+        assertEquals("Bob", result.get().getAddressBook().getPersonList().get(0).getName().fullName);
     }
 
     @Test
@@ -75,6 +78,7 @@ class JsonSessionStorageTest {
 
         assertTrue(result.isPresent());
         assertEquals(List.of("Carl"), result.get().getSearchKeywords());
+        assertEquals("Carl", result.get().getAddressBook().getPersonList().get(0).getName().fullName);
     }
 
     @Test
@@ -123,9 +127,13 @@ class JsonSessionStorageTest {
 
     private SessionData createSessionData(Instant savedAt, List<String> keywords, String commandText) {
         Path addressBookPath = tempDir.resolve("addressBook.json");
+        AddressBook addressBook = new AddressBook();
+        if (!keywords.isEmpty()) {
+            addressBook.addPerson(new PersonBuilder().withName(keywords.get(0)).build());
+        }
         List<SessionCommand> commands = commandText == null
                 ? List.of()
                 : List.of(new SessionCommand(savedAt, commandText));
-        return new SessionData(savedAt, addressBookPath, keywords, commands, GUI_SETTINGS);
+        return new SessionData(savedAt, addressBookPath, addressBook, keywords, commands, GUI_SETTINGS);
     }
 }
