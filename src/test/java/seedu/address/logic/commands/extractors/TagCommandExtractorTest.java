@@ -41,8 +41,9 @@ public class TagCommandExtractorTest {
         // mixed tags
         Set<Tag> expectedMultipleAddedMixedTags = Set.of(new Tag("friend"), new Tag("colleague"));
         Set<Tag> expectedMultipleRemovedMixedTags = Set.of(new Tag("villain"), new Tag("enemy"));
-        assertEquals(new TagCommand(INDEX_FIRST_PERSON, expectedMultipleAddedMixedTags, expectedMultipleRemovedMixedTags),
-                TagCommandExtractor.extract(BareCommand.parse("tag 1 +friend -villain +colleague -enemy")));
+        assertEquals(new TagCommand(INDEX_FIRST_PERSON, expectedMultipleAddedMixedTags,
+                expectedMultipleRemovedMixedTags), TagCommandExtractor.extract(BareCommand.parse(
+                "tag 1 +friend -villain +colleague -enemy")));
     }
 
     @Test
@@ -67,7 +68,8 @@ public class TagCommandExtractorTest {
     @Test
     public void extract_invalidTags_throwsException() {
         // no tags supplied
-        assertThrows(ValidationException.class, () -> TagCommandExtractor.extract(BareCommand.parse("tag 1")));
+        assertThrows(ValidationException.class, () -> TagCommandExtractor.extract(
+                BareCommand.parse("tag 1")));
     }
 
     @Test
@@ -76,6 +78,7 @@ public class TagCommandExtractorTest {
         Set<Tag> expectedAddedTags = Set.of(new Tag("friend"));
         Set<Tag> expectedRemovedTags = Set.of(new Tag("enemy"));
         assertEquals(new TagCommand(INDEX_FIRST_PERSON, expectedAddedTags, expectedRemovedTags),
-                TagCommandExtractor.extract(BareCommand.parse("tag 1 -enemy +friend -enemy +friend +friend -enemy")));
+                TagCommandExtractor.extract(BareCommand.parse(
+                        "tag 1 -enemy +friend -enemy +friend +friend -enemy")));
     }
 }

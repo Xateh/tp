@@ -166,7 +166,8 @@ public class TagCommandTest {
         Set<Tag> addTags = Set.of(new Tag("tag1"));
         Set<Tag> subTags = Set.of(new Tag("tag2"));
         TagCommand tagCommand = new TagCommand(targetIndex, addTags, subTags);
-        String expected = TagCommand.class.getCanonicalName() + "{index=" + targetIndex + ", addTags=" + addTags + ", subTags=" + subTags + "}";
+        String expected = TagCommand.class.getCanonicalName() + "{index=" + targetIndex + ", addTags=" + addTags
+                + ", subTags=" + subTags + "}";
         assertEquals(expected, tagCommand.toString());
     }
 
