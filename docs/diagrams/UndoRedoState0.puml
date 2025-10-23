@@ -18,4 +18,7 @@ hide State3
 
 class Pointer as "Current State" #FFFFFF
 Pointer -up-> State1
+note right of Pointer
+    Indicates the head of the undo history.
+end note
 @end
