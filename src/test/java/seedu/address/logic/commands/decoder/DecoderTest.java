@@ -24,7 +24,7 @@ public class DecoderTest {
     @Test
     public void decode_tagCommandExactMatch_success() throws
             LexerException, ParserException, ResolutionException, ValidationException {
-        Command tagCommand = Decoder.decode(BareCommand.parse("tag 1 test1 test2"));
+        Command tagCommand = Decoder.decode(BareCommand.parse("tag 1 +test1 -test2"));
         assertEquals(TagCommand.class, tagCommand.getClass());
     }
 

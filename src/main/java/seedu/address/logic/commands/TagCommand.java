@@ -26,27 +26,28 @@ public class TagCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds tags to person identified "
             + "by the index number used in the displayed person list. "
             + "New tags will be added on top of existing tags.\n"
-            + "Parameters: INDEX (must be a positive integer) "
+            + "Parameters: index (must be a positive integer) "
             + "[TAG NAME]...\n"
             + "Example: " + COMMAND_WORD + " 1 beast friend";
 
-    public static final String MESSAGE_ADD_TAGS_SUCCESS = "Added tag to person: %1$s %2$s";
-    public static final String MESSAGE_NO_TAGS_PROVIDED = "At least one tag must be provided.";
-    public static final String MESSAGE_DUPLICATE_TAGS = "Some tags already exist for this person: %1$s";
+    public static final String MESSAGE_CHANGE_TAGS_SUCCESS = "Tags changed on person %1$s; added %2$s, removed %3$s";
 
     private final Index index;
-    private final Set<Tag> tagsToAdd;
+    private final Set<Tag> addTags;
+    private final Set<Tag> subTags;
 
     /**
-     * @param index of the person in the filtered person list to add tags
-     * @param tagsToAdd tags to add to the person
+     * @param index   of the person in the filtered person list to add tags
+     * @param addTags tags to add to the person
      */
-    public TagCommand(Index index, Set<Tag> tagsToAdd) {
+    public TagCommand(Index index, Set<Tag> addTags, Set<Tag> subTags) {
         requireNonNull(index);
-        requireNonNull(tagsToAdd);
+        requireNonNull(addTags);
+        requireNonNull(subTags);
 
         this.index = index;
-        this.tagsToAdd = new HashSet<>(tagsToAdd);
+        this.addTags = new HashSet<>(addTags);
+        this.subTags = new HashSet<>(subTags);
     }
 
     @Override
@@ -59,28 +60,33 @@ public class TagCommand extends Command {
         }
 
         Person personToEdit = lastShownList.get(index.getZeroBased());
-        Person editedPerson = createPersonWithAddedTags(personToEdit, tagsToAdd);
+        Person editedPerson = createPersonWithModifiedTags(personToEdit, addTags, subTags);
 
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
 
-        String tagsString = tagsToAdd.stream()
+        String addTagsString = addTags.stream()
+                .map(tag -> tag.tagName)
+                .reduce((t1, t2) -> t1 + ", " + t2)
+                .orElse("");
+        String removeTagsString = subTags.stream()
                 .map(tag -> tag.tagName)
                 .reduce((t1, t2) -> t1 + ", " + t2)
                 .orElse("");
 
-        return new CommandResult(String.format(MESSAGE_ADD_TAGS_SUCCESS,
-                Messages.format(editedPerson), tagsString));
+        return new CommandResult(String.format(MESSAGE_CHANGE_TAGS_SUCCESS,
+                Messages.format(editedPerson), addTagsString, removeTagsString));
     }
 
     /**
      * Creates and returns a Person with tags added.
      */
-    private static Person createPersonWithAddedTags(Person personToEdit, Set<Tag> tagsToAdd) {
+    private static Person createPersonWithModifiedTags(Person personToEdit, Set<Tag> tagsToAdd, Set<Tag> tagsToRemove) {
         assert personToEdit != null;
 
         Set<Tag> updatedTags = new HashSet<>(personToEdit.getTags());
         updatedTags.addAll(tagsToAdd);
+        updatedTags.removeAll(tagsToRemove);
 
         return new Person(personToEdit.getName(), personToEdit.getPhone(),
                 personToEdit.getEmail(), personToEdit.getAddress(), updatedTags);
@@ -92,25 +98,26 @@ public class TagCommand extends Command {
             return true;
         }
 
-        if (!(other instanceof TagCommand)) {
+        if (!(other instanceof TagCommand otherTagCommand)) {
             return false;
         }
 
-        TagCommand otherTagCommand = (TagCommand) other;
         return index.equals(otherTagCommand.index)
-                && tagsToAdd.equals(otherTagCommand.tagsToAdd);
+                && addTags.equals(otherTagCommand.addTags)
+                && subTags.equals(otherTagCommand.subTags);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(index, tagsToAdd);
+        return Objects.hash(index, addTags);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("index", index)
-                .add("tagsToAdd", tagsToAdd)
+                .add("addTags", addTags)
+                .add("subTags", subTags)
                 .toString();
     }
 }
