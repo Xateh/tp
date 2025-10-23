@@ -1,6 +1,7 @@
 package seedu.address.logic;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
@@ -8,6 +9,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.history.CommandHistory;
 import seedu.address.model.person.Person;
 import seedu.address.session.SessionData;
 
@@ -50,7 +52,17 @@ public interface Logic {
     void setGuiSettings(GuiSettings guiSettings);
 
     /**
-     * Returns a snapshot of the current session data for persistence.
+     * Returns a snapshot of the current session data if the address book has changed since the last save.
      */
-    SessionData getCurrentSessionData();
+    Optional<SessionData> getSessionSnapshotIfDirty();
+
+    /**
+     * Marks the current session snapshot as successfully persisted.
+     */
+    void markSessionSnapshotPersisted();
+
+    /**
+     * Returns the current command history snapshot for persistence.
+     */
+    CommandHistory getCommandHistorySnapshot();
 }

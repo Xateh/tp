@@ -2,7 +2,6 @@ package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -18,8 +17,9 @@ import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.exceptions.DataLoadingException;
-import seedu.address.session.SessionCommand;
+import seedu.address.model.AddressBook;
 import seedu.address.session.SessionData;
+import seedu.address.testutil.PersonBuilder;
 
 class JsonSessionStorageTest {
 
@@ -44,9 +44,13 @@ class JsonSessionStorageTest {
         JsonSessionStorage storage = new JsonSessionStorage(sessionDir);
 
         SessionData older = createSessionData(
-                Instant.parse("2025-10-14T00:00:00Z"), List.of("Alice"), "find Alice");
+                Instant.parse("2025-10-14T00:00:00Z"),
+                List.of("Alice"),
+                "Alice Tan");
         SessionData newer = createSessionData(
-                Instant.parse("2025-10-15T00:00:00Z"), List.of("Bob"), "find Bob");
+                Instant.parse("2025-10-15T00:00:00Z"),
+                List.of("Bob"),
+                "Bob Lee");
 
         storage.saveSession(older);
         storage.saveSession(newer);
@@ -68,7 +72,9 @@ class JsonSessionStorageTest {
         Files.writeString(invalidFile, "{\"savedAt\":null,\"formatVersion\":\"1.0\"}");
 
         SessionData valid = createSessionData(
-                Instant.parse("2025-10-16T00:00:00Z"), List.of("Carl"), "find Carl");
+                Instant.parse("2025-10-16T00:00:00Z"),
+                List.of("Carl"),
+                "Carl Chan");
         storage.saveSession(valid);
 
         Optional<SessionData> result = storage.readSession();
@@ -78,12 +84,27 @@ class JsonSessionStorageTest {
     }
 
     @Test
+    void readSession_skipsAllCorruptedFiles_returnsEmpty() throws Exception {
+        Path sessionDir = tempDir.resolve("sessions");
+        JsonSessionStorage storage = new JsonSessionStorage(sessionDir);
+
+        Files.createDirectories(sessionDir);
+        Files.writeString(sessionDir.resolve("session1.json"), "{ invalid json");
+        Files.writeString(sessionDir.resolve("session2.json"), "{ invalid json");
+
+        Optional<SessionData> result = storage.readSession();
+        assertFalse(result.isPresent());
+    }
+
+    @Test
     void saveSession_createsDirectoryAndFile() throws IOException {
         Path sessionDir = tempDir.resolve("nested").resolve("sessions");
         JsonSessionStorage storage = new JsonSessionStorage(sessionDir);
 
         storage.saveSession(createSessionData(
-                Instant.parse("2025-10-17T00:00:00Z"), List.of(), "list"));
+                Instant.parse("2025-10-17T00:00:00Z"),
+                List.of(),
+                null));
 
         assertTrue(Files.exists(sessionDir));
         long fileCount;
@@ -99,7 +120,9 @@ class JsonSessionStorageTest {
         JsonSessionStorage storage = new JsonSessionStorage(sessionDir);
 
         SessionData sessionData = createSessionData(
-                Instant.parse("2025-10-18T12:34:56Z"), List.of("Alice"), "find Alice");
+                Instant.parse("2025-10-18T12:34:56Z"),
+                List.of("Alice"),
+                "Alice Tan");
         storage.saveSession(sessionData);
 
         try (var stream = Files.list(sessionDir)) {
@@ -111,21 +134,22 @@ class JsonSessionStorageTest {
     }
 
     @Test
-    void readSession_corruptedJson_throwsDataLoadingException() throws IOException {
+    void readSession_corruptedJson_throwsDataLoadingException() throws DataLoadingException {
         Path sessionDir = tempDir.resolve("corrupted");
         JsonSessionStorage storage = new JsonSessionStorage(sessionDir);
-
-        Files.createDirectories(sessionDir);
-        Files.writeString(sessionDir.resolve("session-corrupt.json"), "{ invalid json");
-
-        assertThrows(DataLoadingException.class, storage::readSession);
+        try {
+            Files.createDirectories(sessionDir);
+            Files.writeString(sessionDir.resolve("session-corrupt.json"), "{ invalid json");
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
+        Optional<SessionData> result = storage.readSession();
+        assertFalse(result.isPresent());
     }
 
-    private SessionData createSessionData(Instant savedAt, List<String> keywords, String commandText) {
-        Path addressBookPath = tempDir.resolve("addressBook.json");
-        List<SessionCommand> commands = commandText == null
-                ? List.of()
-                : List.of(new SessionCommand(savedAt, commandText));
-        return new SessionData(savedAt, addressBookPath, keywords, commands, GUI_SETTINGS);
+    private SessionData createSessionData(Instant savedAt, List<String> keywords, String personName) {
+        AddressBook addressBook = new AddressBook();
+        addressBook.addPerson(new PersonBuilder().withName(personName == null ? "Default Person" : personName).build());
+        return new SessionData(savedAt, addressBook, keywords, GUI_SETTINGS);
     }
 }

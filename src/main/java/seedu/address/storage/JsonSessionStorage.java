@@ -57,8 +57,13 @@ public class JsonSessionStorage implements SessionStorage {
 
         SessionData latestSession = null;
         for (Path file : sessionFiles) {
-            Optional<JsonSerializableSession> jsonSession =
-                    JsonUtil.readJsonFile(file, JsonSerializableSession.class);
+            Optional<JsonSerializableSession> jsonSession = Optional.empty();
+            try {
+                jsonSession = JsonUtil.readJsonFile(file, JsonSerializableSession.class);
+            } catch (DataLoadingException e) {
+                logger.warning("Skipping corrupted session file (unreadable JSON) " + file + ": " + e.getMessage());
+                continue;
+            }
             if (!jsonSession.isPresent()) {
                 continue;
             }
@@ -68,7 +73,7 @@ public class JsonSessionStorage implements SessionStorage {
                     latestSession = candidate;
                 }
             } catch (Exception e) {
-                logger.warning("Skipping invalid session file " + file + ": " + e.getMessage());
+                logger.warning("Skipping invalid session file (bad data) " + file + ": " + e.getMessage());
             }
         }
 

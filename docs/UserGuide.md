@@ -319,6 +319,18 @@ In addition to the main address book file, AssetSphere writes a snapshot of your
 
 At start-up AssetSphere loads the most recent valid snapshot so that the app opens with the same filters and window placement you last used. You can safely delete older session files if you want to reclaim disk space; the app will automatically create a fresh snapshot the next time you close it.
 
+#### Notes for this release (fix/command-history)
+
+Behavior for end users remains unchanged by the recent internal refactor. The app still:
+* Restores the most recent valid session snapshot at startup (filters, window layout, and address book snapshot).
+* Persists a session JSON file on normal exit under the `sessions/` subdirectory next to your main data file.
+* Persists the command history to `data/commandhistory.json` on exit.
+
+If you observe unexpected behaviour around session restoration or command history persistence after updating to this version, please:
+1. Ensure the app can write to the directory where your data files live.
+2. Check the `data/sessions/` folder for session files. Corrupted or invalid session files are ignored at startup.
+3. If needed, remove problematic session files and restart the app — a new snapshot will be created when you exit.
+
 ### Editing the data file
 
 AddressBook data are saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
