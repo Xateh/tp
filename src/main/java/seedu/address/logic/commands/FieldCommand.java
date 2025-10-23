@@ -6,9 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
 
@@ -19,51 +19,40 @@ import seedu.address.model.person.Person;
 public class FieldCommand extends Command {
 
     public static final String COMMAND_WORD = "field";
-    private final int oneBasedIndex;
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Adds or updates custom fields for the person identified by the index number.\n"
+            + "Parameters: INDEX (must be a positive integer) /KEY:VALUE...\n"
+            + "Example: " + COMMAND_WORD + " 1 /company:\"Goldman Sachs\"";
+    public static final String MESSAGE_VALUE_CANNOT_BE_BLANK = "Field value cannot be blank.";
+    public static final String MESSAGE_NAME_CANNOT_BE_BLANK = "Field name cannot be blank.";
+    public static final String MESSAGE_AT_LEAST_ONE_PAIR =
+            "Provide at least one /key:value pair. Usage: field <index> /key:value ...";
+    private final Index index;
     private final Map<String, String> pairs;
 
     /**
-     * Creates a FieldCommand from a parsed {@link BareCommand}.
-     * @throws IllegalArgumentException if parameters/options are invalid.
+     * Creates a FieldCommand.
      */
-    public FieldCommand(BareCommand c) {
-        requireNonNull(c);
-        if (!"field".equalsIgnoreCase(c.getImperative())) {
-            throw new IllegalArgumentException("Wrong imperative for FieldCommand");
+    public FieldCommand(Index index, Map<String, String> pairs) {
+        requireNonNull(index);
+        requireNonNull(pairs);
+        if (pairs.isEmpty()) {
+            throw new IllegalArgumentException(MESSAGE_AT_LEAST_ONE_PAIR);
         }
-        // Parse index (1-based)
-        try {
-            this.oneBasedIndex = Integer.parseInt(c.getParameter(0).getValue());
-        } catch (ArrayIndexOutOfBoundsException ex0) {
-            throw new IllegalArgumentException("Missing index. Usage: field <index> /key:value ...", ex0);
-        } catch (NumberFormatException ex1) {
-            throw new IllegalArgumentException("Invalid index. Must be a positive integer.", ex1);
-        }
-        // Collect /key:value options
-        Map<String, String> tmp = new LinkedHashMap<>();
-        for (Map.Entry<String, List<String>> entry : c.getAllOptions().entrySet()) {
-            String k = entry.getKey();
-            String v = entry.getValue().get(0);
-            if (v != null) {
-                tmp.put(k, v);
+        Map<String, String> sanitized = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : pairs.entrySet()) {
+            String key = normalize(entry.getKey());
+            String value = normalize(entry.getValue());
+            if (key.isEmpty()) {
+                throw new IllegalArgumentException(MESSAGE_NAME_CANNOT_BE_BLANK);
             }
+            if (value.isEmpty()) {
+                throw new IllegalArgumentException(MESSAGE_VALUE_CANNOT_BE_BLANK);
+            }
+            sanitized.put(key, value);
         }
-        if (tmp.isEmpty()) {
-            throw new IllegalArgumentException(
-                "Provide at least one /key:value pair. Usage: field <index> /key:value ...");
-        }
-        this.pairs = tmp;
-    }
-
-    /**
-     * Convenience constructor used by tests.
-     */
-    public FieldCommand(int oneBasedIndex, Map<String, String> pairs) {
-        if (oneBasedIndex <= 0 || pairs == null || pairs.isEmpty()) {
-            throw new IllegalArgumentException("Index must be > 0 and at least one /key:value pair provided.");
-        }
-        this.oneBasedIndex = oneBasedIndex;
-        this.pairs = new LinkedHashMap<>(pairs);
+        this.index = index;
+        this.pairs = sanitized;
     }
 
     /**
@@ -73,7 +62,7 @@ public class FieldCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         List<Person> list = model.getFilteredPersonList();
-        int zero = oneBasedIndex - 1;
+        int zero = index.getZeroBased();
         if (zero < 0 || zero >= list.size()) {
             throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
@@ -82,10 +71,7 @@ public class FieldCommand extends Command {
         // Merge strategy: overwrite existing keys with new values, keep others.
         Map<String, String> merged = new LinkedHashMap<>(target.getCustomFields());
         for (Map.Entry<String, String> e : pairs.entrySet()) {
-            String k = normalizeKey(e.getKey());
-            String v = normalizeValue(e.getValue());
-            validate(k, v);
-            merged.put(k, v);
+            merged.put(e.getKey(), e.getValue());
         }
 
         Person edited = target.withCustomFields(merged);
@@ -106,22 +92,8 @@ public class FieldCommand extends Command {
         return new CommandResult(sb.toString());
     }
 
-    private static String normalizeKey(String key) {
-        return key == null ? "" : key.trim();
-    }
-
-    private static String normalizeValue(String value) {
-        return value == null ? "" : value.trim();
-    }
-
-    private static void validate(String key, String value) {
-        if (key.isEmpty()) {
-            throw new IllegalArgumentException("Field name cannot be blank.");
-        }
-        if (value.isEmpty()) {
-            throw new IllegalArgumentException("Field value cannot be blank.");
-        }
-        // Optional: add length constraints if CheckStyle/enforcer requires.
+    private static String normalize(String input) {
+        return input == null ? "" : input.trim();
     }
 }
 

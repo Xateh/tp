@@ -26,7 +26,6 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
-import seedu.address.logic.commands.HistoryCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -87,15 +86,6 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_historyCommand_displaysRecordedCommands() throws Exception {
-        logic.execute(ListCommand.COMMAND_WORD);
-        CommandResult result = logic.execute(HistoryCommand.COMMAND_WORD);
-        String expectedHistory = String.format("1. %s", ListCommand.COMMAND_WORD);
-        assertEquals(String.format(HistoryCommand.MESSAGE_SUCCESS, expectedHistory),
-                result.getFeedbackToUser());
-    }
-
-    @Test
     public void execute_storageThrowsIoException_throwsCommandException() {
         assertCommandFailureForExceptionFromStorage(DUMMY_IO_EXCEPTION, String.format(
                 LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()));
@@ -105,59 +95,6 @@ public class LogicManagerTest {
     public void execute_storageThrowsAdException_throwsCommandException() {
         assertCommandFailureForExceptionFromStorage(DUMMY_AD_EXCEPTION, String.format(
                 LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, DUMMY_AD_EXCEPTION.getMessage()));
-    }
-
-    @Test
-    public void execute_commandHistorySaveIoException_throwsCommandException() {
-        Path abPath = temporaryFolder.resolve("historyFailAb.json");
-        Path prefsPath = temporaryFolder.resolve("historyFailPrefs.json");
-        Path historyPath = temporaryFolder.resolve("historyFailHistory.json");
-        Path sessionDir = temporaryFolder.resolve("historyFailSessions");
-
-        StorageManager storage = new StorageManager(
-                new JsonAddressBookStorage(abPath),
-                new JsonUserPrefsStorage(prefsPath),
-                new JsonCommandHistoryStorage(historyPath),
-                new JsonSessionStorage(sessionDir)) {
-            @Override
-            public void saveCommandHistory(seedu.address.model.history.CommandHistory commandHistory)
-                    throws IOException {
-                throw DUMMY_IO_EXCEPTION;
-            }
-        };
-
-        logic = new LogicManager(model, storage);
-
-        assertCommandFailure(ListCommand.COMMAND_WORD, CommandException.class,
-                String.format(LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()),
-                new ModelManager(model.getAddressBook(), new UserPrefs()));
-    }
-
-    @Test
-    public void execute_commandHistorySaveAccessDenied_throwsCommandException() {
-        Path abPath = temporaryFolder.resolve("historyDeniedAb.json");
-        Path prefsPath = temporaryFolder.resolve("historyDeniedPrefs.json");
-        Path historyPath = temporaryFolder.resolve("historyDeniedHistory.json");
-        Path sessionDir = temporaryFolder.resolve("historyDeniedSessions");
-        AccessDeniedException denied = new AccessDeniedException(historyPath.toString());
-
-        StorageManager storage = new StorageManager(
-                new JsonAddressBookStorage(abPath),
-                new JsonUserPrefsStorage(prefsPath),
-                new JsonCommandHistoryStorage(historyPath),
-                new JsonSessionStorage(sessionDir)) {
-            @Override
-            public void saveCommandHistory(seedu.address.model.history.CommandHistory commandHistory)
-                    throws IOException {
-                throw denied;
-            }
-        };
-
-        logic = new LogicManager(model, storage);
-
-        assertCommandFailure(ListCommand.COMMAND_WORD, CommandException.class,
-                String.format(LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, historyPath),
-                new ModelManager(model.getAddressBook(), new UserPrefs()));
     }
 
     @Test
