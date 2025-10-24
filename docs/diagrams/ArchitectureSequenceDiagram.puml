@@ -20,6 +20,12 @@ activate model MODEL_COLOR
 model -[MODEL_COLOR]-> logic
 deactivate model
 
+' Logic also updates command history after executing the command
+logic -[LOGIC_COLOR]> model : getCommandHistory().add("delete 1")
+activate model MODEL_COLOR
+model --[MODEL_COLOR]> logic
+deactivate model
+
 logic -[LOGIC_COLOR]> storage : saveAddressBook(addressBook)
 activate storage STORAGE_COLOR
 
@@ -34,6 +40,12 @@ note over logic,storage: At shutdown, Logic requests session snapshot
 logic -[LOGIC_COLOR]> storage : saveSession(sessionData)
 activate storage STORAGE_COLOR
 storage -[STORAGE_COLOR]> storage : Save session file
+deactivate storage
+
+note over logic,storage: Logic also persists command history
+logic -[LOGIC_COLOR]> storage : saveCommandHistory(commandHistory)
+activate storage STORAGE_COLOR
+storage -[STORAGE_COLOR]> storage : Save command history file
 deactivate storage
 
 logic --[LOGIC_COLOR]> ui

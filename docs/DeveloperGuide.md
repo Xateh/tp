@@ -631,7 +631,7 @@ Asset manager | assign follow-ups to team members                               
 * 3a. User realises he removed the tags wrongly
     * 3a1. User keys command for re-tagging the wrongly removed tags
     * 3a2. User repeats steps 1-3 to remove the correct tags
-  
+
   Use case ends.
 
 **Use case: Add fields to contacts**
@@ -642,7 +642,7 @@ Asset manager | assign follow-ups to team members                               
 2. System searches for contact specified by index number and adds the specified field with the corresponding value to the contact
 3. System displays to user the field and associated value added to the specified contact.
 
-    Steps 1-3 are repeated until all desired fields have been    
+    Steps 1-3 are repeated until all desired fields have been
 added.
 
     Use case ends.
@@ -660,7 +660,7 @@ added.
 
 * 3a. The user realised he added the fields wrongly.
     * 3a1. User keys command to delete the wrongly added field
-    
+
   Use case resumes from step 1
 
 **Use case: Delete fields from contacts**
