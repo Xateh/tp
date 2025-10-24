@@ -1,10 +1,13 @@
 package seedu.address.storage;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.logging.Logger;
 
+import seedu.address.commons.core.Config;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.model.ReadOnlyAddressBook;
@@ -12,6 +15,7 @@ import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.history.CommandHistory;
 import seedu.address.session.SessionData;
+import seedu.address.session.SessionDirectoryResolver;
 
 /**
  * Manages storage of AddressBook data in local storage.
@@ -33,6 +37,36 @@ public class StorageManager implements Storage {
         this.userPrefsStorage = userPrefsStorage;
         this.commandHistoryStorage = commandHistoryStorage;
         this.sessionStorage = sessionStorage;
+    }
+
+    /**
+     * Creates a {@code StorageManager} using {@code config} and {@code userPrefs} to configure storage paths.
+     */
+    public StorageManager(Config config, ReadOnlyUserPrefs userPrefs) {
+        this(createAddressBookStorage(userPrefs),
+                createUserPrefsStorage(config),
+                createCommandHistoryStorage(userPrefs),
+                createSessionStorage(userPrefs));
+    }
+
+    private static AddressBookStorage createAddressBookStorage(ReadOnlyUserPrefs userPrefs) {
+        ReadOnlyUserPrefs prefs = requireNonNull(userPrefs);
+        return new JsonAddressBookStorage(prefs.getAddressBookFilePath());
+    }
+
+    private static UserPrefsStorage createUserPrefsStorage(Config config) {
+        Config cfg = requireNonNull(config);
+        return new JsonUserPrefsStorage(cfg.getUserPrefsFilePath());
+    }
+
+    private static CommandHistoryStorage createCommandHistoryStorage(ReadOnlyUserPrefs userPrefs) {
+        ReadOnlyUserPrefs prefs = requireNonNull(userPrefs);
+        return new JsonCommandHistoryStorage(prefs.getCommandHistoryFilePath());
+    }
+
+    private static SessionStorage createSessionStorage(ReadOnlyUserPrefs userPrefs) {
+        ReadOnlyUserPrefs prefs = requireNonNull(userPrefs);
+        return new JsonSessionStorage(SessionDirectoryResolver.resolve(prefs.getAddressBookFilePath()));
     }
 
     // ================ UserPrefs methods ==============================

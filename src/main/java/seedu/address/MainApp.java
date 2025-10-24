@@ -1,32 +1,26 @@
 package seedu.address;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import seedu.address.app.MainAppConfigLoader;
+import seedu.address.app.MainAppUserPrefsLoader;
 import seedu.address.commons.core.Config;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.core.Version;
-import seedu.address.commons.exceptions.DataLoadingException;
-import seedu.address.commons.util.ConfigUtil;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.Logic;
 import seedu.address.logic.LogicManager;
 import seedu.address.model.Model;
-import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
 import seedu.address.session.SessionData;
-import seedu.address.storage.AddressBookStorage;
-import seedu.address.storage.CommandHistoryStorage;
-import seedu.address.storage.JsonAddressBookStorage;
-import seedu.address.storage.JsonUserPrefsStorage;
-import seedu.address.storage.SessionStorage;
 import seedu.address.storage.Storage;
 import seedu.address.storage.StorageManager;
-import seedu.address.storage.UserPrefsStorage;
 import seedu.address.ui.Ui;
 import seedu.address.ui.UiManager;
 
@@ -38,124 +32,79 @@ public class MainApp extends Application {
     public static final Version VERSION = new Version(0, 2, 2, true);
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
+
     protected Ui ui;
     protected Logic logic;
     protected Storage storage;
     protected Model model;
     protected Config config;
 
-    private final MainAppLifecycleManager lifecycleManager = new MainAppLifecycleManager(logger);
+    private final MainAppLifecycleManager lifecycleManager;
+    private final MainAppConfigLoader configLoader;
+    private final MainAppUserPrefsLoader userPrefsLoader;
+    private AppParameters overrideAppParameters;
+
+    MainApp(MainAppLifecycleManager lifecycleManager, MainAppConfigLoader configLoader,
+            MainAppUserPrefsLoader userPrefsLoader) {
+        this.lifecycleManager = requireNonNull(lifecycleManager);
+        this.configLoader = requireNonNull(configLoader);
+        this.userPrefsLoader = requireNonNull(userPrefsLoader);
+    }
+
+    MainApp(MainAppLifecycleManager lifecycleManager) {
+        this(lifecycleManager, new MainAppConfigLoader(logger), new MainAppUserPrefsLoader(logger));
+    }
+
+    public MainApp() {
+        this(new MainAppLifecycleManager(logger));
+    }
+
+    void setAppParameters(AppParameters appParameters) {
+        this.overrideAppParameters = appParameters;
+    }
 
     @Override
     public void init() throws Exception {
         logger.info("=============================[ Initializing AddressBook ]===========================");
         super.init();
 
-        AppParameters appParameters = AppParameters.parse(getParameters());
-        this.config = initConfig(appParameters.getConfigPath());
+        AppParameters appParameters = overrideAppParameters != null
+                ? overrideAppParameters
+                : AppParameters.parse(getParameters());
+        overrideAppParameters = null;
+
+        initFromParameters(appParameters);
+    }
+
+    void initFromParameters(AppParameters appParameters) {
+        requireNonNull(appParameters);
+
+        this.config = configLoader.load(appParameters.getConfigPath());
         initLogging(config);
 
-        UserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(config.getUserPrefsFilePath());
-        UserPrefs userPrefs = initPrefs(userPrefsStorage);
-        Path addressBookPath = userPrefs.getAddressBookFilePath();
-        AddressBookStorage addressBookStorage = new JsonAddressBookStorage(addressBookPath);
-        CommandHistoryStorage commandHistoryStorage =
-            lifecycleManager.createCommandHistoryStorage(userPrefs.getCommandHistoryFilePath());
-        SessionStorage sessionStorage = lifecycleManager.createSessionStorage(addressBookPath);
-        this.storage = new StorageManager(addressBookStorage, userPrefsStorage, commandHistoryStorage, sessionStorage);
+        UserPrefs userPrefs = userPrefsLoader.load(config);
+
+        this.storage = new StorageManager(config, userPrefs);
 
         Optional<SessionData> restoredSession = lifecycleManager.loadSession(storage);
 
-        this.model = initModelManager(storage, userPrefs, restoredSession);
+        this.model = lifecycleManager.initModel(storage, userPrefs, restoredSession);
 
-        logic = new LogicManager(model, storage, restoredSession);
+        this.logic = createLogic(model, storage, restoredSession);
 
-        ui = new UiManager(logic);
+        this.ui = createUi(logic);
     }
 
-    /**
-     * Returns a {@code ModelManager} with the data from {@code storage}'s address book and {@code userPrefs}. <br>
-     * The data from the sample address book will be used instead if {@code storage}'s address book is not found,
-     * or an empty address book will be used instead if errors occur when reading {@code storage}'s address book.
-     */
-    private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs,
-            Optional<SessionData> restoredSession) {
-        return lifecycleManager.initModel(storage, userPrefs, restoredSession);
+    protected Logic createLogic(Model model, Storage storage, Optional<SessionData> restoredSession) {
+        return new LogicManager(model, storage, restoredSession);
+    }
+
+    protected Ui createUi(Logic logic) {
+        return new UiManager(logic);
     }
 
     private void initLogging(Config config) {
         LogsCenter.init(config);
-    }
-
-    /**
-     * Returns a {@code Config} using the file at {@code configFilePath}. <br>
-     * The default file path {@code Config#DEFAULT_CONFIG_FILE} will be used instead
-     * if {@code configFilePath} is null.
-     */
-    protected Config initConfig(Path configFilePath) {
-        Config initializedConfig;
-        Path configFilePathUsed;
-
-        configFilePathUsed = Config.DEFAULT_CONFIG_FILE;
-
-        if (configFilePath != null) {
-            logger.info("Custom Config file specified " + configFilePath);
-            configFilePathUsed = configFilePath;
-        }
-
-        logger.info("Using config file : " + configFilePathUsed);
-
-        try {
-            Optional<Config> configOptional = ConfigUtil.readConfig(configFilePathUsed);
-            if (!configOptional.isPresent()) {
-                logger.info("Creating new config file " + configFilePathUsed);
-            }
-            initializedConfig = configOptional.orElse(new Config());
-        } catch (DataLoadingException e) {
-            logger.warning("Config file at " + configFilePathUsed + " could not be loaded."
-                    + " Using default config properties.");
-            initializedConfig = new Config();
-        }
-
-        //Update config file in case it was missing to begin with or there are new/unused fields
-        try {
-            ConfigUtil.saveConfig(initializedConfig, configFilePathUsed);
-        } catch (IOException e) {
-            logger.warning("Failed to save config file : " + StringUtil.getDetails(e));
-        }
-        return initializedConfig;
-    }
-
-    /**
-     * Returns a {@code UserPrefs} using the file at {@code storage}'s user prefs file path,
-     * or a new {@code UserPrefs} with default configuration if errors occur when
-     * reading from the file.
-     */
-    protected UserPrefs initPrefs(UserPrefsStorage storage) {
-        Path prefsFilePath = storage.getUserPrefsFilePath();
-        logger.info("Using preference file : " + prefsFilePath);
-
-        UserPrefs initializedPrefs;
-        try {
-            Optional<UserPrefs> prefsOptional = storage.readUserPrefs();
-            if (!prefsOptional.isPresent()) {
-                logger.info("Creating new preference file " + prefsFilePath);
-            }
-            initializedPrefs = prefsOptional.orElse(new UserPrefs());
-        } catch (DataLoadingException e) {
-            logger.warning("Preference file at " + prefsFilePath + " could not be loaded."
-                    + " Using default preferences.");
-            initializedPrefs = new UserPrefs();
-        }
-
-        //Update prefs file in case it was missing to begin with or there are new/unused fields
-        try {
-            storage.saveUserPrefs(initializedPrefs);
-        } catch (IOException e) {
-            logger.warning("Failed to save config file : " + StringUtil.getDetails(e));
-        }
-
-        return initializedPrefs;
     }
 
     @Override

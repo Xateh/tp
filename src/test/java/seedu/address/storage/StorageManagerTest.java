@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import seedu.address.commons.core.Config;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
@@ -141,6 +142,29 @@ public class StorageManagerTest {
         storageManager.saveUserPrefs(prefs);
         Path prefsPath = storageManager.getUserPrefsFilePath();
         assertTrue(prefsPath.toString().contains("data") || prefsPath.toString().contains("prefs"));
+    }
+
+    @Test
+    public void constructor_configAndUserPrefs_setsUpStorages() throws Exception {
+        Config config = new Config();
+        Path prefsPath = getTempFilePath("prefs-new.json");
+        config.setUserPrefsFilePath(prefsPath);
+
+        UserPrefs userPrefs = new UserPrefs();
+        Path addressPath = getTempFilePath("address-new.json");
+        Path historyPath = getTempFilePath("history-new.json");
+        userPrefs.setAddressBookFilePath(addressPath);
+        userPrefs.setCommandHistoryFilePath(historyPath);
+
+        StorageManager manager = new StorageManager(config, userPrefs);
+
+        assertEquals(prefsPath, manager.getUserPrefsFilePath());
+        assertEquals(addressPath, manager.getAddressBookFilePath());
+        assertEquals(historyPath, manager.getCommandHistoryFilePath());
+        assertEquals(addressPath.getParent().resolve("sessions"), manager.getSessionDirectory());
+
+        manager.saveUserPrefs(userPrefs);
+        assertTrue(Files.exists(prefsPath));
     }
 
 }

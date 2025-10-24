@@ -17,6 +17,7 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.util.SampleDataUtil;
 import seedu.address.session.SessionData;
+import seedu.address.session.SessionDirectoryResolver;
 import seedu.address.storage.CommandHistoryStorage;
 import seedu.address.storage.JsonCommandHistoryStorage;
 import seedu.address.storage.JsonSessionStorage;
@@ -72,11 +73,7 @@ public class MainAppLifecycleManager {
      * @return path to the sessions directory
      */
     Path deriveSessionDirectory(Path addressBookPath) {
-        Path parent = addressBookPath.getParent();
-        if (parent == null) {
-            return Path.of("sessions");
-        }
-        return parent.resolve("sessions");
+        return SessionDirectoryResolver.resolve(addressBookPath);
     }
 
     /**
