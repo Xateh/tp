@@ -1,6 +1,5 @@
 package seedu.address.ui;
 
-import java.util.List;
 import java.util.Objects;
 
 import javafx.collections.ObservableList;
@@ -24,9 +23,9 @@ public class CommandBox extends UiPart<Region> {
 
     private final CommandExecutor commandExecutor;
     private final HistorySupplier historySupplier;
-
-    private int historyPointer;
     private boolean navigatingHistory;
+
+    private final HistoryNavigator historyNavigator;
 
     @FXML
     private TextField commandTextField;
@@ -38,16 +37,17 @@ public class CommandBox extends UiPart<Region> {
         super(FXML);
         this.commandExecutor = commandExecutor;
         this.historySupplier = Objects.requireNonNull(historySupplier);
+        this.historyNavigator = new HistoryNavigator();
         // calls #setStyleToDefault() whenever there is a change to the text of the command box.
         commandTextField.textProperty().addListener((unused1, unused2, unused3) -> {
             setStyleToDefault();
             if (!navigatingHistory) {
-                resetHistoryPointer();
+                historyNavigator.reset(historySupplier.getHistory().getEntries());
             }
         });
 
         commandTextField.addEventFilter(KeyEvent.KEY_PRESSED, this::handleHistoryNavigation);
-        resetHistoryPointer();
+        historyNavigator.reset(historySupplier.getHistory().getEntries());
     }
 
     /**
@@ -63,72 +63,32 @@ public class CommandBox extends UiPart<Region> {
         try {
             commandExecutor.execute(commandText);
             setCommandText("");
-            resetHistoryPointer();
+            historyNavigator.reset(historySupplier.getHistory().getEntries());
         } catch (CommandException | ParseException e) {
             setStyleToIndicateCommandFailure();
-            resetHistoryPointer();
+            historyNavigator.reset(historySupplier.getHistory().getEntries());
         }
     }
 
     private void handleHistoryNavigation(KeyEvent event) {
         if (event.getCode() == KeyCode.UP) {
-            navigateToPreviousCommand();
+            java.util.Optional<String> prev = historyNavigator.previous();
+            if (prev.isPresent()) {
+                setCommandText(prev.get());
+            }
             event.consume();
         } else if (event.getCode() == KeyCode.DOWN) {
-            navigateToNextCommand();
+            java.util.Optional<String> next = historyNavigator.next();
+            if (next.isPresent()) {
+                setCommandText(next.get());
+            } else {
+                setCommandText("");
+            }
             event.consume();
         }
     }
 
-    private void navigateToPreviousCommand() {
-        List<String> history = getHistorySnapshot();
-        if (history.isEmpty()) {
-            return;
-        }
-
-        if (historyPointer > history.size()) {
-            historyPointer = history.size();
-        }
-
-        if (historyPointer == history.size()) {
-            historyPointer = history.size() - 1;
-        } else if (historyPointer > 0) {
-            historyPointer--;
-        } else {
-            return;
-        }
-
-        setCommandText(history.get(historyPointer));
-    }
-
-    private void navigateToNextCommand() {
-        List<String> history = getHistorySnapshot();
-        if (historyPointer >= history.size()) {
-            if (historyPointer != history.size()) {
-                historyPointer = history.size();
-            }
-            if (!commandTextField.getText().isEmpty()) {
-                setCommandText("");
-            }
-            return;
-        }
-
-        if (historyPointer == history.size() - 1) {
-            historyPointer = history.size();
-            setCommandText("");
-        } else {
-            historyPointer++;
-            setCommandText(history.get(historyPointer));
-        }
-    }
-
-    private void resetHistoryPointer() {
-        historyPointer = getHistorySnapshot().size();
-    }
-
-    private List<String> getHistorySnapshot() {
-        return historySupplier.getHistory().getEntries();
-    }
+    
 
     private void setCommandText(String text) {
         navigatingHistory = true;
