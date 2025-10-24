@@ -88,7 +88,7 @@ public class CommandBox extends UiPart<Region> {
         }
     }
 
-    
+
 
     private void setCommandText(String text) {
         navigatingHistory = true;

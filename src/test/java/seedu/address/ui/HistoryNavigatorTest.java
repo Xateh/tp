@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ class HistoryNavigatorTest {
     }
 
     @Test
-    void previous_and_next_cycleCorrectly() {
+    void previousAndNextCycleCorrectly() {
         HistoryNavigator nav = new HistoryNavigator();
         nav.reset(List.of("one", "two"));
 
@@ -58,7 +59,7 @@ class HistoryNavigatorTest {
     }
 
     @Test
-    void reset_replacesEntries_and_pointerMovesToEnd() {
+    void resetReplacesEntriesAndPointerMovesToEnd() {
         HistoryNavigator nav = new HistoryNavigator();
         nav.reset(List.of("a", "b", "c"));
         assertEquals(3, nav.getPointer());
