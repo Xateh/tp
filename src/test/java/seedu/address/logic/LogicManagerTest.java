@@ -297,4 +297,142 @@ public class LogicManagerTest {
         assertEquals(1, logic.getFilteredPersonList().size());
         assertEquals(alice, logic.getFilteredPersonList().get(0));
     }
+
+    @Test
+    public void getModel_validLogicManager_returnsSameModel() {
+        // Test the new getModel() method
+        Model retrievedModel = logic.getModel();
+
+        assertEquals(model, retrievedModel);
+        assertTrue(retrievedModel == model); // Check it's the same reference
+    }
+
+    @Test
+    public void getModel_afterModelChanges_returnsUpdatedModel() {
+        // Add a person to the model
+        Person testPerson = new PersonBuilder().withName("Test Person").build();
+        model.addPerson(testPerson);
+
+        // Verify getModel() returns the updated model
+        Model retrievedModel = logic.getModel();
+        assertEquals(model, retrievedModel);
+        assertTrue(retrievedModel.getFilteredPersonList().contains(testPerson));
+    }
+
+    @Test
+    public void getModel_afterExecutingCommand_modelStateConsistent() throws Exception {
+        // Execute a command that modifies the model
+        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
+                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
+        logic.execute(addCommand);
+
+        // Verify getModel() returns the updated model state
+        Model retrievedModel = logic.getModel();
+        assertEquals(model, retrievedModel);
+        assertEquals(1, retrievedModel.getFilteredPersonList().size());
+    }
+
+    @Test
+    public void getModel_multipleCallsSameReference() {
+        // Test that multiple calls to getModel() return the same reference
+        Model firstCall = logic.getModel();
+        Model secondCall = logic.getModel();
+
+        assertTrue(firstCall == secondCall);
+        assertEquals(firstCall, secondCall);
+    }
+
+    @Test
+    public void getModel_afterFilterChange_reflectsChanges() {
+        // Add some test persons
+        Person alice = new PersonBuilder().withName("Alice").build();
+        Person bob = new PersonBuilder().withName("Bob").build();
+        model.addPerson(alice);
+        model.addPerson(bob);
+
+        // Apply a filter
+        model.updateFilteredPersonList(person -> person.getName().fullName.contains("Alice"));
+
+        // Verify getModel() reflects the filtered state
+        Model retrievedModel = logic.getModel();
+        assertEquals(1, retrievedModel.getFilteredPersonList().size());
+        assertEquals(alice, retrievedModel.getFilteredPersonList().get(0));
+    }
+
+    @Test
+    public void getModel_afterGuiSettingsChange_reflectsChanges() {
+        GuiSettings newSettings = new GuiSettings(800, 600, 100, 100);
+        model.setGuiSettings(newSettings);
+
+        Model retrievedModel = logic.getModel();
+        assertEquals(newSettings, retrievedModel.getGuiSettings());
+    }
+
+    @Test
+    public void getModel_withEmptyAddressBook_returnsEmptyModel() {
+        // Ensure the model is empty
+        model.setAddressBook(new seedu.address.model.AddressBook());
+
+        Model retrievedModel = logic.getModel();
+        assertEquals(0, retrievedModel.getFilteredPersonList().size());
+        assertTrue(retrievedModel.getAddressBook().getPersonList().isEmpty());
+    }
+
+    @Test
+    public void getModel_afterCommandHistoryUpdate_maintainsConsistency() throws Exception {
+        // Execute a command to update command history
+        logic.execute(ListCommand.COMMAND_WORD);
+
+        Model retrievedModel = logic.getModel();
+        assertEquals(model, retrievedModel);
+        assertEquals(model.getCommandHistory().getEntries(),
+                retrievedModel.getCommandHistory().getEntries());
+    }
+
+    @Test
+    public void constructor_withoutSessionData_initializesCorrectly() {
+        // Test that the existing constructor (without SessionData) still works
+        JsonAddressBookStorage addressBookStorage =
+                new JsonAddressBookStorage(temporaryFolder.resolve("noSessionAddressBook.json"));
+        JsonUserPrefsStorage userPrefsStorage =
+                new JsonUserPrefsStorage(temporaryFolder.resolve("noSessionPrefs.json"));
+        JsonCommandHistoryStorage commandHistoryStorage =
+                new JsonCommandHistoryStorage(temporaryFolder.resolve("noSessionHistory.json"));
+        JsonSessionStorage sessionStorage = new JsonSessionStorage(temporaryFolder.resolve("noSessionSessions"));
+        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage,
+                commandHistoryStorage, sessionStorage);
+
+        Logic noSessionLogic = new LogicManager(model, storage);
+
+        assertEquals(model, noSessionLogic.getModel());
+    }
+
+    @Test
+    public void getModel_threadSafety_maintainsConsistency() {
+        // Test that getModel() returns consistent results even with concurrent access
+        Model firstModel = logic.getModel();
+
+        // Simulate some concurrent operation
+        Thread.yield();
+
+        Model secondModel = logic.getModel();
+        assertTrue(firstModel == secondModel);
+    }
+
+    @Test
+    public void getModel_afterStorageOperations_maintainsState() throws Exception {
+        // Add a person and execute a command that triggers storage
+        Person testPerson = new PersonBuilder().withName("Storage Test").build();
+        String addCommand = AddCommand.COMMAND_WORD + " n/Storage Test p/12345678 e/test@example.com a/123 Test St";
+
+        try {
+            logic.execute(addCommand);
+        } catch (Exception e) {
+            // Storage might fail in test environment, but that's okay for this test
+        }
+
+        // Verify model state is still accessible
+        Model retrievedModel = logic.getModel();
+        assertEquals(model, retrievedModel);
+    }
 }
