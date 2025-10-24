@@ -162,7 +162,7 @@ Format: `edit <index> [/<field>:<new-value>]+`
 
 **Parameters**
 
-* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit, as listed by the `list` command; must be a positive integer 
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit, as listed by the `list` command; must be a positive integer
 
 **Options**
 
@@ -403,5 +403,5 @@ Action     | Format, Examples
 **History** | `history`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Clear**  | `clear`
-**Exit**  | `exit`  
+**Exit**  | `exit`
 **Help**   | `help`
