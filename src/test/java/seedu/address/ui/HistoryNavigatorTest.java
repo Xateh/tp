@@ -3,6 +3,7 @@ package seedu.address.ui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -71,6 +72,36 @@ class HistoryNavigatorTest {
         nav.reset(List.of("x"));
         assertEquals(1, nav.getPointer());
         assertEquals(List.of("x"), nav.getEntries());
+    }
+
+    @Test
+    void previous_whenPointerGreaterThanSize_clampsAndReturnsLast() throws Exception {
+        HistoryNavigator nav = new HistoryNavigator();
+        nav.reset(List.of("one", "two", "three"));
+
+        // set pointer to an invalid large value via reflection
+        Field pointerField = HistoryNavigator.class.getDeclaredField("pointer");
+        pointerField.setAccessible(true);
+        pointerField.setInt(nav, 10);
+
+        // previous should clamp pointer to size and then to last index -> return "three"
+        assertEquals("three", nav.previous().orElseThrow());
+        // pointer should now point to index 2
+        assertEquals(2, nav.getPointer());
+    }
+
+    @Test
+    void next_whenPointerNegative_incrementsAndReturnsFirst() throws Exception {
+        HistoryNavigator nav = new HistoryNavigator();
+        nav.reset(List.of("alpha", "beta"));
+
+        Field pointerField = HistoryNavigator.class.getDeclaredField("pointer");
+        pointerField.setAccessible(true);
+        pointerField.setInt(nav, -1);
+
+        // next should increment from -1 to 0 and return the first element
+        assertEquals("alpha", nav.next().orElseThrow());
+        assertEquals(0, nav.getPointer());
     }
 
 }

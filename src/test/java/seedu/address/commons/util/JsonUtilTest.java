@@ -1,6 +1,8 @@
 package seedu.address.commons.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -278,6 +280,54 @@ public class JsonUtilTest {
         Object keywords = getSearchKeywords.invoke(result);
         assertTrue(keywords instanceof java.util.List);
         assertTrue(((java.util.List<?>) keywords).isEmpty());
+    }
+
+    @Test
+    public void levelDeserializer_invalidLevel_throwsIllegalArgumentException() throws Exception {
+        // instantiate the inner LevelDeserializer via reflection
+        Class<?> cls = JsonUtil.LevelDeserializer.class;
+        java.lang.reflect.Constructor<?> ctor = cls.getDeclaredConstructor(Class.class);
+        ctor.setAccessible(true);
+        Object deserializer = ctor.newInstance(java.util.logging.Level.class);
+
+        // call the protected _deserialize method via reflection
+        java.lang.reflect.Method m = cls.getDeclaredMethod(
+            "_deserialize",
+            String.class,
+            com.fasterxml.jackson.databind.DeserializationContext.class);
+        m.setAccessible(true);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            try {
+                m.invoke(deserializer, "NOT_A_LEVEL", null);
+            } catch (java.lang.reflect.InvocationTargetException ite) {
+                throw ite.getCause();
+            }
+        });
+    }
+
+    @Test
+    public void saveJsonFile_directoryFallback_throws() throws Exception {
+        SerializableTestClass obj = new SerializableTestClass();
+        obj.setTestValues();
+
+        // Use root path which has no parent and whose toAbsolutePath().getParent() is also null on Unix.
+        // This forces the code path that sets directory to Paths.get(".") and fileName to "session".
+        Path rootPath = Path.of("/");
+
+        try {
+            // We expect an IOException (permission or invalid target) when trying to move temp file to root.
+            assertThrows(IOException.class, () -> JsonUtil.saveJsonFile(obj, rootPath));
+        } finally {
+            // nothing to cleanup — JsonUtil.deleteIfExists should have cleaned temp
+        }
+    }
+
+    @Test
+    public void instantiateJsonUtil_constructorCovered() {
+        // Instantiating the utility class to cover the implicit constructor/static init for 100% coverage
+        JsonUtil util = new JsonUtil();
+        assertNotNull(util);
     }
 
 }

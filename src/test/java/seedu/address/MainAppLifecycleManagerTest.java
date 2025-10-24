@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -31,6 +32,8 @@ import seedu.address.model.UserPrefs;
 import seedu.address.model.history.CommandHistory;
 import seedu.address.model.person.Person;
 import seedu.address.session.SessionData;
+import seedu.address.storage.CommandHistoryStorage;
+import seedu.address.storage.JsonCommandHistoryStorage;
 import seedu.address.storage.Storage;
 import seedu.address.testutil.TypicalPersons;
 
@@ -101,6 +104,14 @@ class MainAppLifecycleManagerTest {
     }
 
     @Test
+    void initModel_withoutSession_usesSampleData() {
+        Storage storage = new AddressBookStorageStub(Optional.empty());
+
+        Model model = lifecycleManager.initModel(storage, new UserPrefs(), Optional.empty());
+        assertEquals(seedu.address.model.util.SampleDataUtil.getSampleAddressBook(), model.getAddressBook());
+    }
+
+    @Test
     void initModel_storageThrows_returnsEmptyAddressBook() {
         Storage storage = new AddressBookStorageThrowsStub();
         Model model = lifecycleManager.initModel(storage, new UserPrefs(), Optional.empty());
@@ -157,6 +168,14 @@ class MainAppLifecycleManagerTest {
         lifecycleManager.persistOnStop(storage, logic);
 
         assertEquals(expectedSession, storage.getSavedSession());
+    }
+
+    @Test
+    void createCommandHistoryStorage_returnsJsonCommandHistoryStorage() {
+        Path p = Path.of("data", "commandhistory.json");
+        CommandHistoryStorage storage = lifecycleManager.createCommandHistoryStorage(p);
+        assertTrue(storage instanceof JsonCommandHistoryStorage);
+        assertEquals(p, storage.getCommandHistoryFilePath());
     }
 
     private SessionData sampleSession() {
@@ -377,5 +396,50 @@ class MainAppLifecycleManagerTest {
         public void setGuiSettings(GuiSettings guiSettings) {
             throw new UnsupportedOperationException();
         }
+    }
+
+    @Test
+    void constructor_nullLogger_throwsNpe() {
+        assertThrows(NullPointerException.class, () -> new MainAppLifecycleManager(null));
+    }
+
+    @Test
+    void createCommandHistoryStorage_nullPath_throwsNpe() {
+        assertThrows(NullPointerException.class, () -> lifecycleManager.createCommandHistoryStorage(null));
+    }
+
+    @Test
+    void createSessionStorage_nullPath_throwsNpe() {
+        assertThrows(NullPointerException.class, () -> lifecycleManager.createSessionStorage(null));
+    }
+
+    @Test
+    void loadSession_nullStorage_throwsNpe() {
+        assertThrows(NullPointerException.class, () -> lifecycleManager.loadSession(null));
+    }
+
+    @Test
+    void initModel_nullArgs_throwsNpe() {
+        // null storage
+        assertThrows(NullPointerException.class, ()
+            -> lifecycleManager.initModel(null, new UserPrefs(), Optional.empty()));
+
+        // create a minimal Storage stub
+        Storage stub = new BaseStorageStub() { };
+
+        assertThrows(NullPointerException.class, () -> lifecycleManager.initModel(stub, null, Optional.empty()));
+        // null restoredSession
+        assertThrows(NullPointerException.class, () -> lifecycleManager.initModel(stub, new UserPrefs(), null));
+    }
+
+    @Test
+    void persistOnStop_nullArgs_throwsNpe() {
+        Logic logicStub = new RecordingLogicStub(new seedu.address.model.history.CommandHistory(), Optional.empty());
+
+        assertThrows(NullPointerException.class, () -> lifecycleManager.persistOnStop(null, logicStub));
+
+        Storage storageStub = new RecordingStorageStub();
+
+        assertThrows(NullPointerException.class, () -> lifecycleManager.persistOnStop(storageStub, null));
     }
 }
