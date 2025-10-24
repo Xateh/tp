@@ -78,7 +78,9 @@ public class AddressBookParser {
         default:
             try {
                 return Decoder.decode(BareCommand.parse(userInput));
-            } catch (LexerException | ParserException | ValidationException | ResolutionException e) {
+            } catch (ValidationException e) {
+                throw new ParseException(e.getMessage(), e);
+            } catch (LexerException | ParserException | ResolutionException e) {
                 System.out.println(e.getMessage());
             }
 

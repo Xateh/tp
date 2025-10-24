@@ -12,6 +12,7 @@ import javafx.scene.layout.Region;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.history.CommandHistory;
 
 /**
  * The UI component that is responsible for receiving user command inputs.
@@ -126,7 +127,7 @@ public class CommandBox extends UiPart<Region> {
     }
 
     private List<String> getHistorySnapshot() {
-        return historySupplier.getHistory();
+        return historySupplier.getHistory().getEntries();
     }
 
     private void setCommandText(String text) {
@@ -172,7 +173,7 @@ public class CommandBox extends UiPart<Region> {
     /** Supplies snapshots of the command history for navigation. */
     @FunctionalInterface
     public interface HistorySupplier {
-        List<String> getHistory();
+        CommandHistory getHistory();
     }
 
 }

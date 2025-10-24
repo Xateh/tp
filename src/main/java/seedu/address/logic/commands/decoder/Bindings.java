@@ -8,6 +8,7 @@ import seedu.address.logic.commands.exceptions.ResolutionException;
 import seedu.address.logic.commands.extractors.CommandExtractor;
 import seedu.address.logic.commands.extractors.DeleteCommandExtractor;
 import seedu.address.logic.commands.extractors.EditCommandExtractor;
+import seedu.address.logic.commands.extractors.FieldCommandExtractor;
 import seedu.address.logic.commands.extractors.FindCommandExtractor;
 import seedu.address.logic.commands.extractors.HistoryCommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
@@ -16,6 +17,7 @@ import seedu.address.logic.commands.extractors.TagCommandExtractor;
  * Enumeration containing bindings for all imperatives and their respective command extractors.
  */
 public enum Bindings {
+    FIELD("field", FieldCommandExtractor::extract),
     FIND("find", FindCommandExtractor::extract),
     DELETE("delete", DeleteCommandExtractor::extract),
     EDIT("edit", EditCommandExtractor::extract),

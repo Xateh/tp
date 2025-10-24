@@ -3,8 +3,11 @@ package seedu.address.commons.util;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,6 +43,7 @@ public class JsonUtil {
                     .addDeserializer(Level.class, new LevelDeserializer(Level.class)));
 
     static <T> void serializeObjectToJsonFile(Path jsonFile, T objectToSerialize) throws IOException {
+        requireNonNull(objectToSerialize);
         FileUtil.writeToFile(jsonFile, toJsonString(objectToSerialize));
     }
 
@@ -88,7 +92,31 @@ public class JsonUtil {
         requireNonNull(filePath);
         requireNonNull(jsonFile);
 
-        serializeObjectToJsonFile(filePath, jsonFile);
+        FileUtil.createParentDirsOfFile(filePath);
+
+        Path directory = filePath.getParent();
+        if (directory == null) {
+            directory = filePath.toAbsolutePath().getParent();
+        }
+        if (directory == null) {
+            directory = Paths.get(".");
+        }
+
+        String fileName = filePath.getFileName() != null ? filePath.getFileName().toString() : "session";
+        String prefix = fileName.length() >= 3 ? fileName : (fileName + "___").substring(0, 3);
+        Path tempFile = Files.createTempFile(directory, prefix, ".tmp");
+
+        try {
+            serializeObjectToJsonFile(tempFile, jsonFile);
+            try {
+                Files.move(tempFile, filePath,
+                        StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(tempFile, filePath, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
     }
 
 
@@ -108,13 +136,14 @@ public class JsonUtil {
      * @return JSON data representation of the given class instance, in string
      */
     public static <T> String toJsonString(T instance) throws JsonProcessingException {
+        requireNonNull(instance);
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(instance);
     }
 
     /**
      * Contains methods that retrieve logging level from serialized string.
      */
-    private static class LevelDeserializer extends FromStringDeserializer<Level> {
+    public static class LevelDeserializer extends FromStringDeserializer<Level> {
 
         protected LevelDeserializer(Class<?> vc) {
             super(vc);

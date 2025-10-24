@@ -391,6 +391,43 @@ _{more aspects and alternatives to be added}_
 
 _{Explain here how the data archiving feature will be implemented}_
 
+### Application lifecycle and testability (feature: fix/command-history)
+
+The `fix/command-history` feature branch extracts lifecycle-specific behaviours from `MainApp` into a small helper class called `MainAppLifecycleManager` located at `src/main/java/seedu/address/MainAppLifecycleManager.java`.
+
+Purpose:
+* Reduce the amount of JavaFX/Platform-specific behaviour inside `MainApp` to make the lifecycle logic easier to unit-test.
+* Centralise session directory derivation, session loading, and stop-time persistence (command-history + session snapshot) in a single testable class.
+
+Key points for developers:
+* `MainApp` now delegates to `MainAppLifecycleManager` for:
+  - Creating `CommandHistoryStorage` and `SessionStorage` instances (previously created inline in `MainApp`).
+  - Loading the most recent session snapshot safely (exceptions are caught and logged).
+  - Initialising the `Model` either from a restored session snapshot or from storage (with sample data or empty fallback).
+  - Persisting command history and session snapshot on stop; failures to save command history do not prevent attempting to persist the session snapshot.
+* The helper is deliberately small and designed to be exercised with pure unit tests. See `src/test/java/seedu/address/MainAppLifecycleManagerTest.java` for example tests and expected behaviours (including failure paths).
+
+Developer notes when modifying lifecycle behaviour:
+* Keep `MainApp` changes minimal: prefer delegating to `MainAppLifecycleManager` rather than pulling JavaFX logic into the helper. This preserves production behaviour while improving testability.
+* When changing where session files are stored, update `JsonSessionStorage#createFileName` and the relevant docs in the User Guide.
+* For any change that affects persistence ordering (e.g., command history vs session snapshot), add unit tests that simulate the storage throwing IOExceptions to ensure the app continues to try saving the session snapshot.
+
+Testing guidance:
+* Unit tests should avoid launching JavaFX. Use the `MainAppLifecycleManagerTest` as a template — it provides several storage/logic stubs that exercise:
+  - `deriveSessionDirectory(Path)` behaviour for files with and without parent directories.
+  - `loadSession(Storage)` safe-loading semantics including handling `DataLoadingException`.
+  - `initModel(Storage, UserPrefs, Optional<SessionData>)` paths: restored session preferred; storage read used otherwise; fallback to empty address book on read errors.
+  - `persistOnStop(Storage, Logic)` behaviour for saving command history and session snapshot, and the proper handling of IO failures.
+
+Small API contract (summary):
+* Inputs: `Storage`, `ReadOnlyUserPrefs`, `Optional<SessionData>`, `Logic` for the persistence call.
+* Outputs: `Model` (initialised), optional persisted files on stop.
+* Error modes: catches `DataLoadingException` and `IOException` and logs warnings/errors rather than throwing; this mirrors previous `MainApp` behaviour.
+
+Proactive follow-ups you may consider:
+* If you add more lifecycle responsibilities (e.g., scheduled background persistence), provide an explicit interface to enable/disable it for tests.
+* Add integration tests that run the JavaFX application in headless mode for end-to-end verification if CI supports it.
+
 
 --------------------------------------------------------------------------------------------------------------------
 
