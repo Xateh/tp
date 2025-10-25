@@ -95,25 +95,35 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
     public boolean test(Person person) {
         Map<String, String> customs = person.getCustomFields();
         for (String keyword : keywords) {
+            String kw = keyword == null ? "" : keyword.trim();
+            if (kw.isEmpty()) {
+                // ignore blank tokens
+                continue;
+            }
+            if (kw.split("\\s+").length > 1) {
+                // ignore multi-word tokens; warning/feedback should be produced by caller
+                continue;
+            }
+
             if (searchName
-                    && StringUtil.containsWordIgnoreCase(person.getName().fullName, keyword)) {
+                    && StringUtil.containsWordIgnoreCase(person.getName().fullName, kw)) {
                 return true;
             }
             if (searchPhone
-                    && StringUtil.containsWordIgnoreCase(person.getPhone().value, keyword)) {
+                    && StringUtil.containsWordIgnoreCase(person.getPhone().value, kw)) {
                 return true;
             }
             if (searchEmail
-                    && StringUtil.containsWordIgnoreCase(person.getEmail().value, keyword)) {
+                    && StringUtil.containsWordIgnoreCase(person.getEmail().value, kw)) {
                 return true;
             }
             if (searchAddress
-                    && StringUtil.containsWordIgnoreCase(person.getAddress().value, keyword)) {
+                    && StringUtil.containsWordIgnoreCase(person.getAddress().value, kw)) {
                 return true;
             }
             if (searchTag
                     && person.getTags().stream()
-                            .anyMatch(tag -> StringUtil.containsWordIgnoreCase(tag.tagName, keyword))) {
+                            .anyMatch(tag -> StringUtil.containsWordIgnoreCase(tag.tagName, kw))) {
                 return true;
             }
             //checks if person has custom fields and there is custom fields passed in to search on
@@ -132,7 +142,7 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
                     }
 
                     String value = entry.getValue();
-                    if (value != null && StringUtil.containsWordIgnoreCase(value, keyword)) {
+                    if (value != null && StringUtil.containsWordIgnoreCase(value, kw)) {
                         return true;
                     }
                 }

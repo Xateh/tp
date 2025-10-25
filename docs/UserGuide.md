@@ -133,6 +133,23 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
+### Finding persons : `find`
+
+Searches for persons whose fields contain any of the specified keywords. By default the search
+is performed across the built-in fields (name, phone, email, address, tags). You may restrict
+the search to specific fields using options (for example `/name` or `/tag`).
+
+Format: `find KEYWORD [MORE_KEYWORDS]... [/<field>]*`
+
+Notes:
+- Keyword matching is case-insensitive and requires a full-word match.
+- Duplicate keywords (case-insensitive) are ignored. When duplicates are detected the command
+  still executes but will display a non-fatal warning indicating which keywords were ignored.
+
+Example:
+* `find Alice /name` — finds persons with the name containing the word "Alice".
+* `find Alice alice` — duplicates of "alice" are ignored; command executes and a warning is shown.
+
 ### Viewing command history : `history`
 Displays the list of commands previously entered.
 

@@ -46,6 +46,7 @@ public class TagCommandTest {
         assertTrue(result.getFeedbackToUser().contains("Added tag to person"));
         assertTrue(result.getFeedbackToUser().contains("newTag"));
         assertTrue(result.getFeedbackToUser().contains("anotherTag"));
+        assertTrue(result.getWarnings().isEmpty());
     }
 
     @Test
@@ -61,6 +62,7 @@ public class TagCommandTest {
 
         // Verify success message contains the tag
         assertTrue(result.getFeedbackToUser().contains("singleTag"));
+        assertTrue(result.getWarnings().isEmpty());
     }
 
     @Test
@@ -70,13 +72,52 @@ public class TagCommandTest {
         Set<Tag> tagsToAdd = Set.of(new Tag("additionalTag"));
 
         TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, tagsToAdd);
-        tagCommand.execute(model);
+        CommandResult result = tagCommand.execute(model);
 
         // Verify original tags are preserved and new tag is added
         Person editedPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         assertTrue(editedPerson.getTags().containsAll(originalTags));
         assertTrue(editedPerson.getTags().contains(new Tag("additionalTag")));
         assertEquals(originalTags.size() + 1, editedPerson.getTags().size());
+        assertTrue(result.getWarnings().isEmpty());
+    }
+
+    @Test
+    public void execute_existingTagOnly_generatesWarning() throws CommandException {
+        Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Tag existingTag = personToEdit.getTags().iterator().next();
+        Set<Tag> tagsToAdd = Set.of(new Tag(existingTag.tagName));
+
+        TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, tagsToAdd);
+        CommandResult result = tagCommand.execute(model);
+
+        Person editedPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        assertEquals(personToEdit, editedPerson);
+        assertEquals(1, result.getWarnings().size());
+        Warning warning = result.getWarnings().get(0);
+        assertEquals(Warning.Type.DUPLICATE_INPUT_IGNORED, warning.getType());
+        assertTrue(warning.getMessage().contains(existingTag.tagName));
+        assertTrue(result.getFeedbackToUser().contains("Warnings:"));
+        assertTrue(result.getFeedbackToUser().contains(existingTag.tagName));
+        assertTrue(result.getFeedbackToUser().startsWith("No new tags were added"));
+    }
+
+    @Test
+    public void execute_existingAndNewTags_successWithWarning() throws CommandException {
+        Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Tag existingTag = personToEdit.getTags().iterator().next();
+        Tag newTag = new Tag("freshTag");
+        Set<Tag> tagsToAdd = Set.of(new Tag(existingTag.tagName), newTag);
+
+        TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, tagsToAdd);
+        CommandResult result = tagCommand.execute(model);
+
+        Person editedPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        assertTrue(editedPerson.getTags().contains(newTag));
+        assertEquals(1, result.getWarnings().size());
+        Warning warning = result.getWarnings().get(0);
+        assertTrue(warning.getMessage().contains(existingTag.tagName));
+        assertTrue(result.getFeedbackToUser().contains("freshTag"));
     }
 
     @Test

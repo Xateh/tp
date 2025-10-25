@@ -46,6 +46,25 @@ public class AddCommandTest {
     }
 
     @Test
+    public void execute_withWarnings_addSuccessfulWithWarnings() throws Exception {
+        ModelStubAcceptingPersonAdded modelStub = new ModelStubAcceptingPersonAdded();
+        Person validPerson = new PersonBuilder().build();
+
+        java.util.List<Warning> warnings = java.util.List.of(
+                Warning.duplicateInputIgnored("Some duplicate tags were ignored."));
+
+        CommandResult commandResult = new AddCommand(validPerson, warnings).execute(modelStub);
+
+        String expectedFeedback = String.format(AddCommand.MESSAGE_SUCCESS, Messages.format(validPerson))
+                + System.lineSeparator() + System.lineSeparator() + "Warnings:" + System.lineSeparator()
+                + "1. " + warnings.get(0).formatForDisplay();
+
+        assertEquals(expectedFeedback, commandResult.getFeedbackToUser());
+        assertEquals(warnings, commandResult.getWarnings());
+        assertEquals(java.util.List.of(validPerson), modelStub.personsAdded);
+    }
+
+    @Test
     public void execute_duplicatePerson_throwsCommandException() {
         Person validPerson = new PersonBuilder().build();
         AddCommand addCommand = new AddCommand(validPerson);

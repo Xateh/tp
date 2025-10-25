@@ -41,11 +41,36 @@ class FieldCommandTest {
         input.put(" company ", " Goldman Sachs ");
         FieldCommand cmd = new FieldCommand(Index.fromOneBased(1), input);
 
-        String feedback = cmd.execute(model).getFeedbackToUser();
+        CommandResult result = cmd.execute(model);
+        String feedback = result.getFeedbackToUser();
 
         assertTrue(feedback.contains("company:Goldman Sachs"));
         Person edited = model.getFilteredPersonList().get(0);
         assertEquals("Goldman Sachs", edited.getCustomFields().get("company"));
+    }
+
+    @Test
+    void executeOverwriteGeneratesWarning() throws Exception {
+        Map<String, String> input1 = new LinkedHashMap<>();
+        input1.put("company", "OldCo");
+        FieldCommand cmd1 = new FieldCommand(Index.fromOneBased(1), input1);
+        cmd1.execute(model); // initial set
+
+        Map<String, String> input2 = new LinkedHashMap<>();
+        input2.put("company", "NewCo");
+        FieldCommand cmd2 = new FieldCommand(Index.fromOneBased(1), input2);
+
+        CommandResult result = cmd2.execute(model);
+        // verify field updated
+        Person edited = model.getFilteredPersonList().get(0);
+        assertEquals("NewCo", edited.getCustomFields().get("company"));
+
+        // verify warning attached and formatted
+        assertEquals(1, result.getWarnings().size());
+        Warning w = result.getWarnings().get(0);
+        assertEquals(Warning.Type.FIELD_OVERWRITTEN, w.getType());
+        assertTrue(w.getMessage().contains("company"));
+        assertTrue(result.getFeedbackToUser().contains("Warnings:"));
     }
 
     @Test

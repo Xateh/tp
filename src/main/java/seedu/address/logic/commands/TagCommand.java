@@ -4,9 +4,11 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
@@ -33,6 +35,7 @@ public class TagCommand extends Command {
     public static final String MESSAGE_ADD_TAGS_SUCCESS = "Added tag to person: %1$s %2$s";
     public static final String MESSAGE_NO_TAGS_PROVIDED = "At least one tag must be provided.";
     public static final String MESSAGE_DUPLICATE_TAGS = "Some tags already exist for this person: %1$s";
+    public static final String MESSAGE_NO_NEW_TAGS = "No new tags were added to person: %1$s";
 
     private final Index index;
     private final Set<Tag> tagsToAdd;
@@ -59,18 +62,40 @@ public class TagCommand extends Command {
         }
 
         Person personToEdit = lastShownList.get(index.getZeroBased());
-        Person editedPerson = createPersonWithAddedTags(personToEdit, tagsToAdd);
 
-        model.setPerson(personToEdit, editedPerson);
-        model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        Set<Tag> duplicateTags = tagsToAdd.stream()
+                .filter(tag -> personToEdit.getTags().contains(tag))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        String tagsString = tagsToAdd.stream()
-                .map(tag -> tag.tagName)
-                .reduce((t1, t2) -> t1 + ", " + t2)
-                .orElse("");
+        Set<Tag> uniqueTags = tagsToAdd.stream()
+                .filter(tag -> !personToEdit.getTags().contains(tag))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        return new CommandResult(String.format(MESSAGE_ADD_TAGS_SUCCESS,
-                Messages.format(editedPerson), tagsString));
+        Person editedPerson = personToEdit;
+        if (!uniqueTags.isEmpty()) {
+            editedPerson = createPersonWithAddedTags(personToEdit, uniqueTags);
+            model.setPerson(personToEdit, editedPerson);
+            model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        }
+
+        String feedbackMessage;
+        if (uniqueTags.isEmpty()) {
+            feedbackMessage = String.format(MESSAGE_NO_NEW_TAGS, Messages.format(editedPerson));
+        } else {
+            String tagsString = formatTags(uniqueTags);
+            feedbackMessage = String.format(MESSAGE_ADD_TAGS_SUCCESS,
+                    Messages.format(editedPerson), tagsString);
+        }
+
+        List<Warning> warnings = duplicateTags.isEmpty()
+                ? List.of()
+                : List.of(Warning.duplicateInputIgnored(
+                        String.format(MESSAGE_DUPLICATE_TAGS, formatTags(duplicateTags))));
+
+        if (warnings.isEmpty()) {
+            return new CommandResult(feedbackMessage);
+        }
+        return new CommandResult(feedbackMessage, warnings);
     }
 
     /**
@@ -84,6 +109,13 @@ public class TagCommand extends Command {
 
         return new Person(personToEdit.getName(), personToEdit.getPhone(),
                 personToEdit.getEmail(), personToEdit.getAddress(), updatedTags);
+    }
+
+    private static String formatTags(Set<Tag> tags) {
+        return tags.stream()
+                .map(tag -> tag.tagName)
+                .sorted()
+                .collect(Collectors.joining(", "));
     }
 
     @Override

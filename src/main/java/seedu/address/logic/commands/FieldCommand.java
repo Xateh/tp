@@ -3,8 +3,10 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.Messages;
@@ -70,7 +72,12 @@ public class FieldCommand extends Command {
 
         // Merge strategy: overwrite existing keys with new values, keep others.
         Map<String, String> merged = new LinkedHashMap<>(target.getCustomFields());
+        // detect overwritten keys
+        Set<String> overwritten = new LinkedHashSet<>();
         for (Map.Entry<String, String> e : pairs.entrySet()) {
+            if (merged.containsKey(e.getKey())) {
+                overwritten.add(e.getKey());
+            }
             merged.put(e.getKey(), e.getValue());
         }
 
@@ -89,7 +96,15 @@ public class FieldCommand extends Command {
             sb.append(e.getKey()).append(":").append(e.getValue());
         }
         sb.append(" for ").append(edited.getName().fullName);
-        return new CommandResult(sb.toString());
+        String feedback = sb.toString();
+
+        if (overwritten.isEmpty()) {
+            return new CommandResult(feedback);
+        }
+
+        String keys = String.join(", ", overwritten);
+        Warning w = Warning.fieldOverwritten("Overwritten keys: " + keys);
+        return new CommandResult(feedback, List.of(w));
     }
 
     private static String normalize(String input) {

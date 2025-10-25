@@ -12,6 +12,7 @@ import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -72,6 +73,43 @@ public class FindCommandTest {
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
         assertEquals(Arrays.asList(CARL, ELLE, FIONA), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_duplicateKeywords_generatesWarning() {
+        String expectedMessage = String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 1);
+        FieldContainsKeywordsPredicate predicate = preparePredicate("Kurz kurz");
+        FindCommand command = new FindCommand(predicate);
+        expectedModel.updateFilteredPersonList(predicate);
+
+        String dup = "kurz"; // normalized duplicate
+        List<Warning> warnings = List.of(Warning.duplicateInputIgnored(
+                String.format(FindCommand.MESSAGE_DUPLICATE_KEYWORDS, dup)));
+        CommandResult expected = new CommandResult(expectedMessage, warnings);
+
+        assertCommandSuccess(command, model, expected, expectedModel);
+        assertEquals(List.of(CARL), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_blankAndMultiwordKeywords_generateWarnings() {
+        String expectedMessage = String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 1);
+        // preparePredicate splits on whitespace; simulate a multi-word token using space inside quotes is
+        // not trivial here; instead manually build keywords list
+        FieldContainsKeywordsPredicate customPredicate = new FieldContainsKeywordsPredicate(
+                Arrays.asList("", "Kurz", "multi word"));
+        FindCommand command = new FindCommand(customPredicate);
+        expectedModel.updateFilteredPersonList(customPredicate);
+
+        // expected warnings: one blank ignored, one multi-word ignored
+        List<Warning> warnings = List.of(
+                Warning.ignoredBlankKeywords("Blank keywords were ignored"),
+                Warning.ignoredMultiwordKeywords("Multi-word keywords ignored: multi word")
+        );
+        CommandResult expected = new CommandResult(expectedMessage, warnings);
+
+        assertCommandSuccess(command, model, expected, expectedModel);
+        assertEquals(List.of(CARL), model.getFilteredPersonList());
     }
 
     @Test

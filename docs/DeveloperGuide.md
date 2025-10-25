@@ -264,6 +264,24 @@ Error handling is a two-part responsibility:
     - Invalid option _value_ (e.g., `/priority:urgent` when only `low`/`medium`/`high` are allowed).
     - Unknown options (e.g., `/nonexistent`). _Note: The base framework may ignore excess/unknown options by default._
 
+**Warnings (non-fatal recoverable input corrections)**
+
+Some user inputs may be invalid but are recoverable without aborting command execution. In such
+cases a command may choose to proceed and return a non-fatal warning to the user describing the
+correction made. Warnings are represented by the `Warning` class and exposed through the
+`CommandResult` API.
+
+As an example, the `find` command ignores duplicate keywords (case-insensitive). If the user
+provides duplicate keywords, the command still executes and returns matching results, but also
+attaches a `Warning` listing the ignored duplicate keywords so the user understands what was
+adjusted.
+
+The `add` command also tolerates duplicate tag inputs: if the user supplies the same tag multiple
+times (e.g. `add n/Alice t/friend t/friend`), the duplicates are ignored and the command succeeds.
+When this happens a `Warning` of type `DUPLICATE_INPUT_IGNORED` is attached to the `CommandResult`.
+The `CommandResult` appends a small "Warnings:" block to the normal feedback so the UI can show
+non-fatal corrections to the user.
+
 **Documenting Command Syntax**
 
 When writing help text or documentation for your new command, you **must** use the following standard notation.
