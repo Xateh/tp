@@ -29,6 +29,9 @@ HiddenOutside ..> Model
 AddressBook .up.|> ReadOnlyAddressBook
 
 ModelManager .up.|> Model
+Class CommandHistory
+
+ModelManager -left-> "1" CommandHistory
 Model .right.> ReadOnlyUserPrefs
 Model .left.> ReadOnlyAddressBook
 ModelManager -left-> "1" AddressBook

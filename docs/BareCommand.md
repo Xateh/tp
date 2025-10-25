@@ -139,12 +139,12 @@ Note that the following is just an example; index validation is provided as a st
 public class TagCommandExtractor {
     public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
-    
+
     // ...
-    
+
     public static TagCommand extract(BareCommand bareCommand) throws ValidationException {
         // ...
-        
+
         // Parsing an index parameter
         try {
             index = Index.fromOneBased(Integer.parseInt(params[0]));
@@ -155,7 +155,7 @@ public class TagCommandExtractor {
             // only thrown by Index::fromOneBased
             throw new ValidationException(String.format(MESSAGE_INDEX_OUT_OF_RANGE, params[0]));
         }
-        
+
         // ...
     }
 }
