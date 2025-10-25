@@ -249,6 +249,7 @@ Options are optional, named inputs that modify command behavior.
 - **Semantics:** Options are **optional**, **non-positional** (order does not matter), and **named**.
 - **Implementation:** Options are provided to your command as a collection (e.g., a map) of key-value pairs or keys. You **must not** rely on the order in which they were provided by the user.
 - **Default Behaviour:** Because all options are by definition optional, your command implementation **must provide a default behaviour** for every option it supports.
+- **Minimum Multiplicity:** Even though all options are optional as described above, it is valid to require a **minimum multiplicity**; that is, require at least a certain number of options to be supplied for the command to work.
 - **Formats:** The parser supports two formats and delivers them as such:
     1. **Name-only (Flag):** `/force`. Your code should check for the _presence_ of the "force" key.
     2. **Name-Value Pair:** `/priority:high`. Your code should retrieve the "priority" key and its associated _value_ ("high").

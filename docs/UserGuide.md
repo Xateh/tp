@@ -82,11 +82,15 @@ Options are optional settings to customise your command. They always come _after
 
 When you look at the help for a command, you'll see this notation:
 
+- **Parameter Variants:**
+    - The acceptable parameter variants are placed as a prefix before the field, e.g. (+, -) `<tag>`. By default, if the variant is not specified, then the parameter must be a normal parameter and not have any prefix.
+    - (*): Normal parameter (no prefix)
+    - (+): Additive parameter (prefix `+`)
+    - (-): Subtractive parameter (prefix `-`)
 - **Field Types:**
     - `(string)`: Text that can be a single `word` or `"text with spaces"`.
     - `(word)`: Text that must be a single `word` (without quotes).
-    - `(index)`: A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered
-      list displayed.
+    - `(index)`: A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.
 - **Multiplicity (How many?):**
     - `<item>`: Exactly one is required.
     - `<item>?`: Zero or one (it's optional).
@@ -162,7 +166,7 @@ Format: `edit <index> [/<field>:<new-value>]+`
 
 **Parameters**
 
-* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit, as listed by the `list` command; must be a positive integer
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit 
 
 **Options**
 
@@ -174,31 +178,25 @@ Examples:
 *  `edit 1 /phone:91234567 /email:"johndoe@example.com"` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 /name:"Betsy Crower" /tag` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
 
-### Adding a tag : `tag`
+### Modifying tags : `tag`
 
-Adds a single tag to an existing person in the address book.
+Adds/removes tags to/from a person.
 
-Format: `tag INDEX TAG+`
+Format: `tag <index> [(+|-)<tag>]+`
 
-* Adds the specified `TAG` to the person at the given `INDEX` in the displayed list.
-* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
-* There can be multiple tags added at one time, the tags are separated by a whitespace
+* Adds tags specified with the `+` prefix to the person at the given `<index>` in the displayed list.
+* Removes tags specified with the `-` prefix to the person at the given `<index>` in the displayed list.
 
-Examples:
-* `list` followed by `tag 2 friend cool` will add `friend` and `cool` to the 2nd person in the address book.
+**Parameters**
 
-### Removing a tag : `untag`
-
-Removes a single tag from an existing person in the address book.
-
-Format: `untag INDEX t/TAG`
-
-* Removes the specified `TAG` from the person at the given `INDEX` in the displayed list.
-* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, …​
-* If the contact does not have the specified tag, the command will report an error and no changes will be made.
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
+* (+, -) `<tag>` (string): tags to add to or remove from a person
 
 Examples:
-* `list` followed by `untag 2 t/friends` removes the `friends` tag from the 2nd person in the address book.
+
+* `list` followed by `tag 2 +friend +cool` will add `friend` and `cool` to the 2nd person in the address book.
+* `list` followed by `tag 1 -villain -enemy` will remove `villain` and `enemy` from the 1st person in the address book.
+* `list` followed by `tag 2 +friend -villain +cool -enemy` will add `friend` and `cool` to and remove `villain` and `enemy` from the 2nd person in the address book.
 
 ### Adding information to a person: `infoedit`
 
@@ -249,7 +247,7 @@ Finds persons whose fields contain any of the given keywords.
 
 Format: `find <keyword>+ [/<field>]*`
 
-If no specific field is provided, all built-in fields will be searched.
+* If no specific field is provided, all built-in fields will be searched.
 * The search is case-insensitive. e.g `hans` will match `Hans`.
 * The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`.
 * All the fields are searched.
@@ -265,8 +263,8 @@ Examples:
 * `find test.dummy@gmail.com` returns all persons whose email is `test.dummy@gmail.com`.
 * `find friend` returns all persons tagged with `"friend"`.
 
-You can limit the search to specific fields by adding options after your keywords.
-Each field option starts with / followed by the field name.
+* You can limit the search to specific fields by adding options after your keywords.
+* Each field option starts with / followed by the field name.
 * The same rules for searching applies as per the case of searching all built in fields. (see above)
 * Now, only those persons matching at least one keyword on any one specified field will be returned.
 
@@ -286,7 +284,7 @@ Format: `delete <index>`
 
 **Parameters**
 
-- `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to delete
 
 **Examples**
 
