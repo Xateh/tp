@@ -391,9 +391,9 @@ _{more aspects and alternatives to be added}_
 
 _{Explain here how the data archiving feature will be implemented}_
 
-### Application lifecycle and testability (feature: fix/command-history)
+### Application lifecycle and testability
 
-The `fix/command-history` feature branch extracts lifecycle-specific behaviours from `MainApp` into a small helper class called `MainAppLifecycleManager` located at `src/main/java/seedu/address/MainAppLifecycleManager.java`.
+Lifecycle-specific behaviours are extracted from `MainApp` into a small helper class called `MainAppLifecycleManager` located at `src/main/java/seedu/address/MainAppLifecycleManager.java`.
 
 Purpose:
 * Reduce the amount of JavaFX/Platform-specific behaviour inside `MainApp` to make the lifecycle logic easier to unit-test.
@@ -406,6 +406,19 @@ Key points for developers:
   - Initialising the `Model` either from a restored session snapshot or from storage (with sample data or empty fallback).
   - Persisting command history and session snapshot on stop; failures to save command history do not prevent attempting to persist the session snapshot.
 * The helper is deliberately small and designed to be exercised with pure unit tests. See `src/test/java/seedu/address/MainAppLifecycleManagerTest.java` for example tests and expected behaviours (including failure paths).
+
+Additional note about session metadata persistence:
+* Session metadata such as the most-recent search keywords and GUI settings are now tracked as "session metadata" and marked dirty when they change. These metadata-only changes do not trigger immediate disk writes; instead they are recorded by `SessionRecorder` and a lifecycle-specific API (`Logic#getSessionSnapshotIfAnyDirty()`, implemented in `LogicManager`) exposes a session snapshot when either the address book or session metadata are dirty. `MainAppLifecycleManager#persistOnStop` consumes that snapshot so that shutdown-time persistence includes metadata-only changes (search keywords, window size/position, etc.). See `src/main/java/seedu/address/logic/session/SessionRecorder.java`, `src/main/java/seedu/address/logic/LogicManager.java`, and `src/main/java/seedu/address/MainAppLifecycleManager.java`.
+
+Important refinement — what actually triggers a session file write:
+
+* The app now persists a session snapshot on stop only when the information that will be written to the session file has changed compared to the last persisted snapshot. Concretely, this comparison ignores the snapshot timestamp (`savedAt`) — i.e., a different `savedAt` value alone will *not* cause a new file to be written. Only changes to the address book contents, the active search keywords, or the GUI settings (window size/position) will make the session "dirty" for persistence.
+
+* As a consequence, transient UI-only changes that do not affect any of the persisted session attributes (for example, the textual feedback displayed in the command-result box) do not mark the session as dirty and will not cause an extra session file to be created on exit.
+
+This behaviour is implemented by maintaining a persisted "session signature" (a snapshot of address book, search keywords and GUI settings) and comparing prospective snapshots against that signature before saving; see `SessionRecorder` for details.
+
+Testing tip: Add unit tests that mutate only GUI settings or execute `find`/`list` commands and assert that `getSessionSnapshotIfAnyDirty()` returns a snapshot (while `getSessionSnapshotIfDirty()` remains reserved for address-book-only dirty checks). This ensures the lifecycle save-on-stop behaviour remains correct.
 
 Developer notes when modifying lifecycle behaviour:
 * Keep `MainApp` changes minimal: prefer delegating to `MainAppLifecycleManager` rather than pulling JavaFX logic into the helper. This preserves production behaviour while improving testability.

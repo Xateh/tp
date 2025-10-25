@@ -52,6 +52,68 @@ class MainAppLifecycleManagerTest {
         assertEquals(expected, lifecycleManager.deriveSessionDirectory(addressBookPath));
     }
 
+    private static class RecordingLogicMetadataOnlyStub implements Logic {
+        private final CommandHistory history;
+        private final Optional<SessionData> snapshot;
+        private boolean sessionMarkedPersisted;
+
+        RecordingLogicMetadataOnlyStub(CommandHistory history, Optional<SessionData> snapshot) {
+            this.history = history;
+            this.snapshot = snapshot;
+        }
+
+        @Override
+        public CommandHistory getCommandHistorySnapshot() {
+            return history;
+        }
+
+        @Override
+        public Optional<SessionData> getSessionSnapshotIfDirty() {
+            // Simulate address-book-only dirty = false
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<SessionData> getSessionSnapshotIfAnyDirty() {
+            return snapshot;
+        }
+
+        @Override
+        public void markSessionSnapshotPersisted() {
+            sessionMarkedPersisted = true;
+        }
+
+        @Override
+        public CommandResult execute(String commandText) throws CommandException, ParseException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ReadOnlyAddressBook getAddressBook() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ObservableList<Person> getFilteredPersonList() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Path getAddressBookFilePath() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public GuiSettings getGuiSettings() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void setGuiSettings(GuiSettings guiSettings) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     @Test
     void deriveSessionDirectory_withoutParent_returnsDefaultSessionsDirectory() {
         Path addressBookPath = Path.of("addressbook.json");
@@ -168,6 +230,21 @@ class MainAppLifecycleManagerTest {
         lifecycleManager.persistOnStop(storage, logic);
 
         assertEquals(expectedSession, storage.getSavedSession());
+    }
+
+    @Test
+    void persistOnStop_metadataOnlySession_savedOnStop() throws Exception {
+        // simulate a logic implementation where address-book dirty check is false
+        // but metadata-only snapshot is present (e.g., search keywords or GUI changes)
+        SessionData expectedSession = sampleSession();
+        RecordingLogicMetadataOnlyStub logic = new RecordingLogicMetadataOnlyStub(
+                new CommandHistory(List.of("meta")), Optional.of(expectedSession));
+        RecordingStorageStub storage = new RecordingStorageStub();
+
+        lifecycleManager.persistOnStop(storage, logic);
+
+        assertEquals(expectedSession, storage.getSavedSession());
+        assertTrue(logic.sessionMarkedPersisted);
     }
 
     @Test
@@ -359,6 +436,11 @@ class MainAppLifecycleManagerTest {
 
         @Override
         public Optional<SessionData> getSessionSnapshotIfDirty() {
+            return snapshot;
+        }
+
+        @Override
+        public Optional<SessionData> getSessionSnapshotIfAnyDirty() {
             return snapshot;
         }
 

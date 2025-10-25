@@ -59,6 +59,14 @@ public interface Logic {
     Optional<SessionData> getSessionSnapshotIfDirty();
 
     /**
+     * Returns a snapshot of the current session data if any part of the session (address book or
+     * session metadata such as search keywords or GUI settings) has changed since the last save.
+     * This method is intended to be used by lifecycle/shutdown code to decide whether to persist
+     * a session snapshot.
+     */
+    Optional<SessionData> getSessionSnapshotIfAnyDirty();
+
+    /**
      * Marks the current session snapshot as successfully persisted.
      */
     void markSessionSnapshotPersisted();

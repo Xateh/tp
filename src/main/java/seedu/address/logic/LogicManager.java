@@ -53,7 +53,7 @@ public class LogicManager implements Logic {
         CommandHistory initialHistory = loadCommandHistory(storage);
         this.addressBookParser = new AddressBookParser();
         this.model.setCommandHistory(initialHistory);
-        sessionRecorder = new SessionRecorder(initialSession);
+        sessionRecorder = new SessionRecorder(model.getAddressBook(), model.getGuiSettings(), initialSession);
         initialSession.ifPresent(this::restoreSessionState);
     }
 
@@ -107,11 +107,13 @@ public class LogicManager implements Logic {
     @Override
     public void setGuiSettings(GuiSettings guiSettings) {
         model.setGuiSettings(guiSettings);
+        // Record that GUI settings changed so session snapshot will include the new GUI state
+        sessionRecorder.afterGuiSettingsChanged(guiSettings);
     }
 
     @Override
     public Optional<SessionData> getSessionSnapshotIfDirty() {
-        if (!sessionRecorder.isAddressBookDirty()) {
+        if (!sessionRecorder.isAddressBookDirty(model.getAddressBook())) {
             return Optional.empty();
         }
         return Optional.of(sessionRecorder.buildSnapshot(model.getAddressBook(), model.getGuiSettings()));
@@ -120,6 +122,14 @@ public class LogicManager implements Logic {
     @Override
     public void markSessionSnapshotPersisted() {
         sessionRecorder.markSnapshotPersisted();
+    }
+
+    @Override
+    public Optional<SessionData> getSessionSnapshotIfAnyDirty() {
+        if (!sessionRecorder.isAnyDirty(model.getAddressBook(), model.getGuiSettings())) {
+            return Optional.empty();
+        }
+        return Optional.of(sessionRecorder.buildSnapshot(model.getAddressBook(), model.getGuiSettings()));
     }
 
     @Override

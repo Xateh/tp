@@ -144,8 +144,13 @@ public class MainAppLifecycleManager {
 
     /**
      * Persists command history and the current session snapshot (if dirty) to {@code storage}.
-     * If saving the command history fails the method will still attempt to persist the session
-     * snapshot. Any IO errors are logged but not thrown.
+    * If saving the command history fails the method will still attempt to persist the session
+    * snapshot. Any IO errors are logged but not thrown.
+    *
+    * Note: Previously this method wrote session snapshots only when the address book had
+    * changed. It now uses {@link Logic#getSessionSnapshotIfAnyDirty()} so snapshots will also be
+    * written when session metadata (search filter or GUI settings) have changed. Actual
+    * persistence still only occurs on shutdown via this method.
      *
      * @param storage storage to persist data to
      * @param logic logic component providing snapshots
@@ -160,7 +165,7 @@ public class MainAppLifecycleManager {
             logger.severe("Failed to save command history " + StringUtil.getDetails(e));
         }
 
-        Optional<SessionData> sessionSnapshot = logic.getSessionSnapshotIfDirty();
+        Optional<SessionData> sessionSnapshot = logic.getSessionSnapshotIfAnyDirty();
         if (sessionSnapshot.isEmpty()) {
             return;
         }

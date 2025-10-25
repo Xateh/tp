@@ -25,33 +25,33 @@ public class SessionRecorderTest {
 
     @Test
     public void markSnapshotPersisted_withoutDirtyFlag_noEffect() {
-        SessionRecorder recorder = new SessionRecorder();
-        assertFalse(recorder.isAddressBookDirty());
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
+        assertFalse(recorder.isAddressBookDirty(new AddressBook()));
         recorder.markSnapshotPersisted();
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(new AddressBook()));
     }
 
     @Test
     public void markSnapshotPersisted_calledMultipleTimes_idempotent() {
-        SessionRecorder recorder = new SessionRecorder();
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         recorder.afterSuccessfulCommand(new AddCommand(new PersonBuilder().build()), true);
-        assertTrue(recorder.isAddressBookDirty());
+        assertTrue(recorder.isAddressBookDirty(createSampleAddressBook()));
         recorder.markSnapshotPersisted();
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(createSampleAddressBook()));
         recorder.markSnapshotPersisted();
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(createSampleAddressBook()));
     }
 
     @Test
     public void findAndListCommand_interleaving_keywordsAndDirtyFlag() {
-        SessionRecorder recorder = new SessionRecorder();
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         List<String> keywords = List.of("alice", "bob");
         recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(keywords)), false);
         assertEquals(keywords, recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS).getSearchKeywords());
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(new AddressBook()));
         recorder.afterSuccessfulCommand(new ListCommand(), false);
         assertTrue(recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS).getSearchKeywords().isEmpty());
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(new AddressBook()));
     }
 
 
@@ -63,11 +63,11 @@ public class SessionRecorderTest {
 
     @Test
     public void constructor_withoutSession_initialisesCleanState() {
-        SessionRecorder recorder = new SessionRecorder();
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         SessionData snapshot = recorder.buildSnapshot(createSampleAddressBook(), DEFAULT_GUI_SETTINGS);
 
         assertTrue(snapshot.getSearchKeywords().isEmpty());
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(createSampleAddressBook()));
     }
 
     @Test
@@ -79,43 +79,44 @@ public class SessionRecorderTest {
                 List.of("alice", "bob"),
                 DEFAULT_GUI_SETTINGS);
 
-        SessionRecorder recorder = new SessionRecorder(Optional.of(previous));
+        SessionRecorder recorder = new SessionRecorder(addressBook, DEFAULT_GUI_SETTINGS, Optional.of(previous));
         SessionData snapshot = recorder.buildSnapshot(addressBook, DEFAULT_GUI_SETTINGS);
 
         assertEquals(List.of("alice", "bob"), snapshot.getSearchKeywords());
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(addressBook));
     }
 
     @Test
     public void afterSuccessfulCommand_marksDirtyWhenAddressBookChanges() {
-        SessionRecorder recorder = new SessionRecorder();
+        AddressBook current = createSampleAddressBook();
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         recorder.afterSuccessfulCommand(new AddCommand(new PersonBuilder().build()), true);
 
-        assertTrue(recorder.isAddressBookDirty());
+        assertTrue(recorder.isAddressBookDirty(current));
     }
 
     @Test
     public void afterSuccessfulCommand_nonMutatingCommandRetainsCleanFlag() {
-        SessionRecorder recorder = new SessionRecorder();
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         recorder.afterSuccessfulCommand(new ListCommand(), false);
 
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(new AddressBook()));
     }
 
     @Test
     public void afterSuccessfulCommand_findUpdatesKeywordsWithoutDirtyFlag() {
-        SessionRecorder recorder = new SessionRecorder();
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         List<String> keywords = List.of("alice", "bob");
         recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(keywords)), false);
 
         SessionData snapshot = recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS);
         assertEquals(keywords, snapshot.getSearchKeywords());
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(new AddressBook()));
     }
 
     @Test
     public void afterSuccessfulCommand_listClearsKeywords() {
-        SessionRecorder recorder = new SessionRecorder();
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(List.of("alice"))), false);
 
         recorder.afterSuccessfulCommand(new ListCommand(), false);
@@ -125,19 +126,47 @@ public class SessionRecorderTest {
     }
 
     @Test
+    public void metadataChange_thenRevert_notDirty() {
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
+        recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(List.of("alice"))), false);
+        assertTrue(recorder.isAnyDirty(new AddressBook(), DEFAULT_GUI_SETTINGS));
+
+        recorder.afterSuccessfulCommand(new ListCommand(), false);
+        assertFalse(recorder.isAnyDirty(new AddressBook(), DEFAULT_GUI_SETTINGS));
+    }
+
+    @Test
+    public void guiSettingsChange_onlyMarksDirtyWhenValueDiffers() {
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
+
+        GuiSettings updatedSettings = new GuiSettings(1024, 768, 10, 10);
+        recorder.afterGuiSettingsChanged(updatedSettings);
+        assertTrue(recorder.isAnyDirty(new AddressBook(), updatedSettings));
+
+        // Setting the same value again should not clear the dirty flag prematurely
+        recorder.afterGuiSettingsChanged(updatedSettings);
+        assertTrue(recorder.isAnyDirty(new AddressBook(), updatedSettings));
+
+        // Reverting to baseline clears the metadata dirty flag
+        recorder.afterGuiSettingsChanged(DEFAULT_GUI_SETTINGS);
+        assertFalse(recorder.isAnyDirty(new AddressBook(), DEFAULT_GUI_SETTINGS));
+    }
+
+    @Test
     public void markSnapshotPersisted_resetsDirtyFlag() {
-        SessionRecorder recorder = new SessionRecorder();
+        AddressBook current = createSampleAddressBook();
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         recorder.afterSuccessfulCommand(new AddCommand(new PersonBuilder().build()), true);
-        assertTrue(recorder.isAddressBookDirty());
+        assertTrue(recorder.isAddressBookDirty(current));
 
         recorder.markSnapshotPersisted();
 
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(current));
     }
 
     @Test
     public void buildSnapshot_containsAddressBookState() {
-        SessionRecorder recorder = new SessionRecorder();
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         AddressBook addressBook = createSampleAddressBook();
 
         SessionData snapshot = recorder.buildSnapshot(addressBook, DEFAULT_GUI_SETTINGS);
@@ -148,16 +177,16 @@ public class SessionRecorderTest {
 
     @Test
     public void dirtyFlag_andSnapshotReflectsAddressBookMutation() {
-        SessionRecorder recorder = new SessionRecorder();
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         AddressBook ab = createSampleAddressBook();
         // Simulate a mutating command
         recorder.afterSuccessfulCommand(new AddCommand(new PersonBuilder().withName("Bob").build()), true);
-        assertTrue(recorder.isAddressBookDirty());
+        assertTrue(recorder.isAddressBookDirty(ab));
 
         SessionData snapshot = recorder.buildSnapshot(ab, DEFAULT_GUI_SETTINGS);
         assertEquals(ab, new AddressBook(snapshot.getAddressBook()));
         recorder.markSnapshotPersisted();
-        assertFalse(recorder.isAddressBookDirty());
+        assertFalse(recorder.isAddressBookDirty(ab));
     }
 
     @Test
@@ -169,7 +198,7 @@ public class SessionRecorderTest {
                 ab,
                 keywords,
                 DEFAULT_GUI_SETTINGS);
-        SessionRecorder recorder = new SessionRecorder(Optional.of(previous));
+        SessionRecorder recorder = new SessionRecorder(ab, DEFAULT_GUI_SETTINGS, Optional.of(previous));
         SessionData snapshot = recorder.buildSnapshot(ab, DEFAULT_GUI_SETTINGS);
         assertEquals(keywords, snapshot.getSearchKeywords());
     }
