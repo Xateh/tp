@@ -11,6 +11,12 @@ Class "<<interface>>\nUserPrefsStorage" as UserPrefsStorage
 Class JsonUserPrefsStorage
 }
 
+package "CommandHistory Storage" #F4F6F6{
+Class "<<interface>>\nCommandHistoryStorage" as CommandHistoryStorage
+Class JsonCommandHistoryStorage
+Class JsonSerializableCommandHistory
+}
+
 Class "<<interface>>\nStorage" as Storage
 Class StorageManager
 
@@ -38,10 +44,12 @@ StorageManager .up.|> Storage
 StorageManager -up-> "1" UserPrefsStorage
 StorageManager -up-> "1" AddressBookStorage
 StorageManager -up-> "1" SessionStorage
+StorageManager -up-> "1" CommandHistoryStorage
 
 Storage -left-|> UserPrefsStorage
 Storage -right-|> AddressBookStorage
 Storage -up-|> SessionStorage
+Storage -down-|> CommandHistoryStorage
 
 JsonUserPrefsStorage .up.|> UserPrefsStorage
 JsonAddressBookStorage .up.|> AddressBookStorage
@@ -51,5 +59,8 @@ JsonAdaptedPerson --> "*" JsonAdaptedTag
 JsonSessionStorage .up.|> SessionStorage
 JsonSessionStorage ..> JsonSerializableSession
 JsonSerializableSession --> "*" JsonSessionCommand
+JsonCommandHistoryStorage .up.|> CommandHistoryStorage
+JsonCommandHistoryStorage ..> JsonSerializableCommandHistory
+
 
 @enduml
