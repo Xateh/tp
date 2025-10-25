@@ -36,6 +36,8 @@ public interface Logic {
     /** Returns an unmodifiable view of the filtered list of persons */
     ObservableList<Person> getFilteredPersonList();
 
+    // Returns the history of executed commands, ordered from oldest to newest.
+
     /**
      * Returns the user prefs' address book file path.
      */
@@ -71,6 +73,9 @@ public interface Logic {
 
     /**
      * Returns the current command history snapshot for persistence.
+     *
+     * <p>Callers who only require the raw list of entries may use
+     * {@code getCommandHistorySnapshot().getEntries()}.
      */
     CommandHistory getCommandHistorySnapshot();
 }

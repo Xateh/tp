@@ -29,6 +29,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.HistoryCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -133,6 +134,22 @@ public class LogicManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void getCommandHistorySnapshot_unmodifiableList() {
+        assertThrows(UnsupportedOperationException.class, () ->
+            logic.getCommandHistorySnapshot().getEntries().add("new command")
+        );
+    }
+
+    @Test
+    public void getCommandHistorySnapshot_includesExecutedCommands() throws Exception {
+        logic.execute(ListCommand.COMMAND_WORD);
+        logic.execute(HistoryCommand.COMMAND_WORD);
+
+        List<String> snapshot = logic.getCommandHistorySnapshot().getEntries();
+        assertEquals(List.of(ListCommand.COMMAND_WORD, HistoryCommand.COMMAND_WORD), snapshot);
     }
 
     @Test
