@@ -83,6 +83,7 @@ public class LogicManager implements Logic {
         return model.getFilteredPersonList();
     }
 
+
     private CommandHistory loadCommandHistory(Storage storage) {
         try {
             return storage.readCommandHistory().orElseGet(CommandHistory::new);
