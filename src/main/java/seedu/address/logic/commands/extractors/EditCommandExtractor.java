@@ -40,6 +40,7 @@ public class EditCommandExtractor {
 
         // extract edit details
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
+        java.util.List<seedu.address.logic.commands.Warning> warnings = new java.util.ArrayList<>();
         try {
             Optional<String> name = bareCommand.getOptionValue(OPTION_KEY_NAME);
             if (name.isPresent()) {
@@ -58,13 +59,19 @@ public class EditCommandExtractor {
                 editPersonDescriptor.setAddress(ParserUtil.parseAddress(address.get()));
             }
             if (bareCommand.hasOption(OPTION_KEY_TAG)) {
-                editPersonDescriptor.setTags(
-                        ParserUtil.parseTags(bareCommand.getOptionAllValues(OPTION_KEY_TAG).get()));
+                java.util.List<String> rawTags = bareCommand.getOptionAllValues(OPTION_KEY_TAG).get();
+                editPersonDescriptor.setTags(ParserUtil.parseTags(rawTags));
+                // detect duplicate tag option values
+                java.util.Set<String> uniq = new java.util.HashSet<>(rawTags);
+                if (rawTags.size() != uniq.size()) {
+                    warnings.add(seedu.address.logic.commands.Warning.duplicateInputIgnored(
+                            "Duplicate tag option values ignored."));
+                }
             }
         } catch (ParseException e) {
             throw new ValidationException(e.getMessage());
         }
 
-        return new EditCommand(index, editPersonDescriptor);
+        return new EditCommand(index, editPersonDescriptor, warnings);
     }
 }

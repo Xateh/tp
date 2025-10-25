@@ -40,6 +40,25 @@ class FieldCommandExtractorTest {
     }
 
     @Test
+    void extract_duplicateOptionValues_generatesWarning() throws Exception {
+        // build a bare command with duplicate option values for same key
+        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
+        builder.setImperative("field");
+        builder.addParameter("1");
+        builder.setOption("company", "A");
+        builder.setOption("company", "B");
+        BareCommand bare = builder.build();
+
+        FieldCommand command = FieldCommandExtractor.extract(bare);
+        seedu.address.logic.commands.CommandResult result = command.execute(model);
+        // first value should be used
+        seedu.address.model.person.Person edited = model.getFilteredPersonList().get(0);
+        assertEquals("A", edited.getCustomFields().get("company"));
+        // warnings should be present
+        assertEquals(1, result.getWarnings().size());
+    }
+
+    @Test
     void extract_invalidIndex_throwsValidationException() throws Exception {
         BareCommand bare = BareCommand.parse("field x /k:v");
         ValidationException ex = assertThrows(ValidationException.class, () ->

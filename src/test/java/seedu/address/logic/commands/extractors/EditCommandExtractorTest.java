@@ -85,4 +85,20 @@ public class EditCommandExtractorTest {
         assertEquals(expected,
                 EditCommandExtractor.extract(BareCommand.parse("edit 1 /tag:friend /tag:friend")));
     }
+
+    @Test
+    public void extract_duplicateTagOptions_generatesWarningOnExecute() throws Exception {
+        // prepare a model with a person
+        seedu.address.model.AddressBook ab = new seedu.address.model.AddressBook();
+        seedu.address.model.person.Person p = new seedu.address.testutil.PersonBuilder().withTags().build();
+        ab.addPerson(p);
+        seedu.address.model.Model model = new seedu.address.model.ModelManager(ab, new seedu.address.model.UserPrefs());
+
+        EditCommand cmd = EditCommandExtractor.extract(BareCommand.parse("edit 1 /tag:friend /tag:friend"));
+        seedu.address.logic.commands.CommandResult result = cmd.execute(model);
+
+        assertEquals(1, result.getWarnings().size());
+        assertEquals(seedu.address.logic.commands.Warning.Type.DUPLICATE_INPUT_IGNORED,
+                result.getWarnings().get(0).getType());
+    }
 }

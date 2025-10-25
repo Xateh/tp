@@ -33,13 +33,18 @@ public final class FieldCommandExtractor {
         }
 
         Map<String, String> pairs = new LinkedHashMap<>();
+        java.util.List<seedu.address.logic.commands.Warning> warnings = new java.util.ArrayList<>();
         for (Map.Entry<String, List<String>> entry : options.entrySet()) {
             List<String> values = entry.getValue();
             String firstValue = (values == null || values.isEmpty()) ? "" : values.get(0);
             pairs.put(entry.getKey(), firstValue);
+            if (values != null && values.size() > 1) {
+                warnings.add(seedu.address.logic.commands.Warning.duplicateInputIgnored(
+                        "Duplicate option values ignored for key: " + entry.getKey()));
+            }
         }
         try {
-            return new FieldCommand(index, pairs);
+            return new FieldCommand(index, pairs, warnings);
         } catch (IllegalArgumentException e) {
             throw new ValidationException(e.getMessage());
         }

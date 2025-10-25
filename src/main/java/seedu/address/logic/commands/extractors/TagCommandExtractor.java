@@ -43,13 +43,24 @@ public class TagCommandExtractor {
         try {
             varParams = Validation.validateVariableParametersWithMinimumMultiplicity(
                     bareCommand, 1, 1, ParameterKind.NORMAL);
+
+            java.util.List<String> rawValues = new java.util.ArrayList<>();
             for (Parameter varParam : varParams) {
+                rawValues.add(varParam.getValue());
                 tags.add(new Tag(varParam.getValue()));
             }
+
+            // detect duplicate input tokens (same tag provided multiple times)
+            java.util.Set<String> unique = new java.util.HashSet<>(rawValues);
+            java.util.List<seedu.address.logic.commands.Warning> warnings = new java.util.ArrayList<>();
+            if (rawValues.size() != unique.size()) {
+                warnings.add(seedu.address.logic.commands.Warning.duplicateInputIgnored(
+                        "Some duplicate tag inputs were ignored."));
+            }
+
+            return new TagCommand(index, tags, warnings);
         } catch (ValidationException e) {
             throw new ValidationException(e.getMessage() + "\n" + MESSAGE_TAGS_UNSPECIFIED);
         }
-
-        return new TagCommand(index, tags);
     }
 }

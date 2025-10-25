@@ -54,6 +54,7 @@ public class EditCommand extends Command {
 
     private final Index index;
     private final EditPersonDescriptor editPersonDescriptor;
+    private final java.util.List<Warning> initialWarnings;
 
     /**
      * @param index of the person in the filtered person list to edit
@@ -65,6 +66,20 @@ public class EditCommand extends Command {
 
         this.index = index;
         this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+        this.initialWarnings = java.util.List.of();
+    }
+
+    /**
+     * Creates an EditCommand with optional parser-level warnings.
+     */
+    public EditCommand(Index index, EditPersonDescriptor editPersonDescriptor,
+                       java.util.List<Warning> initialWarnings) {
+        requireNonNull(index);
+        requireNonNull(editPersonDescriptor);
+        requireNonNull(initialWarnings);
+        this.index = index;
+        this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+        this.initialWarnings = java.util.List.copyOf(initialWarnings);
     }
 
     @Override
@@ -85,7 +100,15 @@ public class EditCommand extends Command {
 
         model.setPerson(personToEdit, editedPerson);
         model.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-        return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson)));
+
+        java.util.List<Warning> warnings = new java.util.ArrayList<>(initialWarnings == null
+                ? java.util.List.of()
+                : initialWarnings);
+
+        if (warnings.isEmpty()) {
+            return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson)));
+        }
+        return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson)), warnings);
     }
 
     /**

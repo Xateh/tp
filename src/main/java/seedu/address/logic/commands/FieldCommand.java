@@ -31,6 +31,7 @@ public class FieldCommand extends Command {
             "Provide at least one /key:value pair. Usage: field <index> /key:value ...";
     private final Index index;
     private final Map<String, String> pairs;
+    private final java.util.List<Warning> initialWarnings;
 
     /**
      * Creates a FieldCommand.
@@ -55,6 +56,34 @@ public class FieldCommand extends Command {
         }
         this.index = index;
         this.pairs = sanitized;
+        this.initialWarnings = java.util.List.of();
+    }
+
+    /**
+     * Creates a FieldCommand with parser-level warnings (e.g. duplicate option values ignored).
+     */
+    public FieldCommand(Index index, Map<String, String> pairs, java.util.List<Warning> initialWarnings) {
+        requireNonNull(index);
+        requireNonNull(pairs);
+        requireNonNull(initialWarnings);
+        if (pairs.isEmpty()) {
+            throw new IllegalArgumentException(MESSAGE_AT_LEAST_ONE_PAIR);
+        }
+        Map<String, String> sanitized = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : pairs.entrySet()) {
+            String key = normalize(entry.getKey());
+            String value = normalize(entry.getValue());
+            if (key.isEmpty()) {
+                throw new IllegalArgumentException(MESSAGE_NAME_CANNOT_BE_BLANK);
+            }
+            if (value.isEmpty()) {
+                throw new IllegalArgumentException(MESSAGE_VALUE_CANNOT_BE_BLANK);
+            }
+            sanitized.put(key, value);
+        }
+        this.index = index;
+        this.pairs = sanitized;
+        this.initialWarnings = java.util.List.copyOf(initialWarnings);
     }
 
     /**
@@ -98,13 +127,18 @@ public class FieldCommand extends Command {
         sb.append(" for ").append(edited.getName().fullName);
         String feedback = sb.toString();
 
-        if (overwritten.isEmpty()) {
-            return new CommandResult(feedback);
+        java.util.List<Warning> warnings = new java.util.ArrayList<>(initialWarnings == null
+                ? java.util.List.of()
+                : initialWarnings);
+        if (!overwritten.isEmpty()) {
+            String keys = String.join(", ", overwritten);
+            warnings.add(Warning.fieldOverwritten("Overwritten keys: " + keys));
         }
 
-        String keys = String.join(", ", overwritten);
-        Warning w = Warning.fieldOverwritten("Overwritten keys: " + keys);
-        return new CommandResult(feedback, List.of(w));
+        if (warnings.isEmpty()) {
+            return new CommandResult(feedback);
+        }
+        return new CommandResult(feedback, warnings);
     }
 
     private static String normalize(String input) {

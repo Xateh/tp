@@ -39,17 +39,26 @@ public class TagCommand extends Command {
 
     private final Index index;
     private final Set<Tag> tagsToAdd;
+    private final java.util.List<Warning> initialWarnings;
 
     /**
      * @param index of the person in the filtered person list to add tags
      * @param tagsToAdd tags to add to the person
      */
     public TagCommand(Index index, Set<Tag> tagsToAdd) {
+        this(index, tagsToAdd, java.util.List.of());
+    }
+
+    /**
+     * Creates a TagCommand with optional initial warnings (e.g. from parsing).
+     */
+    public TagCommand(Index index, Set<Tag> tagsToAdd, java.util.List<Warning> initialWarnings) {
         requireNonNull(index);
         requireNonNull(tagsToAdd);
-
+        requireNonNull(initialWarnings);
         this.index = index;
         this.tagsToAdd = new HashSet<>(tagsToAdd);
+        this.initialWarnings = java.util.List.copyOf(initialWarnings);
     }
 
     @Override
@@ -87,10 +96,13 @@ public class TagCommand extends Command {
                     Messages.format(editedPerson), tagsString);
         }
 
-        List<Warning> warnings = duplicateTags.isEmpty()
-                ? List.of()
-                : List.of(Warning.duplicateInputIgnored(
-                        String.format(MESSAGE_DUPLICATE_TAGS, formatTags(duplicateTags))));
+        java.util.List<Warning> warnings = new java.util.ArrayList<>(initialWarnings == null
+                ? java.util.List.of()
+                : initialWarnings);
+        if (!duplicateTags.isEmpty()) {
+            warnings.add(Warning.duplicateInputIgnored(
+                    String.format(MESSAGE_DUPLICATE_TAGS, formatTags(duplicateTags))));
+        }
 
         if (warnings.isEmpty()) {
             return new CommandResult(feedbackMessage);
