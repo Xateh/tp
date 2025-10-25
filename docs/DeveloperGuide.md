@@ -407,6 +407,11 @@ Key points for developers:
   - Persisting command history and session snapshot on stop; failures to save command history do not prevent attempting to persist the session snapshot.
 * The helper is deliberately small and designed to be exercised with pure unit tests. See `src/test/java/seedu/address/MainAppLifecycleManagerTest.java` for example tests and expected behaviours (including failure paths).
 
+Additional note about session metadata persistence:
+* Session metadata such as the most-recent search keywords and GUI settings are now tracked as "session metadata" and marked dirty when they change. These metadata-only changes do not trigger immediate disk writes; instead they are recorded by `SessionRecorder` and a lifecycle-specific API (`Logic#getSessionSnapshotIfAnyDirty()`, implemented in `LogicManager`) exposes a session snapshot when either the address book or session metadata are dirty. `MainAppLifecycleManager#persistOnStop` consumes that snapshot so that shutdown-time persistence includes metadata-only changes (search keywords, window size/position, etc.). See `src/main/java/seedu/address/logic/session/SessionRecorder.java`, `src/main/java/seedu/address/logic/LogicManager.java`, and `src/main/java/seedu/address/MainAppLifecycleManager.java`.
+
+Testing tip: Add unit tests that mutate only GUI settings or execute `find`/`list` commands and assert that `getSessionSnapshotIfAnyDirty()` returns a snapshot (while `getSessionSnapshotIfDirty()` remains reserved for address-book-only dirty checks). This ensures the lifecycle save-on-stop behaviour remains correct.
+
 Developer notes when modifying lifecycle behaviour:
 * Keep `MainApp` changes minimal: prefer delegating to `MainAppLifecycleManager` rather than pulling JavaFX logic into the helper. This preserves production behaviour while improving testability.
 * When changing where session files are stored, update `JsonSessionStorage#createFileName` and the relevant docs in the User Guide.

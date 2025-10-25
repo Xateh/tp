@@ -254,6 +254,52 @@ public class LogicManagerTest {
         assertEquals(List.of(), snapshot.getSearchKeywords());
     }
 
+    @Test
+    public void getSessionSnapshotIfAnyDirty_searchKeywordsChange_present() throws Exception {
+        model.addPerson(new PersonBuilder().withName("Alice Pauline").build());
+
+        // search changes should mark metadata dirty, visible via getSessionSnapshotIfAnyDirty
+        logic.execute("find Alice");
+        Optional<SessionData> snapshot = logic.getSessionSnapshotIfAnyDirty();
+        assertTrue(snapshot.isPresent());
+        assertEquals(List.of("Alice"), snapshot.get().getSearchKeywords());
+
+        // marking persisted clears the metadata dirty flag
+        logic.markSessionSnapshotPersisted();
+        assertTrue(logic.getSessionSnapshotIfAnyDirty().isEmpty());
+    }
+
+    @Test
+    public void getSessionSnapshotIfAnyDirty_guiSettingsChange_present() {
+        GuiSettings newSettings = new GuiSettings(640, 480, 10, 10);
+        // changing GUI settings through Logic should mark metadata dirty
+        logic.setGuiSettings(newSettings);
+
+        Optional<SessionData> snapshot = logic.getSessionSnapshotIfAnyDirty();
+        assertTrue(snapshot.isPresent());
+        assertEquals(newSettings, snapshot.get().getGuiSettings());
+
+        logic.markSessionSnapshotPersisted();
+        assertTrue(logic.getSessionSnapshotIfAnyDirty().isEmpty());
+    }
+
+    @Test
+    public void getSessionSnapshotIfAnyDirty_commandResultOnlyChange_empty() throws Exception {
+        // List with no active filters only changes the command result text
+        logic.execute(ListCommand.COMMAND_WORD);
+        assertTrue(logic.getSessionSnapshotIfAnyDirty().isEmpty());
+    }
+
+    @Test
+    public void getSessionSnapshotIfAnyDirty_metadataReverted_empty() throws Exception {
+        model.addPerson(new PersonBuilder().withName("Alice Pauline").build());
+
+        logic.execute("find Alice");
+        logic.execute(ListCommand.COMMAND_WORD);
+
+        assertTrue(logic.getSessionSnapshotIfAnyDirty().isEmpty());
+    }
+
     /**
      * Executes the command and confirms that
      * - no exceptions are thrown <br>
