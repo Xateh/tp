@@ -391,9 +391,9 @@ _{more aspects and alternatives to be added}_
 
 _{Explain here how the data archiving feature will be implemented}_
 
-### Application lifecycle and testability (feature: fix/command-history)
+### Application lifecycle and testability
 
-The `fix/command-history` feature branch extracts lifecycle-specific behaviours from `MainApp` into a small helper class called `MainAppLifecycleManager` located at `src/main/java/seedu/address/MainAppLifecycleManager.java`.
+Lifecycle-specific behaviours are extracted from `MainApp` into a small helper class called `MainAppLifecycleManager` located at `src/main/java/seedu/address/MainAppLifecycleManager.java`.
 
 Purpose:
 * Reduce the amount of JavaFX/Platform-specific behaviour inside `MainApp` to make the lifecycle logic easier to unit-test.
