@@ -319,6 +319,11 @@ In addition to the main address book file, AssetSphere writes a snapshot of your
 
 At start-up AssetSphere loads the most recent valid snapshot so that the app opens with the same filters and window placement you last used. You can safely delete older session files if you want to reclaim disk space; the app will automatically create a fresh snapshot the next time you close it.
 
+Note about when a snapshot is created:
+
+- A new session snapshot is only saved on exit when the information that will be written to the session file has actually changed since the last saved snapshot. The timestamp stored in the snapshot (`savedAt`) is ignored for this comparison — changing only the timestamp will not cause a new file to be written.
+- Transient UI changes that do not affect the persisted session attributes (address book contents, active `find` keywords, or GUI settings) — for example, brief differences in the feedback text shown in the command-result box — will not trigger a new session file.
+
 #### Notes for this release (fix/command-history)
 
 Behavior for end users remains unchanged by the recent internal refactor. The app still:

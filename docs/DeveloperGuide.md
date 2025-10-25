@@ -410,6 +410,14 @@ Key points for developers:
 Additional note about session metadata persistence:
 * Session metadata such as the most-recent search keywords and GUI settings are now tracked as "session metadata" and marked dirty when they change. These metadata-only changes do not trigger immediate disk writes; instead they are recorded by `SessionRecorder` and a lifecycle-specific API (`Logic#getSessionSnapshotIfAnyDirty()`, implemented in `LogicManager`) exposes a session snapshot when either the address book or session metadata are dirty. `MainAppLifecycleManager#persistOnStop` consumes that snapshot so that shutdown-time persistence includes metadata-only changes (search keywords, window size/position, etc.). See `src/main/java/seedu/address/logic/session/SessionRecorder.java`, `src/main/java/seedu/address/logic/LogicManager.java`, and `src/main/java/seedu/address/MainAppLifecycleManager.java`.
 
+Important refinement — what actually triggers a session file write:
+
+* The app now persists a session snapshot on stop only when the information that will be written to the session file has changed compared to the last persisted snapshot. Concretely, this comparison ignores the snapshot timestamp (`savedAt`) — i.e., a different `savedAt` value alone will *not* cause a new file to be written. Only changes to the address book contents, the active search keywords, or the GUI settings (window size/position) will make the session "dirty" for persistence.
+
+* As a consequence, transient UI-only changes that do not affect any of the persisted session attributes (for example, the textual feedback displayed in the command-result box) do not mark the session as dirty and will not cause an extra session file to be created on exit.
+
+This behaviour is implemented by maintaining a persisted "session signature" (a snapshot of address book, search keywords and GUI settings) and comparing prospective snapshots against that signature before saving; see `SessionRecorder` for details.
+
 Testing tip: Add unit tests that mutate only GUI settings or execute `find`/`list` commands and assert that `getSessionSnapshotIfAnyDirty()` returns a snapshot (while `getSessionSnapshotIfDirty()` remains reserved for address-book-only dirty checks). This ensures the lifecycle save-on-stop behaviour remains correct.
 
 Developer notes when modifying lifecycle behaviour:
