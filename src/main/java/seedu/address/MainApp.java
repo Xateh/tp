@@ -18,17 +18,12 @@ import seedu.address.logic.LogicManager;
 import seedu.address.logic.commands.InfoCommand;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
-import seedu.address.model.ModelManager;
-import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
-import seedu.address.model.util.SampleDataUtil;
 import seedu.address.session.SessionData;
 import seedu.address.storage.AddressBookStorage;
 import seedu.address.storage.CommandHistoryStorage;
 import seedu.address.storage.JsonAddressBookStorage;
-import seedu.address.storage.JsonCommandHistoryStorage;
-import seedu.address.storage.JsonSessionStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.SessionStorage;
 import seedu.address.storage.Storage;
@@ -45,12 +40,13 @@ public class MainApp extends Application {
     public static final Version VERSION = new Version(0, 2, 2, true);
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
-
     protected Ui ui;
     protected Logic logic;
     protected Storage storage;
     protected Model model;
     protected Config config;
+
+    private final MainAppLifecycleManager lifecycleManager = new MainAppLifecycleManager(logger);
 
     @Override
     public void init() throws Exception {
@@ -65,21 +61,14 @@ public class MainApp extends Application {
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
         Path addressBookPath = userPrefs.getAddressBookFilePath();
         AddressBookStorage addressBookStorage = new JsonAddressBookStorage(addressBookPath);
-        Path sessionDir = deriveSessionDirectory(addressBookPath);
         CommandHistoryStorage commandHistoryStorage =
-            new JsonCommandHistoryStorage(userPrefs.getCommandHistoryFilePath());
-        SessionStorage sessionStorage = new JsonSessionStorage(sessionDir);
+            lifecycleManager.createCommandHistoryStorage(userPrefs.getCommandHistoryFilePath());
+        SessionStorage sessionStorage = lifecycleManager.createSessionStorage(addressBookPath);
         this.storage = new StorageManager(addressBookStorage, userPrefsStorage, commandHistoryStorage, sessionStorage);
 
-        this.model = initModelManager(storage, userPrefs);
+        Optional<SessionData> restoredSession = lifecycleManager.loadSession(storage);
 
-        Optional<SessionData> restoredSession = Optional.empty();
-        try {
-            restoredSession = storage.readSession();
-        } catch (DataLoadingException e) {
-            logger.warning("Session files could not be read. Starting without restoring session. "
-                    + e.getMessage());
-        }
+        this.model = initModelManager(storage, userPrefs, restoredSession);
 
         logic = new LogicManager(model, storage, restoredSession);
 
@@ -88,38 +77,14 @@ public class MainApp extends Application {
         InfoCommand.setUiManager((UiManager) ui);
     }
 
-    private Path deriveSessionDirectory(Path addressBookPath) {
-        Path parent = addressBookPath.getParent();
-        if (parent == null) {
-            return Path.of("sessions");
-        }
-        return parent.resolve("sessions");
-    }
-
     /**
      * Returns a {@code ModelManager} with the data from {@code storage}'s address book and {@code userPrefs}. <br>
      * The data from the sample address book will be used instead if {@code storage}'s address book is not found,
      * or an empty address book will be used instead if errors occur when reading {@code storage}'s address book.
      */
-    private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
-        logger.info("Using data file : " + storage.getAddressBookFilePath());
-
-        Optional<ReadOnlyAddressBook> addressBookOptional;
-        ReadOnlyAddressBook initialData;
-        try {
-            addressBookOptional = storage.readAddressBook();
-            if (!addressBookOptional.isPresent()) {
-                logger.info("Creating a new data file " + storage.getAddressBookFilePath()
-                        + " populated with a sample AddressBook.");
-            }
-            initialData = addressBookOptional.orElseGet(SampleDataUtil::getSampleAddressBook);
-        } catch (DataLoadingException e) {
-            logger.warning("Data file at " + storage.getAddressBookFilePath() + " could not be loaded."
-                    + " Will be starting with an empty AddressBook.");
-            initialData = new AddressBook();
-        }
-
-        return new ModelManager(initialData, userPrefs);
+    private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs,
+            Optional<SessionData> restoredSession) {
+        return lifecycleManager.initModel(storage, userPrefs, restoredSession);
     }
 
     private void initLogging(Config config) {
@@ -211,10 +176,6 @@ public class MainApp extends Application {
         } catch (IOException e) {
             logger.severe("Failed to save preferences " + StringUtil.getDetails(e));
         }
-        try {
-            storage.saveSession(logic.getCurrentSessionData());
-        } catch (IOException e) {
-            logger.severe("Failed to save session " + StringUtil.getDetails(e));
-        }
+        lifecycleManager.persistOnStop(storage, logic);
     }
 }

@@ -18,11 +18,11 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 1. Ensure you have Java `17` or above installed in your Computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. Download the latest `.jar` file from [here](https://github.com/se-edu/addressbook-level3/releases).
+1. Download the latest `.jar` file from [here](https://github.com/AY2526S1-CS2103T-T13-2/tp/releases).
 
-1. Copy the file to the folder you want to use as the _home folder_ for your AddressBook.
+1. Copy the file to the folder you want to use as the _home folder_ for your AssetSphere.
 
-1. Open a command terminal, `cd` into the folder you put the jar file in, and use the `java -jar addressbook.jar` command to run the application.<br>
+1. Open a command terminal, `cd` into the folder you put the jar file in, and use the `java -jar assetsphere.jar` command to run the application.<br>
    A GUI similar to the below should appear in a few seconds. Note how the app contains some sample data.<br>
    ![Ui](images/Ui.png)
 
@@ -82,11 +82,15 @@ Options are optional settings to customise your command. They always come _after
 
 When you look at the help for a command, you'll see this notation:
 
+- **Parameter Variants:**
+    - The acceptable parameter variants are placed as a prefix before the field, e.g. (+, -) `<tag>`. By default, if the variant is not specified, then the parameter must be a normal parameter and not have any prefix.
+    - (*): Normal parameter (no prefix)
+    - (+): Additive parameter (prefix `+`)
+    - (-): Subtractive parameter (prefix `-`)
 - **Field Types:**
     - `(string)`: Text that can be a single `word` or `"text with spaces"`.
     - `(word)`: Text that must be a single `word` (without quotes).
-    - `(index)`: A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered
-      list displayed.
+    - `(index)`: A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.
 - **Multiplicity (How many?):**
     - `<item>`: Exactly one is required.
     - `<item>?`: Zero or one (it's optional).
@@ -162,7 +166,7 @@ Format: `edit <index> [/<field>:<new-value>]+`
 
 **Parameters**
 
-* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit, as listed by the `list` command; must be a positive integer
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit 
 
 **Options**
 
@@ -174,31 +178,25 @@ Examples:
 *  `edit 1 /phone:91234567 /email:"johndoe@example.com"` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 /name:"Betsy Crower" /tag` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
 
-### Adding a tag : `tag`
+### Modifying tags : `tag`
 
-Adds a single tag to an existing person in the address book.
+Adds/removes tags to/from a person.
 
-Format: `tag INDEX TAG+`
+Format: `tag <index> [(+|-)<tag>]+`
 
-* Adds the specified `TAG` to the person at the given `INDEX` in the displayed list.
-* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
-* There can be multiple tags added at one time, the tags are separated by a whitespace
+* Adds tags specified with the `+` prefix to the person at the given `<index>` in the displayed list.
+* Removes tags specified with the `-` prefix to the person at the given `<index>` in the displayed list.
 
-Examples:
-* `list` followed by `tag 2 friend cool` will add `friend` and `cool` to the 2nd person in the address book.
+**Parameters**
 
-### Removing a tag : `untag`
-
-Removes a single tag from an existing person in the address book.
-
-Format: `untag INDEX t/TAG`
-
-* Removes the specified `TAG` from the person at the given `INDEX` in the displayed list.
-* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, …​
-* If the contact does not have the specified tag, the command will report an error and no changes will be made.
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
+* (+, -) `<tag>` (string): tags to add to or remove from a person
 
 Examples:
-* `list` followed by `untag 2 t/friends` removes the `friends` tag from the 2nd person in the address book.
+
+* `list` followed by `tag 2 +friend +cool` will add `friend` and `cool` to the 2nd person in the address book.
+* `list` followed by `tag 1 -villain -enemy` will remove `villain` and `enemy` from the 1st person in the address book.
+* `list` followed by `tag 2 +friend -villain +cool -enemy` will add `friend` and `cool` to and remove `villain` and `enemy` from the 2nd person in the address book.
 
 ### Adding information to a person: `info`
 
@@ -237,7 +235,7 @@ Finds persons whose fields contain any of the given keywords.
 
 Format: `find <keyword>+ [/<field>]*`
 
-If no specific field is provided, all built-in fields will be searched.
+* If no specific field is provided, all built-in fields will be searched.
 * The search is case-insensitive. e.g `hans` will match `Hans`.
 * The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`.
 * All the fields are searched.
@@ -253,8 +251,8 @@ Examples:
 * `find test.dummy@gmail.com` returns all persons whose email is `test.dummy@gmail.com`.
 * `find friend` returns all persons tagged with `"friend"`.
 
-You can limit the search to specific fields by adding options after your keywords.
-Each field option starts with / followed by the field name.
+* You can limit the search to specific fields by adding options after your keywords.
+* Each field option starts with / followed by the field name.
 * The same rules for searching applies as per the case of searching all built in fields. (see above)
 * Now, only those persons matching at least one keyword on any one specified field will be returned.
 
@@ -274,7 +272,7 @@ Format: `delete <index>`
 
 **Parameters**
 
-- `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to delete
 
 **Examples**
 
@@ -295,7 +293,7 @@ Format: `exit`
 
 ### Saving the data
 
-AddressBook data are saved in the hard disk automatically after any command that changes the data. There is no need to save manually.
+AssetSphere data are saved in the hard disk automatically after any command that changes the data. There is no need to save manually.
 
 #### Session snapshots
 
@@ -307,9 +305,26 @@ In addition to the main address book file, AssetSphere writes a snapshot of your
 
 At start-up AssetSphere loads the most recent valid snapshot so that the app opens with the same filters and window placement you last used. You can safely delete older session files if you want to reclaim disk space; the app will automatically create a fresh snapshot the next time you close it.
 
+Note about when a snapshot is created:
+
+- A new session snapshot is only saved on exit when the information that will be written to the session file has actually changed since the last saved snapshot. The timestamp stored in the snapshot (`savedAt`) is ignored for this comparison — changing only the timestamp will not cause a new file to be written.
+- Transient UI changes that do not affect the persisted session attributes (address book contents, active `find` keywords, or GUI settings) — for example, brief differences in the feedback text shown in the command-result box — will not trigger a new session file.
+
+#### Notes for this release (fix/command-history)
+
+Behavior for end users remains unchanged by the recent internal refactor. The app still:
+* Restores the most recent valid session snapshot at startup (filters, window layout, and address book snapshot).
+* Persists a session JSON file on normal exit under the `sessions/` subdirectory next to your main data file.
+* Persists the command history to `data/commandhistory.json` on exit.
+
+If you observe unexpected behaviour around session restoration or command history persistence after updating to this version, please:
+1. Ensure the app can write to the directory where your data files live.
+2. Check the `data/sessions/` folder for session files. Corrupted or invalid session files are ignored at startup.
+3. If needed, remove problematic session files and restart the app — a new snapshot will be created when you exit.
+
 ### Editing the data file
 
-AddressBook data are saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+AssetSphere data are saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
 
 Caution:
 
@@ -339,8 +354,8 @@ Caution:
 <box type="warning" seamless>
 
 **Caution:**
-If your changes to the data file makes its format invalid, AddressBook will discard all data and start with an empty data file at the next run.  Hence, it is recommended to take a backup of the file before editing it.<br>
-Furthermore, certain edits can cause the AddressBook to behave in unexpected ways (e.g., if a value entered is outside the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+If your changes to the data file makes its format invalid, AssetSphere will discard all data and start with an empty data file at the next run.  Hence, it is recommended to take a backup of the file before editing it.<br>
+Furthermore, certain edits can cause the AssetSphere to behave in unexpected ways (e.g., if a value entered is outside the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
 
 ### Archiving data files `[coming in v2.0]`
@@ -352,7 +367,7 @@ _Details coming soon ..._
 ## FAQ
 
 **Q**: How do I transfer my data to another Computer?<br>
-**A**: Install the app in the other computer and overwrite the empty data file it creates with the file that contains the data of your previous AddressBook home folder.
+**A**: Install the app in the other computer and overwrite the empty data file it creates with the file that contains the data of your previous AssetSphere home folder.
 
 --------------------------------------------------------------------------------------------------------------------
 
