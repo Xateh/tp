@@ -22,7 +22,7 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
 1. Copy the file to the folder you want to use as the _home folder_ for your AssetSphere.
 
-1. Open a command terminal, `cd` into the folder you put the jar file in, and use the `java -jar addressbook.jar` command to run the application.<br>
+1. Open a command terminal, `cd` into the folder you put the jar file in, and use the `java -jar assetsphere.jar` command to run the application.<br>
    A GUI similar to the below should appear in a few seconds. Note how the app contains some sample data.<br>
    ![Ui](images/Ui.png)
 
@@ -162,7 +162,7 @@ Format: `edit <index> [/<field>:<new-value>]+`
 
 **Parameters**
 
-* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit, as listed by the `list` command; must be a positive integer 
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit, as listed by the `list` command; must be a positive integer
 
 **Options**
 
@@ -319,6 +319,23 @@ In addition to the main address book file, AssetSphere writes a snapshot of your
 
 At start-up AssetSphere loads the most recent valid snapshot so that the app opens with the same filters and window placement you last used. You can safely delete older session files if you want to reclaim disk space; the app will automatically create a fresh snapshot the next time you close it.
 
+Note about when a snapshot is created:
+
+- A new session snapshot is only saved on exit when the information that will be written to the session file has actually changed since the last saved snapshot. The timestamp stored in the snapshot (`savedAt`) is ignored for this comparison — changing only the timestamp will not cause a new file to be written.
+- Transient UI changes that do not affect the persisted session attributes (address book contents, active `find` keywords, or GUI settings) — for example, brief differences in the feedback text shown in the command-result box — will not trigger a new session file.
+
+#### Notes for this release (fix/command-history)
+
+Behavior for end users remains unchanged by the recent internal refactor. The app still:
+* Restores the most recent valid session snapshot at startup (filters, window layout, and address book snapshot).
+* Persists a session JSON file on normal exit under the `sessions/` subdirectory next to your main data file.
+* Persists the command history to `data/commandhistory.json` on exit.
+
+If you observe unexpected behaviour around session restoration or command history persistence after updating to this version, please:
+1. Ensure the app can write to the directory where your data files live.
+2. Check the `data/sessions/` folder for session files. Corrupted or invalid session files are ignored at startup.
+3. If needed, remove problematic session files and restart the app — a new snapshot will be created when you exit.
+
 ### Editing the data file
 
 AssetSphere data are saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
@@ -391,5 +408,5 @@ Action     | Format, Examples
 **History** | `history`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Clear**  | `clear`
-**Exit**  | `exit`  
+**Exit**  | `exit`
 **Help**   | `help`

@@ -20,6 +20,14 @@ public abstract class UiPart<T> {
     private final FXMLLoader fxmlLoader = new FXMLLoader();
 
     /**
+     * No-op constructor to allow subclasses (and tests) to avoid loading FXML.
+     * Use with care: subclasses using this constructor must initialize state themselves.
+     */
+    protected UiPart() {
+        // intentionally empty
+    }
+
+    /**
      * Constructs a UiPart with the specified FXML file URL.
      * The FXML file must not specify the {@code fx:controller} attribute.
      */
