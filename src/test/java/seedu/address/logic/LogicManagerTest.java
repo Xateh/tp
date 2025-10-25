@@ -5,14 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_BOB;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.AMY;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
@@ -31,7 +34,6 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
-import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.history.CommandHistory;
 import seedu.address.model.person.Person;
@@ -44,9 +46,6 @@ import seedu.address.storage.StorageManager;
 import seedu.address.testutil.PersonBuilder;
 
 public class LogicManagerTest {
-    private static final IOException DUMMY_IO_EXCEPTION = new IOException("dummy IO exception");
-    private static final IOException DUMMY_AD_EXCEPTION = new AccessDeniedException("dummy access denied exception");
-
     @TempDir
     public Path temporaryFolder;
 
@@ -86,15 +85,49 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_storageThrowsIoException_throwsCommandException() {
-        assertCommandFailureForExceptionFromStorage(DUMMY_IO_EXCEPTION, String.format(
-                LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()));
+    public void getAddressBookFilePath_delegatesToModel() {
+        assertEquals(model.getAddressBookFilePath(), logic.getAddressBookFilePath());
     }
 
     @Test
-    public void execute_storageThrowsAdException_throwsCommandException() {
-        assertCommandFailureForExceptionFromStorage(DUMMY_AD_EXCEPTION, String.format(
-                LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, DUMMY_AD_EXCEPTION.getMessage()));
+    public void guiSettings_roundTripThroughLogic() {
+        GuiSettings newSettings = new GuiSettings(1024, 768, 20, 40);
+        logic.setGuiSettings(newSettings);
+        assertEquals(newSettings, logic.getGuiSettings());
+    }
+
+    @Test
+    public void execute_successCommand_recordsHistoryEntry() throws Exception {
+        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
+                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
+
+        logic.execute(addCommand);
+
+        CommandHistory historySnapshot = logic.getCommandHistorySnapshot();
+        assertEquals(1, historySnapshot.size());
+        assertEquals(addCommand.trim(), historySnapshot.getEntries().get(0));
+    }
+
+    @Test
+    public void execute_parseException_doesNotRecordHistory() {
+        CommandHistory before = logic.getCommandHistorySnapshot();
+        String invalidCommand = "uicfhmowqewca";
+
+        assertThrows(ParseException.class, () -> logic.execute(invalidCommand));
+
+        CommandHistory after = logic.getCommandHistorySnapshot();
+        assertEquals(before, after);
+    }
+
+    @Test
+    public void execute_commandException_doesNotRecordHistory() {
+        CommandHistory before = logic.getCommandHistorySnapshot();
+        String deleteCommand = "delete 9";
+
+        assertThrows(CommandException.class, () -> logic.execute(deleteCommand));
+
+        CommandHistory after = logic.getCommandHistorySnapshot();
+        assertEquals(before, after);
     }
 
     @Test
@@ -142,7 +175,7 @@ public class LogicManagerTest {
                 new JsonSessionStorage(sessionDir)) {
             @Override
             public Optional<CommandHistory> readCommandHistory() throws DataLoadingException {
-                throw new DataLoadingException(DUMMY_IO_EXCEPTION);
+                throw new DataLoadingException(new IOException("dummy IO exception"));
             }
         };
 
@@ -150,6 +183,121 @@ public class LogicManagerTest {
         new LogicManager(testModel, storage);
 
         assertTrue(testModel.getCommandHistory().isEmpty());
+    }
+
+    @Test
+    public void getSessionSnapshotIfDirty_addressBookUnchanged_returnsEmpty() throws Exception {
+        logic.execute(ListCommand.COMMAND_WORD);
+        assertTrue(logic.getSessionSnapshotIfDirty().isEmpty());
+    }
+
+    @Test
+    public void getSessionSnapshotIfDirty_addressBookChanged_returnsSnapshot() throws Exception {
+        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
+                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
+        Person expectedPerson = new PersonBuilder(AMY).withTags().build();
+
+        logic.execute(addCommand);
+
+        Optional<SessionData> snapshot = logic.getSessionSnapshotIfDirty();
+        assertTrue(snapshot.isPresent());
+        assertTrue(snapshot.get().getAddressBook().getPersonList().contains(expectedPerson));
+    }
+
+    @Test
+    public void getSessionSnapshotIfDirty_markPersistedClearsDirtyFlag() throws Exception {
+        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
+                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
+        logic.execute(addCommand);
+
+        assertTrue(logic.getSessionSnapshotIfDirty().isPresent());
+        logic.markSessionSnapshotPersisted();
+        assertTrue(logic.getSessionSnapshotIfDirty().isEmpty());
+    }
+
+    @Test
+    public void getCommandHistorySnapshot_returnsDefensiveCopy() throws Exception {
+        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
+                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
+        logic.execute(addCommand);
+
+        CommandHistory snapshot = logic.getCommandHistorySnapshot();
+        snapshot.reset(List.of("modified"));
+
+        CommandHistory latestSnapshot = logic.getCommandHistorySnapshot();
+        assertEquals(List.of(addCommand.trim()), latestSnapshot.getEntries());
+    }
+
+    @Test
+    public void sessionSnapshot_tracksSearchKeywordsAcrossMutations() throws Exception {
+        model.addPerson(new PersonBuilder().withName("Alice Pauline").build());
+
+        logic.execute("find Alice");
+        assertTrue(logic.getSessionSnapshotIfDirty().isEmpty());
+
+        String addBobCommand = AddCommand.COMMAND_WORD + NAME_DESC_BOB + PHONE_DESC_BOB
+                + EMAIL_DESC_BOB + ADDRESS_DESC_BOB;
+        logic.execute(addBobCommand);
+
+        SessionData snapshot = logic.getSessionSnapshotIfDirty().orElseThrow();
+        assertEquals(List.of("Alice"), snapshot.getSearchKeywords());
+        logic.markSessionSnapshotPersisted();
+
+        logic.execute(ListCommand.COMMAND_WORD);
+        assertTrue(logic.getSessionSnapshotIfDirty().isEmpty());
+
+        String addAmyCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
+                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
+        logic.execute(addAmyCommand);
+
+        snapshot = logic.getSessionSnapshotIfDirty().orElseThrow();
+        assertEquals(List.of(), snapshot.getSearchKeywords());
+    }
+
+    @Test
+    public void getSessionSnapshotIfAnyDirty_searchKeywordsChange_present() throws Exception {
+        model.addPerson(new PersonBuilder().withName("Alice Pauline").build());
+
+        // search changes should mark metadata dirty, visible via getSessionSnapshotIfAnyDirty
+        logic.execute("find Alice");
+        Optional<SessionData> snapshot = logic.getSessionSnapshotIfAnyDirty();
+        assertTrue(snapshot.isPresent());
+        assertEquals(List.of("Alice"), snapshot.get().getSearchKeywords());
+
+        // marking persisted clears the metadata dirty flag
+        logic.markSessionSnapshotPersisted();
+        assertTrue(logic.getSessionSnapshotIfAnyDirty().isEmpty());
+    }
+
+    @Test
+    public void getSessionSnapshotIfAnyDirty_guiSettingsChange_present() {
+        GuiSettings newSettings = new GuiSettings(640, 480, 10, 10);
+        // changing GUI settings through Logic should mark metadata dirty
+        logic.setGuiSettings(newSettings);
+
+        Optional<SessionData> snapshot = logic.getSessionSnapshotIfAnyDirty();
+        assertTrue(snapshot.isPresent());
+        assertEquals(newSettings, snapshot.get().getGuiSettings());
+
+        logic.markSessionSnapshotPersisted();
+        assertTrue(logic.getSessionSnapshotIfAnyDirty().isEmpty());
+    }
+
+    @Test
+    public void getSessionSnapshotIfAnyDirty_commandResultOnlyChange_empty() throws Exception {
+        // List with no active filters only changes the command result text
+        logic.execute(ListCommand.COMMAND_WORD);
+        assertTrue(logic.getSessionSnapshotIfAnyDirty().isEmpty());
+    }
+
+    @Test
+    public void getSessionSnapshotIfAnyDirty_metadataReverted_empty() throws Exception {
+        model.addPerson(new PersonBuilder().withName("Alice Pauline").build());
+
+        logic.execute("find Alice");
+        logic.execute(ListCommand.COMMAND_WORD);
+
+        assertTrue(logic.getSessionSnapshotIfAnyDirty().isEmpty());
     }
 
     /**
@@ -213,61 +361,9 @@ public class LogicManagerTest {
      * @param e the exception to be thrown by the Storage component
      * @param expectedMessage the message expected inside exception thrown by the Logic component
      */
-    private void assertCommandFailureForExceptionFromStorage(IOException e, String expectedMessage) {
-        Path addressBookPath = temporaryFolder.resolve("ExceptionAddressBook.json");
-
-        // Inject LogicManager with an AddressBookStorage that throws the IOException e when saving
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(addressBookPath) {
-            @Override
-            public void saveAddressBook(ReadOnlyAddressBook addressBook, Path filePath)
-                    throws IOException {
-                throw e;
-            }
-        };
-
-        JsonUserPrefsStorage userPrefsStorage =
-                new JsonUserPrefsStorage(temporaryFolder.resolve("ExceptionUserPrefs.json"));
-        JsonCommandHistoryStorage commandHistoryStorage =
-                new JsonCommandHistoryStorage(temporaryFolder.resolve("ExceptionCommandHistory.json"));
-        JsonSessionStorage sessionStorage =
-                new JsonSessionStorage(temporaryFolder.resolve("ExceptionSessions"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage,
-                commandHistoryStorage, sessionStorage);
-
-        logic = new LogicManager(model, storage);
-
-        // Triggers the saveAddressBook method by executing an add command
-        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
-        Person expectedPerson = new PersonBuilder(AMY).withTags().build();
-        ModelManager expectedModel = new ModelManager();
-        expectedModel.addPerson(expectedPerson);
-        assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
-    }
-
     private void syncCommandHistory(Model expectedModel, Model actualModel) {
         CommandHistory historySnapshot = new CommandHistory(actualModel.getCommandHistory().getEntries());
         expectedModel.setCommandHistory(historySnapshot);
-    }
-
-    @Test
-    public void getCurrentSessionData_recordsSuccessfulCommands() throws Exception {
-        logic.execute(ListCommand.COMMAND_WORD);
-        SessionData sessionData = logic.getCurrentSessionData();
-        assertEquals(1, sessionData.getCommandHistory().size());
-        assertEquals(ListCommand.COMMAND_WORD, sessionData.getCommandHistory().get(0).getCommandText());
-    }
-
-    @Test
-    public void getCurrentSessionData_tracksSearchKeywords() throws Exception {
-        model.addPerson(new PersonBuilder().withName("Alice Pauline").build());
-        logic.execute("find Alice");
-        SessionData sessionData = logic.getCurrentSessionData();
-        assertEquals(List.of("Alice"), sessionData.getSearchKeywords());
-
-        logic.execute(ListCommand.COMMAND_WORD);
-        sessionData = logic.getCurrentSessionData();
-        assertEquals(List.of(), sessionData.getSearchKeywords());
     }
 
     @Test
@@ -286,15 +382,37 @@ public class LogicManagerTest {
                 commandHistoryStorage, sessionStorage);
 
         SessionData previousSession = new SessionData(
-                Instant.parse("2025-10-14T00:00:00Z"),
-                storage.getAddressBookFilePath(),
-                List.of("Alice"),
-                List.of(),
-                new GuiSettings());
+            Instant.parse("2025-10-14T00:00:00Z"),
+            model.getAddressBook(),
+            List.of("Alice"),
+            new GuiSettings());
 
         logic = new LogicManager(model, storage, Optional.of(previousSession));
 
         assertEquals(1, logic.getFilteredPersonList().size());
         assertEquals(alice, logic.getFilteredPersonList().get(0));
+    }
+
+    @Test
+    public void constructor_withSessionWithoutKeywords_doesNotFilter() throws Exception {
+        JsonAddressBookStorage addressBookStorage =
+                new JsonAddressBookStorage(temporaryFolder.resolve("emptyRestoreAddressBook.json"));
+        JsonUserPrefsStorage userPrefsStorage =
+                new JsonUserPrefsStorage(temporaryFolder.resolve("emptyRestorePrefs.json"));
+        JsonCommandHistoryStorage commandHistoryStorage =
+                new JsonCommandHistoryStorage(temporaryFolder.resolve("emptyRestoreHistory.json"));
+        JsonSessionStorage sessionStorage = new JsonSessionStorage(temporaryFolder.resolve("emptyRestoreSessions"));
+        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage,
+                commandHistoryStorage, sessionStorage);
+
+        SessionData previousSession = new SessionData(
+            Instant.parse("2025-10-14T00:00:00Z"),
+            model.getAddressBook(),
+            List.of(),
+            new GuiSettings());
+
+        logic = new LogicManager(model, storage, Optional.of(previousSession));
+
+        assertEquals(model.getFilteredPersonList(), logic.getFilteredPersonList());
     }
 }
