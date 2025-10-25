@@ -16,7 +16,8 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.Logic;
-import seedu.address.logic.commands.InfoSaveCommand;
+import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.InfoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.person.Info;
 import seedu.address.model.person.Person;
@@ -130,10 +131,9 @@ public class UiManager implements Ui {
         try {
             Index index = Index.fromOneBased(personIndex + 1);
             Info info = new Info(infoText);
-            InfoSaveCommand saveCommand = new InfoSaveCommand(index, info);
 
-            // Execute the save command directly
-            var result = saveCommand.execute(logic.getModel());
+            // Use InfoEditCommand.saveInfo instead of InfoSaveCommand
+            CommandResult result = InfoCommand.saveInfo(logic.getModel(), index, info);
 
             // Update the main window's result display
             mainWindow.showFeedback(result.getFeedbackToUser());

@@ -5,21 +5,17 @@ import static seedu.address.logic.grammars.command.BareCommand.Parameter.Paramet
 import java.util.List;
 
 import seedu.address.commons.core.index.Index;
-import seedu.address.logic.commands.InfoEditCommand;
+import seedu.address.logic.commands.InfoCommand;
 import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.grammars.command.BareCommand;
 
 /**
  * Extractor that builds {@code InfoEditCommand}s.
  */
-public class InfoEditCommandExtractor {
-    // Messages for extraction
-    public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
-    public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
-    public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
+public class InfoCommandExtractor {
     public static final String MESSAGE_TOO_MANY_PARAMETERS = "Too many parameters provided. Expected only index.";
 
-    private InfoEditCommandExtractor() {
+    private InfoCommandExtractor() {
     }
 
     /**
@@ -29,22 +25,19 @@ public class InfoEditCommandExtractor {
      * @return InfoEditCommand that can be executed.
      * @throws ValidationException When the command parameters fail to validate.
      */
-    public static InfoEditCommand extract(BareCommand bareCommand) throws ValidationException {
-        // First, check parameter count manually
-        List<BareCommand.Parameter> allParams = bareCommand.getAllParameters();
+    public static InfoCommand extract(BareCommand bareCommand) throws ValidationException {
+        // Validate that we have exactly 1 parameter using existing validation utility
+        List<BareCommand.Parameter> parameters = Validation.validateVariableParametersWithMinimumMultiplicity(
+                bareCommand, 0, 1, ParameterKind.NORMAL);
 
-        // Count only NORMAL parameters (not flags)
-        long normalParamCount = allParams.stream()
-                .filter(param -> param.getKind() == ParameterKind.NORMAL)
-                .count();
-
-        if (normalParamCount > 1) {
+        // Check we don't have too many parameters
+        if (parameters.size() > 1) {
             throw new ValidationException(MESSAGE_TOO_MANY_PARAMETERS);
         }
 
         // Extract and validate the index using the standard validation
         Index index = Validation.validateIndex(bareCommand, 0);
 
-        return new InfoEditCommand(index);
+        return new InfoCommand(index);
     }
 }
