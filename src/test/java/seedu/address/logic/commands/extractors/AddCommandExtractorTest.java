@@ -2,7 +2,10 @@ package seedu.address.logic.commands.extractors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static seedu.address.logic.commands.extractors.AddCommandExtractor.OPTION_KEY_TAG;
 import static seedu.address.logic.grammars.command.BareCommand.Parameter.ParameterKind.ADDITIVE;
+
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +19,7 @@ import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
 import seedu.address.model.person.builder.PersonBuilder;
+import seedu.address.model.tag.Tag;
 
 /**
  * Contains tests for {@code AddCommandExtractor}. This tests the extractor's ability to validate and parse positional
@@ -28,13 +32,15 @@ public class AddCommandExtractorTest {
     private static final String VALID_PHONE = "87654321";
     private static final String VALID_ADDRESS = "123 Main Street";
     private static final String VALID_EMAIL = "john@example.com";
+    private static final String VALID_TAG1 = "friend";
+    private static final String VALID_TAG2 = "colleague";
 
     // Based on the given restrictions
     private static final String INVALID_NAME_EMPTY = "";
     private static final String INVALID_PHONE_SHORT = "12";
     private static final String INVALID_PHONE_LETTERS = "abcdefgh";
     private static final String INVALID_ADDRESS_EMPTY = "";
-    private static final String INVALID_EMAIL_NODOMAIN = "john@d";
+    private static final String INVALID_EMAIL_NO_DOMAIN = "john@d";
 
     // --- Positive Test Cases ---
 
@@ -60,8 +66,32 @@ public class AddCommandExtractorTest {
     }
 
     @Test
+    public void extract_validArgsWithTags_returnsAddCommand() throws ValidationException {
+        // --- Case 2: All valid parameters ---
+        BareCommand cmd = new BareCommandBuilder()
+                .setImperative("add")
+                .addParameter(VALID_NAME)
+                .addParameter(VALID_PHONE)
+                .addParameter(VALID_ADDRESS)
+                .addParameter(VALID_EMAIL)
+                .setOption(OPTION_KEY_TAG, VALID_TAG1)
+                .setOption(OPTION_KEY_TAG, VALID_TAG2)
+                .build();
+
+        Person expectedPerson = new PersonBuilder()
+                .withName(new Name(VALID_NAME))
+                .withPhone(new Phone(VALID_PHONE))
+                .withAddress(new Address(VALID_ADDRESS))
+                .withEmail(new Email(VALID_EMAIL))
+                .withTags(Set.of(new Tag(VALID_TAG1), new Tag(VALID_TAG2)))
+                .build();
+
+        assertEquals(new AddCommand(expectedPerson), AddCommandExtractor.extract(cmd));
+    }
+
+    @Test
     public void extract_extraValidArgs_returnsAddCommand() throws ValidationException {
-        // --- Case 2: Extra parameters are ignored ---
+        // --- Case 3: Extra parameters are ignored ---
         // The extractor only validates up to index 3.
         BareCommand cmd = new BareCommandBuilder()
                 .setImperative("add")
@@ -191,7 +221,21 @@ public class AddCommandExtractorTest {
                 .addParameter(VALID_NAME)
                 .addParameter(VALID_PHONE)
                 .addParameter(VALID_ADDRESS)
-                .addParameter(INVALID_EMAIL_NODOMAIN)
+                .addParameter(INVALID_EMAIL_NO_DOMAIN)
+                .build();
+        assertThrows(ValidationException.class, () -> AddCommandExtractor.extract(cmd));
+    }
+
+    @Test
+    public void extract_invalidTags_throwsValidationException() {
+        // Fails on Validation.validateTags(...)
+        BareCommand cmd = new BareCommandBuilder()
+                .setImperative("add")
+                .addParameter(VALID_NAME)
+                .addParameter(VALID_PHONE)
+                .addParameter(VALID_ADDRESS)
+                .addParameter(VALID_EMAIL)
+                .setOption(OPTION_KEY_TAG)
                 .build();
         assertThrows(ValidationException.class, () -> AddCommandExtractor.extract(cmd));
     }

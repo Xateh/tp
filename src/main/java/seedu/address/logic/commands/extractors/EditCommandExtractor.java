@@ -12,9 +12,6 @@ import seedu.address.logic.grammars.command.BareCommand;
  * Extractor that builds {@code EditCommand}s.
  */
 public final class EditCommandExtractor {
-    // Messages for extraction
-    public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
-
     // Options
     public static final String OPTION_KEY_NAME = "name";
     public static final String OPTION_KEY_PHONE = "phone";
