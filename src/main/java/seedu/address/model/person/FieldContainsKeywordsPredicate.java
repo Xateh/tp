@@ -27,7 +27,7 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
 
     //if no option value provided, search all non-custom fields
     public FieldContainsKeywordsPredicate(List<String> keywords) {
-        this(keywords, true, true, true, true, true, true, true, Set.of());
+        this(keywords, true, true, true, true, true, false, false, Set.of());
     }
 
     /**
@@ -126,15 +126,15 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
             // finds all persons who is the linker with the given linkname
             if (searchLinker && person.getLinks().stream()
                     .anyMatch(link -> StringUtil.containsWordIgnoreCase(link.getLinkName(), keyword)
-                    && link.getLinker().getName().equals(person.getName()))) {
+                    && link.getLinker().isSamePerson(person))) {
                 return true;
             }
 
-            // checks if searchLinkee(/to) flag is activated and
+            // checks if searchLinkee (/to) flag is activated and
             // finds all persons who is the linkee of the link with the given linkname
             if (searchLinkee && person.getLinks().stream()
                     .anyMatch(link -> StringUtil.containsWordIgnoreCase(link.getLinkName(), keyword)
-                    && link.getLinkee().getName().equals(person.getName()))) {
+                    && link.getLinkee().isSamePerson(person))) {
                 return true;
             }
 
@@ -180,6 +180,8 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
                 && searchEmail == otherFieldsContainsKeywordsPredicate.searchEmail
                 && searchAddress == otherFieldsContainsKeywordsPredicate.searchAddress
                 && searchTag == otherFieldsContainsKeywordsPredicate.searchTag
+                && searchLinker == otherFieldsContainsKeywordsPredicate.searchLinker
+                && searchLinkee == otherFieldsContainsKeywordsPredicate.searchLinkee
                 && customKeys.equals(otherFieldsContainsKeywordsPredicate.customKeys);
     }
 

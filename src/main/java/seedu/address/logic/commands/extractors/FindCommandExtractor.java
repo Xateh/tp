@@ -42,9 +42,9 @@ public final class FindCommandExtractor {
         boolean optEmail = bareCommand.hasOption("email");
         boolean optAddress = bareCommand.hasOption("address");
         boolean optTag = bareCommand.hasOption("tag");
-        boolean optLinker = bareCommand.hasOption("from");
-        boolean optLinkee = bareCommand.hasOption("to");
-        List<String> keysToRemove = List.of("name", "phone", "email", "address", "tags", "tag");
+        boolean optLinker = bareCommand.hasOption("from"); // from specifies finding all linkers
+        boolean optLinkee = bareCommand.hasOption("to"); // to specifies finding all linkees
+        List<String> keysToRemove = List.of("name", "phone", "email", "address", "tag", "from", "to");
         Map<String, List<String>> map = bareCommand.getAllOptions();
         Set<String> customKeys = map.keySet().stream()
                 .map(k -> k != null ? k.trim().toLowerCase() : "")
