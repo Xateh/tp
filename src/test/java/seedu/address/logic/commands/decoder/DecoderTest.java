@@ -15,11 +15,8 @@ import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.HistoryCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.TagCommand;
-import seedu.address.logic.commands.exceptions.ResolutionException;
-import seedu.address.logic.commands.exceptions.ValidationException;
+import seedu.address.logic.exceptions.AssemblyException;
 import seedu.address.logic.grammars.command.BareCommand;
-import seedu.address.logic.grammars.command.lexer.LexerException;
-import seedu.address.logic.grammars.command.parser.ParserException;
 
 /**
  * Test class for testing the decoder's command resolution. Note that tests here should not test behaviour of the
@@ -27,71 +24,78 @@ import seedu.address.logic.grammars.command.parser.ParserException;
  */
 public class DecoderTest {
     @Test
+    public void decode_addCommandExactMatch_success() throws
+            AssemblyException {
+        Command tagCommand = Decoder.decode(BareCommand.parse("clear"));
+        assertEquals(ClearCommand.class, tagCommand.getClass());
+    }
+
+    @Test
     public void decode_clearCommandExactMatch_success() throws
-            LexerException, ParserException, ResolutionException, ValidationException {
+            AssemblyException {
         Command tagCommand = Decoder.decode(BareCommand.parse("clear"));
         assertEquals(ClearCommand.class, tagCommand.getClass());
     }
 
     @Test
     public void decode_deleteCommandExactMatch_success() throws
-            LexerException, ParserException, ResolutionException, ValidationException {
+            AssemblyException {
         Command deleteCommand = Decoder.decode(BareCommand.parse("delete 1"));
         assertEquals(DeleteCommand.class, deleteCommand.getClass());
     }
 
     @Test
     public void decode_editCommandExactMatch_success() throws
-            LexerException, ParserException, ResolutionException, ValidationException {
+            AssemblyException {
         Command editCommand = Decoder.decode(BareCommand.parse("edit 1 /name:Test"));
         assertEquals(EditCommand.class, editCommand.getClass());
     }
 
     @Test
     public void decode_exitCommandExactMatch_success() throws
-            LexerException, ParserException, ResolutionException, ValidationException {
+            AssemblyException {
         Command tagCommand = Decoder.decode(BareCommand.parse("exit"));
         assertEquals(ExitCommand.class, tagCommand.getClass());
     }
 
     @Test
     public void decode_fieldCommandExactMatch_success() throws
-            LexerException, ParserException, ResolutionException, ValidationException {
+            AssemblyException {
         Command fieldCommand = Decoder.decode(BareCommand.parse("field 1 /k:v"));
         assertEquals(FieldCommand.class, fieldCommand.getClass());
     }
 
     @Test
     public void decode_findCommandExactMatch_success() throws
-            LexerException, ParserException, ResolutionException, ValidationException {
+            AssemblyException {
         Command fieldCommand = Decoder.decode(BareCommand.parse("find Sally /name"));
         assertEquals(FindCommand.class, fieldCommand.getClass());
     }
 
     @Test
     public void decode_helpCommandExactMatch_success() throws
-            LexerException, ParserException, ResolutionException, ValidationException {
+            AssemblyException {
         Command tagCommand = Decoder.decode(BareCommand.parse("help"));
         assertEquals(HelpCommand.class, tagCommand.getClass());
     }
 
     @Test
     public void decode_historyCommandExactMatch_success()
-            throws LexerException, ParserException, ResolutionException, ValidationException {
+            throws AssemblyException {
         Command historyCommand = Decoder.decode(BareCommand.parse("history"));
         assertEquals(HistoryCommand.class, historyCommand.getClass());
     }
 
     @Test
     public void decode_listCommandExactMatch_success()
-            throws LexerException, ParserException, ResolutionException, ValidationException {
+            throws AssemblyException {
         Command historyCommand = Decoder.decode(BareCommand.parse("list"));
         assertEquals(ListCommand.class, historyCommand.getClass());
     }
 
     @Test
     public void decode_tagCommandExactMatch_success() throws
-            LexerException, ParserException, ResolutionException, ValidationException {
+            AssemblyException {
         Command tagCommand = Decoder.decode(BareCommand.parse("tag 1 +test1 -test2"));
         assertEquals(TagCommand.class, tagCommand.getClass());
     }

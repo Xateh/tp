@@ -1,9 +1,11 @@
 package seedu.address.logic.grammars.command.lexer;
 
+import seedu.address.logic.exceptions.AssemblyException;
+
 /**
  * Exception for errors encountered during lexing.
  */
-public class LexerException extends Exception {
+public final class LexerException extends AssemblyException {
     private final LexerError lexerError;
 
     /**

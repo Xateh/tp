@@ -6,12 +6,19 @@ import static seedu.address.logic.grammars.command.BareCommand.Parameter.Paramet
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.grammars.command.BareCommand;
+import seedu.address.model.person.Address;
+import seedu.address.model.person.Email;
+import seedu.address.model.person.Name;
+import seedu.address.model.person.Phone;
+import seedu.address.model.tag.Tag;
 
 /**
  * Utility class for common extractions and validations used by multiple commands. Whenever these validators are used,
@@ -161,5 +168,88 @@ public class Validation {
         requireNonNull(bareCommand);
         return Validation.validateIndex(
                 Validation.validateParameter(bareCommand, position, ParameterKind.NORMAL).getValue());
+    }
+
+
+    /**
+     * Parses a {@code String name} into a {@code Name}. Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ValidationException the given {@code name} is invalid.
+     */
+    public static Name validateName(String name) throws ValidationException {
+        requireNonNull(name);
+        String trimmedName = name.trim();
+        if (!Name.isValidName(trimmedName)) {
+            throw new ValidationException(Name.MESSAGE_CONSTRAINTS);
+        }
+        return new Name(trimmedName);
+    }
+
+    /**
+     * Parses a {@code String phone} into a {@code Phone}. Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ValidationException if the given {@code phone} is invalid.
+     */
+    public static Phone validatePhone(String phone) throws ValidationException {
+        requireNonNull(phone);
+        String trimmedPhone = phone.trim();
+        if (!Phone.isValidPhone(trimmedPhone)) {
+            throw new ValidationException(Phone.MESSAGE_CONSTRAINTS);
+        }
+        return new Phone(trimmedPhone);
+    }
+
+    /**
+     * Parses a {@code String address} into an {@code Address}. Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ValidationException if the given {@code address} is invalid.
+     */
+    public static Address validateAddress(String address) throws ValidationException {
+        requireNonNull(address);
+        String trimmedAddress = address.trim();
+        if (!Address.isValidAddress(trimmedAddress)) {
+            throw new ValidationException(Address.MESSAGE_CONSTRAINTS);
+        }
+        return new Address(trimmedAddress);
+    }
+
+    /**
+     * Parses a {@code String email} into an {@code Email}. Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ValidationException if the given {@code email} is invalid.
+     */
+    public static Email validateEmail(String email) throws ValidationException {
+        requireNonNull(email);
+        String trimmedEmail = email.trim();
+        if (!Email.isValidEmail(trimmedEmail)) {
+            throw new ValidationException(Email.MESSAGE_CONSTRAINTS);
+        }
+        return new Email(trimmedEmail);
+    }
+
+    /**
+     * Parses a {@code String tag} into a {@code Tag}. Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ValidationException if the given {@code tag} is invalid.
+     */
+    public static Tag validateTag(String tag) throws ValidationException {
+        requireNonNull(tag);
+        String trimmedTag = tag.trim();
+        if (!Tag.isValidTagName(trimmedTag)) {
+            throw new ValidationException(Tag.MESSAGE_CONSTRAINTS);
+        }
+        return new Tag(trimmedTag);
+    }
+
+    /**
+     * Parses {@code Collection<String> tags} into a {@code Set<Tag>}.
+     */
+    public static Set<Tag> validateTags(Collection<String> tags) throws ValidationException {
+        requireNonNull(tags);
+        final Set<Tag> tagSet = new HashSet<>();
+        for (String tagName : tags) {
+            tagSet.add(validateTag(tagName));
+        }
+        return tagSet;
     }
 }

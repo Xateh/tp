@@ -23,7 +23,7 @@ import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.Logic;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.logic.exceptions.AssemblyException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
@@ -84,7 +84,7 @@ class MainAppLifecycleManagerTest {
         }
 
         @Override
-        public CommandResult execute(String commandText) throws CommandException, ParseException {
+        public CommandResult execute(String commandText) throws CommandException, AssemblyException {
             throw new UnsupportedOperationException();
         }
 
@@ -450,7 +450,7 @@ class MainAppLifecycleManagerTest {
         }
 
         @Override
-        public CommandResult execute(String commandText) throws CommandException, ParseException {
+        public CommandResult execute(String commandText) throws CommandException, AssemblyException {
             throw new UnsupportedOperationException();
         }
 
@@ -504,10 +504,11 @@ class MainAppLifecycleManagerTest {
     void initModel_nullArgs_throwsNpe() {
         // null storage
         assertThrows(NullPointerException.class, ()
-            -> lifecycleManager.initModel(null, new UserPrefs(), Optional.empty()));
+                -> lifecycleManager.initModel(null, new UserPrefs(), Optional.empty()));
 
         // create a minimal Storage stub
-        Storage stub = new BaseStorageStub() { };
+        Storage stub = new BaseStorageStub() {
+        };
 
         assertThrows(NullPointerException.class, () -> lifecycleManager.initModel(stub, null, Optional.empty()));
         // null restoredSession

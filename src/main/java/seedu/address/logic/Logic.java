@@ -7,7 +7,7 @@ import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.logic.exceptions.AssemblyException;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.history.CommandHistory;
 import seedu.address.model.person.Person;
@@ -19,12 +19,13 @@ import seedu.address.session.SessionData;
 public interface Logic {
     /**
      * Executes the command and returns the result.
+     *
      * @param commandText The command as entered by the user.
      * @return the result of the command execution.
-     * @throws CommandException If an error occurs during command execution.
-     * @throws ParseException If an error occurs during parsing.
+     * @throws CommandException  If an error occurs during command execution.
+     * @throws AssemblyException If an error occurs during command assembly.
      */
-    CommandResult execute(String commandText) throws CommandException, ParseException;
+    CommandResult execute(String commandText) throws CommandException, AssemblyException;
 
     /**
      * Returns the AddressBook.
@@ -33,7 +34,9 @@ public interface Logic {
      */
     ReadOnlyAddressBook getAddressBook();
 
-    /** Returns an unmodifiable view of the filtered list of persons */
+    /**
+     * Returns an unmodifiable view of the filtered list of persons
+     */
     ObservableList<Person> getFilteredPersonList();
 
     // Returns the history of executed commands, ordered from oldest to newest.
@@ -59,10 +62,9 @@ public interface Logic {
     Optional<SessionData> getSessionSnapshotIfDirty();
 
     /**
-     * Returns a snapshot of the current session data if any part of the session (address book or
-     * session metadata such as search keywords or GUI settings) has changed since the last save.
-     * This method is intended to be used by lifecycle/shutdown code to decide whether to persist
-     * a session snapshot.
+     * Returns a snapshot of the current session data if any part of the session (address book or session metadata such
+     * as search keywords or GUI settings) has changed since the last save. This method is intended to be used by
+     * lifecycle/shutdown code to decide whether to persist a session snapshot.
      */
     Optional<SessionData> getSessionSnapshotIfAnyDirty();
 
