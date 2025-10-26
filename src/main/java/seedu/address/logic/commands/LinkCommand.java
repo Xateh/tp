@@ -32,7 +32,6 @@ public class LinkCommand extends Command {
 
     public static final String MESSAGE_SUCCESS = "%1$s is now %2$s of %3$s";
     public static final String MESSAGE_DUPLICATE_LINK = "No change: that link already exists.";
-    public static final String MESSAGE_SAME_PERSON = "Cannot link a person to themselves.";
     private final Index linkerIndex; // INDEX1
     private final String linkName; // LINK_NAME
     private final Index linkeeIndex; // INDEX2
@@ -76,15 +75,16 @@ public class LinkCommand extends Command {
 
         Link newLink = new Link(linker, linkee, linkName);
 
+        // Get links of linker and linkee
         Set<Link> linkerLinks = new HashSet<>(linker.getLinks());
         Set<Link> linkeeLinks = new HashSet<>(linkee.getLinks());
 
-        // If the exact link already exists on linker, treat as no-op
+        // If the exact link already exists on linker, treat as no-op with a message
         if (linkerLinks.contains(newLink)) {
             return new CommandResult(MESSAGE_DUPLICATE_LINK);
         }
 
-        // Add the corresponding Link instance to both persons
+        // Add the same Link instance to both persons
         linkerLinks.add(newLink);
         linkeeLinks.add(newLink);
 

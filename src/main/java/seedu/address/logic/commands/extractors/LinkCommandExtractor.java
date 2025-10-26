@@ -54,14 +54,18 @@ public class LinkCommandExtractor {
         Index linkerIndex = Validation.validateIndex(bareCommand, 0);
         Index linkeeIndex = Validation.validateIndex(bareCommand, 2);
 
-        // validate link name (pos 1)
+
         String linkName = bareCommand.getParameter(1).getValue();
         if (linkName == null || linkName.isBlank()) {
             throw new ValidationException(MESSAGE_LINK_NAME_REQUIRED + "\n" + MESSAGE_USAGE);
         }
+
+        // validate link name (pos 1)
         if (!Link.isValidLinkName(linkName)) {
             throw new ValidationException(MESSAGE_LINK_NAME_INVALID);
         }
+
+        //link same person to itself
         if (linkerIndex.equals(linkeeIndex)) {
             throw new ValidationException(MESSAGE_SAME_PERSON);
         }
