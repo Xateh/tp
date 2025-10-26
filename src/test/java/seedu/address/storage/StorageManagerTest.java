@@ -2,6 +2,7 @@ package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.nio.file.Files;
@@ -18,7 +19,6 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.history.CommandHistory;
-import seedu.address.session.SessionCommand;
 import seedu.address.session.SessionData;
 
 public class StorageManagerTest {
@@ -74,6 +74,15 @@ public class StorageManagerTest {
     }
 
     @Test
+    public void addressBookLoadedFromDefaultIfNoSession() throws Exception {
+        AddressBook original = getTypicalAddressBook();
+        storageManager.saveAddressBook(original);
+        // Do not save any session snapshot
+        ReadOnlyAddressBook retrieved = storageManager.readAddressBook().get();
+        assertEquals(original, new AddressBook(retrieved));
+    }
+
+    @Test
     public void getAddressBookFilePath() {
         assertNotNull(storageManager.getAddressBookFilePath());
     }
@@ -95,17 +104,19 @@ public class StorageManagerTest {
 
     @Test
     public void sessionReadSave() throws Exception {
+        AddressBook olderAddressBook = getTypicalAddressBook();
+        AddressBook newerAddressBook = new AddressBook(olderAddressBook);
+        newerAddressBook.removePerson(newerAddressBook.getPersonList().get(0));
+
         SessionData olderSession = new SessionData(
                 Instant.parse("2025-10-14T00:00:00Z"),
-                storageManager.getAddressBookFilePath(),
+                olderAddressBook,
                 List.of("Alice"),
-                List.of(new SessionCommand(Instant.parse("2025-10-14T00:00:00Z"), "list")),
                 new GuiSettings());
         SessionData newerSession = new SessionData(
                 Instant.parse("2025-10-15T00:00:00Z"),
-                storageManager.getAddressBookFilePath(),
+                newerAddressBook,
                 List.of("Bob"),
-                List.of(new SessionCommand(Instant.parse("2025-10-15T00:00:00Z"), "find Bob")),
                 new GuiSettings());
 
         storageManager.saveSession(olderSession);
@@ -114,12 +125,22 @@ public class StorageManagerTest {
         SessionData retrieved = storageManager.readSession().get();
         assertEquals(newerSession.getSavedAt(), retrieved.getSavedAt());
         assertEquals(newerSession.getSearchKeywords(), retrieved.getSearchKeywords());
+        assertEquals(new AddressBook(newerSession.getAddressBook()), new AddressBook(retrieved.getAddressBook()));
 
         long fileCount;
         try (var stream = Files.list(storageManager.getSessionDirectory())) {
             fileCount = stream.count();
         }
         assertEquals(2, fileCount);
+    }
+
+    @Test
+    public void configAndPrefsSavedInDataFolder() throws Exception {
+        UserPrefs prefs = new UserPrefs();
+        prefs.setGuiSettings(new GuiSettings(400, 400, 10, 10));
+        storageManager.saveUserPrefs(prefs);
+        Path prefsPath = storageManager.getUserPrefsFilePath();
+        assertTrue(prefsPath.toString().contains("data") || prefsPath.toString().contains("prefs"));
     }
 
 }

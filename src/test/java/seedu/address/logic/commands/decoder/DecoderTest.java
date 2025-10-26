@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
-import seedu.address.logic.commands.FindCommand;
+import seedu.address.logic.commands.FieldCommand;
 import seedu.address.logic.commands.HistoryCommand;
 import seedu.address.logic.commands.TagCommand;
 import seedu.address.logic.commands.exceptions.ResolutionException;
@@ -24,8 +24,15 @@ public class DecoderTest {
     @Test
     public void decode_tagCommandExactMatch_success() throws
             LexerException, ParserException, ResolutionException, ValidationException {
-        Command tagCommand = Decoder.decode(BareCommand.parse("tag 1 test1 test2"));
+        Command tagCommand = Decoder.decode(BareCommand.parse("tag 1 +test1 -test2"));
         assertEquals(TagCommand.class, tagCommand.getClass());
+    }
+
+    @Test
+    public void decode_fieldCommandExactMatch_success() throws
+            LexerException, ParserException, ResolutionException, ValidationException {
+        Command fieldCommand = Decoder.decode(BareCommand.parse("field 1 /k:v"));
+        assertEquals(FieldCommand.class, fieldCommand.getClass());
     }
 
     @Test
@@ -33,13 +40,6 @@ public class DecoderTest {
             throws LexerException, ParserException, ResolutionException, ValidationException {
         Command historyCommand = Decoder.decode(BareCommand.parse("history"));
         assertEquals(HistoryCommand.class, historyCommand.getClass());
-    }
-
-    @Test
-    public void decode_findCommandNoOptionsExactMatch_success() throws
-            LexerException, ParserException, ResolutionException, ValidationException {
-        Command findCommand = Decoder.decode(BareCommand.parse("find test"));
-        assertEquals(FindCommand.class, findCommand.getClass());
     }
 
     @Test

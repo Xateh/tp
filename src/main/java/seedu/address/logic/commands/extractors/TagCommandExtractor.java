@@ -18,9 +18,6 @@ import seedu.address.model.tag.Tag;
  */
 public class TagCommandExtractor {
     // Messages for extraction
-    public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
-    public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
-    public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
     public static final String MESSAGE_TAGS_UNSPECIFIED = "At least one tag must be specified.";
 
     private TagCommandExtractor() {
@@ -38,18 +35,22 @@ public class TagCommandExtractor {
         Index index = Validation.validateIndex(bareCommand, 0);
 
         // extract tags
-        Set<Tag> tags = new HashSet<>();
-        List<Parameter> varParams;
+        Set<Tag> addTags = new HashSet<>();
+        Set<Tag> subTags = new HashSet<>();
         try {
-            varParams = Validation.validateVariableParametersWithMinimumMultiplicity(
-                    bareCommand, 1, 1, ParameterKind.NORMAL);
-            for (Parameter varParam : varParams) {
-                tags.add(new Tag(varParam.getValue()));
+            List<Parameter> varParams = Validation.validateVariableParametersWithMinimumMultiplicity(
+                    bareCommand, 1, 1, ParameterKind.ADDITIVE, ParameterKind.SUBTRACTIVE);
+            for (Parameter param : varParams) {
+                if (param.isAdditive()) {
+                    addTags.add(new Tag(param.getValue()));
+                } else if (param.isSubtractive()) {
+                    subTags.add(new Tag(param.getValue()));
+                }
             }
         } catch (ValidationException e) {
             throw new ValidationException(e.getMessage() + "\n" + MESSAGE_TAGS_UNSPECIFIED);
         }
 
-        return new TagCommand(index, tags);
+        return new TagCommand(index, addTags, subTags);
     }
 }
