@@ -1,5 +1,6 @@
 package seedu.address.logic.commands.extractors;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,22 +33,28 @@ public final class FieldCommandExtractor {
             throw new ValidationException(FieldCommand.MESSAGE_AT_LEAST_ONE_PAIR);
         }
 
-        Map<String, String> pairs = new LinkedHashMap<>();
+        Map<String, String> updates = new LinkedHashMap<>();
+        List<String> removals = new ArrayList<>();
         for (Map.Entry<String, List<String>> entry : options.entrySet()) {
             String key = normalize(entry.getKey());
             if (key.isEmpty()) {
                 throw new ValidationException(FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK);
             }
             List<String> values = entry.getValue();
-            String rawValue = (values == null || values.isEmpty()) ? "" : values.get(0);
+            String rawValue = "";
+            if (values != null && !values.isEmpty()) {
+                rawValue = values.get(values.size() - 1);
+            }
             String value = normalize(rawValue);
             if (value.isEmpty()) {
-                throw new ValidationException(FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK);
+                removals.add(key);
+                continue;
             }
-            pairs.put(key, value);
+
+            updates.put(key, value);
         }
         try {
-            return new FieldCommand(index, pairs);
+            return new FieldCommand(index, updates, removals);
         } catch (IllegalArgumentException e) {
             throw new ValidationException(e.getMessage());
         }

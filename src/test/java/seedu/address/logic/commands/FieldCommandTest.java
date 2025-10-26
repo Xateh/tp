@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.FieldCommand.MESSAGE_AT_LEAST_ONE_PAIR;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +38,7 @@ class FieldCommandTest {
     void executeSinglePairSuccess() throws Exception {
         Map<String, String> input = new LinkedHashMap<>();
         input.put("company", "Goldman Sachs");
-        FieldCommand cmd = new FieldCommand(Index.fromOneBased(1), input);
+        FieldCommand cmd = new FieldCommand(Index.fromOneBased(1), input, List.of());
 
         String feedback = cmd.execute(model).getFeedbackToUser();
 
@@ -48,7 +49,7 @@ class FieldCommandTest {
 
     @Test
     void executeIndexOutOfBoundsThrows() throws Exception {
-        FieldCommand cmd = new FieldCommand(Index.fromOneBased(2), Map.of("k", "v"));
+        FieldCommand cmd = new FieldCommand(Index.fromOneBased(2), Map.of("k", "v"), List.of());
         CommandException ex = assertThrows(CommandException.class, () -> cmd.execute(model));
         assertEquals(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX, ex.getMessage());
     }
@@ -58,7 +59,7 @@ class FieldCommandTest {
         Map<String, String> ordered = new LinkedHashMap<>();
         ordered.put("asset-class", "gold");
         ordered.put("company", "GS");
-        FieldCommand cmd = new FieldCommand(Index.fromOneBased(1), ordered);
+        FieldCommand cmd = new FieldCommand(Index.fromOneBased(1), ordered, List.of());
 
         String msg = cmd.execute(model).getFeedbackToUser();
 
@@ -68,20 +69,55 @@ class FieldCommandTest {
     }
 
     @Test
+    void executeRemovesExistingField_success() throws Exception {
+        Person withField = model.getFilteredPersonList().get(0)
+                .withCustomFields(Map.of("company", "GS"));
+        model.setPerson(model.getFilteredPersonList().get(0), withField);
+
+        FieldCommand cmd = new FieldCommand(Index.fromOneBased(1), Map.of(), List.of("company"));
+
+        String msg = cmd.execute(model).getFeedbackToUser();
+
+        assertTrue(msg.contains("Removed field(s): company"));
+        Person edited = model.getFilteredPersonList().get(0);
+        assertTrue(edited.getCustomFields().isEmpty());
+    }
+
+    @Test
+    void executeRemovalCaseMismatch_noChangeMessage() throws Exception {
+        Person withField = model.getFilteredPersonList().get(0)
+                .withCustomFields(Map.of("Intern", "Yes"));
+        model.setPerson(model.getFilteredPersonList().get(0), withField);
+
+        FieldCommand cmd = new FieldCommand(Index.fromOneBased(1), Map.of(), List.of("intern"));
+
+        String msg = cmd.execute(model).getFeedbackToUser();
+
+        assertEquals("No field changes applied for Alex Yeoh", msg);
+        Person edited = model.getFilteredPersonList().get(0);
+        assertEquals("Yes", edited.getCustomFields().get("Intern"));
+    }
+
+    @Test
     void constructorNullIndexThrows() {
         Map<String, String> pairs = Map.of("k", "v");
-        assertThrows(NullPointerException.class, () -> new FieldCommand(null, pairs));
+        assertThrows(NullPointerException.class, () -> new FieldCommand(null, pairs, List.of()));
     }
 
     @Test
     void constructorNullPairsThrows() {
-        assertThrows(NullPointerException.class, () -> new FieldCommand(Index.fromOneBased(1), null));
+        assertThrows(NullPointerException.class, () -> new FieldCommand(Index.fromOneBased(1), null, List.of()));
+    }
+
+    @Test
+    void constructorNullRemovalsThrows() {
+        assertThrows(NullPointerException.class, () -> new FieldCommand(Index.fromOneBased(1), Map.of("k", "v"), null));
     }
 
     @Test
     void constructorEmptyPairsThrows() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                new FieldCommand(Index.fromOneBased(1), Map.of()));
+                new FieldCommand(Index.fromOneBased(1), Map.of(), List.of()));
         assertEquals(MESSAGE_AT_LEAST_ONE_PAIR, ex.getMessage());
     }
 }
