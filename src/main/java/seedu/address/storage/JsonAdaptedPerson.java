@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -32,6 +34,7 @@ class JsonAdaptedPerson {
     private final String address;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
     private final Map<String, String> customFields = new LinkedHashMap<>();
+    private final List<JsonAdaptedLink> links = new ArrayList<>();
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
@@ -39,13 +42,16 @@ class JsonAdaptedPerson {
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
-            @JsonProperty("tags") List<JsonAdaptedTag> tags) {
+            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("links") List<JsonAdaptedLink> links) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
         if (tags != null) {
             this.tags.addAll(tags);
+        }
+        if (links != null) {
+            this.links.addAll(links);
         }
     }
 
@@ -61,6 +67,9 @@ class JsonAdaptedPerson {
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
         customFields.putAll(source.getCustomFields()); // preserve order
+        links.addAll(source.getLinks().stream()
+                .map(JsonAdaptedLink::new)
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -107,8 +116,31 @@ class JsonAdaptedPerson {
         final Address modelAddress = new Address(address);
 
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        // Backward compatible: if customFields missing, LinkedHashMap stays empty.
-        Person base = new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags);
-        return base.withCustomFields(customFields);
+        //empty links
+        Person base = new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags,
+                customFields, new HashSet<>());
+        return base;
+    }
+
+    Set<Link> resolveLinks(Person self, Function<String, Person> resolveByName) throws IllegalValueException {
+        Set<Link> out = new HashSet<>();
+        if (links == null || links.isEmpty()) {
+            return out;
+        }
+        for (JsonAdaptedLink jl : links) {
+            String linkName = jl.getLinkName();
+            String linkeeName = jl.getLinkeeName();
+
+            if (linkName == null || !Link.isValidLinkName(linkName)) {
+                continue;
+            }
+
+            Person linkee = resolveByName.apply(linkeeName);
+            if (linkee == null) {
+                continue;
+            }
+            out.add(new Link(self, linkee, jl.getLinkName()));
+        }
+        return out;
     }
 }

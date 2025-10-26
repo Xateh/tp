@@ -1,0 +1,24 @@
+{
+  "persons": [
+    {
+      "name": "Alice",
+      "phone": "91234567",
+      "email": "alice@example.com",
+      "address": "123, Jurong West Ave 6, #08-111",
+      "tags": [],
+      "customFields": {},
+      "links": [
+        { "linkName": "lawyer", "linkeeName": "Bob" }
+      ]
+    },
+    {
+      "name": "Bob",
+      "phone": "98765432",
+      "email": "bob@example.com",
+      "address": "321, Clementi Ave 2, #02-222",
+      "tags": [],
+      "customFields": {},
+      "links": []
+    }
+  ]
+}
