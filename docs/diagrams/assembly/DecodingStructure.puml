@@ -13,15 +13,6 @@ abstract class Command {
 }
 
 class BareCommand {
-    - imperative: String
-    - parameters: String[]
-    - options: HashMap<String,String>
-    __
-    + getImperative(): String
-    + getParameter(int): String
-    + getAllParameters(): String[]
-    + getOptionValue(String): String
-    + hasOption(String): boolean
 }
 
 package "Resolution" {

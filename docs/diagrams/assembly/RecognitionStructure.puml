@@ -31,19 +31,6 @@ package "Parser" {
 
         package "Visitor" {
             INTERFACE "AstVisitor<R>" as AstVisitor {
-                + visitCommand(Command): R
-                + visitImperative(Imperative): R
-                + visitParameterList(ParameterList): R
-                + visitParameter(Parameter): R
-                + visitNormalParameter(NormalParameter): R
-                + visitAdditiveParameter(AdditiveParameter): R
-                + visitSubtractiveParameter(SubtractiveParameter): R
-                + visitOptionList(OptionList): R
-                + visitOption(Option): R
-                + visitOptionName(OptionName): R
-                + visitOptionValue(OptionValue): R
-                + visitText(Text): R
-                + visitWord(Word): R
             }
 
             class CommandExtractor {
@@ -60,11 +47,6 @@ class BareCommand {
 
 class BareCommandBuilder {
     __
-    + BareCommandBuilder()
-    + setImperative(String): void
-    + addParameter(String): void
-    + setOption(String): void
-    + setOption(String, String): void
     + build(): BareCommand
 }
 
