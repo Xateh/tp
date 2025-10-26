@@ -223,23 +223,26 @@ Format: `infoview INDEX`
 Examples:
 * `list` followed by `infoview 2` will display available information about the 2nd person in the address book.
 
-### Setting a custom field on a person : `field`
+### Setting and removing a custom field on a person : `field`
 
-Sets or updates one or more **custom field values** for the specified person in the address book.
+Sets, updates or removes one or more **custom field values** for the specified person in the address book.
 
-Format: `field INDEX /KEY:VALUE [/KEY:VALUE]…`
+Format: `field INDEX /KEY[:VALUE] [/KEY[:VALUE]]…`
 
 * Updates the person at the specified `INDEX`. The index refers to the number shown in the current list. The index **must be a positive integer** 1, 2, 3, …​
-* Each `/KEY:VALUE` pair targets a previously defined custom field (`KEY`).
-* You may provide **one or multiple** `/KEY:VALUE` pairs in a single command.
+* Each `/KEY[:VALUE]` pair trims surrounding whitespace from both `KEY` and `VALUE` before applying the change.
+* Providing a `VALUE` **adds or updates** the custom field identified by `KEY`. New keys are created automatically; existing keys are overwritten.
+* Omitting `VALUE` (e.g. `/nickname`) **removes** the custom field identified by `KEY` if it exists.
+* Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
+* You may provide **one or multiple** `/KEY[:VALUE]` pairs in a single command.
+* You may do addition/updating and deletion (of existing fields) in a single command.
 * If a `VALUE` contains spaces, wrap it in double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
-* If a `KEY` is unknown (not defined), the command fails with an error.
 
 **Examples:**
 * `field 5 /linkedInUsername:alextan /rate:120` — Sets two fields on the 5th person in one command.
 * `field 3 /notes:"Met at FinTech conf 2025"` — Adds a note with spaces to the 3rd person.
-* `field 7 /birthday:"1999-02-01"` — Sets a field on the 7th person in one command.
-* `field 7 /birthday:"1999-02-10"` — Updates the field with `KEY` `birthday` on the 7th person.
+* `field 4 /nickname` — Removes the `nickname` custom field from the 4th person.
+* `field 7 /birthday:"1999-02-10"` — Creates or updates the `birthday` custom field on the 7th person.
 
 ### Locating persons by name: `find`
 
@@ -398,10 +401,11 @@ Action     | Format, Examples
 **List**   | `list`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
-**Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
+**Remove Tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
 **Edit Info** | `infoedit INDEX` <br> e.g., `infoedit 2`
 **View Info** | `infoview INDEX` <br> e.g., `infoview 2`
-**Field**  | `field INDEX /KEY:VALUE` <br> e.g., `field 2 /company:"BlackRock"`
+**Field**  | `field INDEX /KEY[:VALUE]` <br> e.g., `field 2 /company:"BlackRock"`
+**Remove Field**  | `field INDEX /KEY` <br> e.g., `field 2 /company`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **History** | `history`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
