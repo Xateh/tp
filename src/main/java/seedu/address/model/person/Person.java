@@ -30,40 +30,11 @@ public class Person {
     private final Info info;
 
     /**
-     * Every field must be present and not null.
-     */
-    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, tags);
-        this.name = name;
-        this.phone = phone;
-        this.email = email;
-        this.address = address;
-        this.tags.addAll(tags);
-        this.customFields = new LinkedHashMap<>(); //default: empty
-        this.info = new Info(""); // default: empty string
-    }
-
-    /**
-     * For info, without custom field
-     */
-    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags, Info info) {
-        requireAllNonNull(name, phone, email, address, tags, info);
-        this.name = name;
-        this.phone = phone;
-        this.email = email;
-        this.address = address;
-        this.tags.addAll(tags);
-        this.customFields = new LinkedHashMap<>(); //default: empty
-        this.info = info;
-    }
-
-    /**
      * Full constructor including custom fields.
-     * Kept package-private to encourage creation via {@link #withCustomFields(Map)}
      */
     public Person(Name name, Phone phone, Email email, Address address,
                   Set<Tag> tags, Map<String, String> customFields, Info info) {
-        requireAllNonNull(name, phone, email, address, tags, info);
+        requireAllNonNull(name, phone, email, address, tags, customFields, info);
         this.name = name;
         this.phone = phone;
         this.email = email;

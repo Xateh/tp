@@ -111,9 +111,8 @@ class JsonAdaptedPerson {
         final Address modelAddress = new Address(address);
 
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        // Backward compatible: if customFields missing, LinkedHashMap stays empty.
         final Info modelInfo = new Info(info == null ? "" : info);
-        Person base = new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags, modelInfo);
-        return base.withCustomFields(customFields);
+        Person base = new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags, customFields, modelInfo);
+        return base;
     }
 }

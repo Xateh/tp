@@ -80,6 +80,7 @@ public class InfoCommand extends Command {
                     personToEdit.getEmail(),
                     personToEdit.getAddress(),
                     personToEdit.getTags(),
+                    personToEdit.getCustomFields(),
                     updatedInfo);
 
             model.setPerson(personToEdit, editedPerson);
