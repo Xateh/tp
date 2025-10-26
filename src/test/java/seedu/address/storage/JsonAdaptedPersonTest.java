@@ -1,5 +1,6 @@
 package seedu.address.storage;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static seedu.address.storage.JsonAdaptedPerson.MISSING_FIELD_MESSAGE_FORMAT;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -114,5 +115,32 @@ public class JsonAdaptedPersonTest {
                 new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, invalidTags, EMPTY_LINKS);
         assertThrows(IllegalValueException.class, person::toModelType);
     }
+
+    @Test
+    public void toModelType_personWithLinks_deserializesWithoutResolving() throws Exception {
+        // one outgoing link to someone-by-name (resolution happens later)
+        List<JsonAdaptedLink> links = List.of(new JsonAdaptedLink("lawyer", "Bernice Yu"));
+
+        JsonAdaptedPerson person = new JsonAdaptedPerson(
+                VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, links);
+
+        // Should build a Person successfully; links are not materialized here
+        assertDoesNotThrow(person::toModelType);
+        assertEquals(0, person.toModelType().getLinks().size(),
+                "Link resolution happens in JsonSerializableAddressBook (pass-2), not here.");
+    }
+
+    @Test
+    public void toModelType_personWithInvalidLinkName_doesNotValidateHere() {
+        // Bad linkName (validation deferred to Link construction in pass-2)
+        List<JsonAdaptedLink> links = List.of(new JsonAdaptedLink("@@@", "Bernice Yu"));
+
+        JsonAdaptedPerson person = new JsonAdaptedPerson(
+                VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, links);
+
+        // This layer should NOT throw; invalid name will be caught when Links are constructed/resolved
+        assertDoesNotThrow(person::toModelType);
+    }
 }
+
 

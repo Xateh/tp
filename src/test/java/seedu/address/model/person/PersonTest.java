@@ -91,9 +91,58 @@ public class PersonTest {
     }
 
     @Test
+    public void getLinks_modify_throwsUnsupportedOperationException() {
+        Person a = new Person(new Name("A"), new Phone("11111111"), new Email("a@ex.com"),
+                new Address("addr"), new java.util.HashSet<>(),
+                new java.util.LinkedHashMap<>(), new java.util.HashSet<>());
+
+        Person b = new Person(new Name("B"), new Phone("22222222"), new Email("b@ex.com"),
+                new Address("addr"), new java.util.HashSet<>(),
+                new java.util.LinkedHashMap<>(), new java.util.HashSet<>());
+
+        Link ab = new Link(a, b, "lawyer");
+
+        // Start with person having a link
+        java.util.HashSet<Link> links = new java.util.HashSet<>();
+        links.add(ab);
+        Person withLink = new Person(a.getName(), a.getPhone(), a.getEmail(), a.getAddress(),
+                a.getTags(), a.getCustomFields(), links);
+
+        assertThrows(UnsupportedOperationException.class, () -> withLink.getLinks().add(ab));
+        assertThrows(UnsupportedOperationException.class, () -> withLink.getLinks().remove(ab));
+    }
+
+    @Test
+    public void equals_differentLinks_returnsFalse() {
+        // Base person (no links)
+        Person a0 = new Person(new Name("A"), new Phone("11111111"), new Email("a@ex.com"),
+                new Address("addr"), new java.util.HashSet<>(),
+                new java.util.LinkedHashMap<>(), new java.util.HashSet<>());
+
+        // Clone of A by value (still no links)
+        Person a1 = new Person(a0.getName(), a0.getPhone(), a0.getEmail(), a0.getAddress(),
+                a0.getTags(), a0.getCustomFields(), new java.util.HashSet<>());
+
+        // A with one link
+        Person b = new Person(new Name("B"), new Phone("22222222"), new Email("b@ex.com"),
+                new Address("addr"), new java.util.HashSet<>(),
+                new java.util.LinkedHashMap<>(), new java.util.HashSet<>());
+        Link ab = new Link(a0, b, "lawyer");
+        java.util.HashSet<Link> links = new java.util.HashSet<>();
+        links.add(ab);
+        Person aWithLink = new Person(a0.getName(), a0.getPhone(), a0.getEmail(), a0.getAddress(),
+                a0.getTags(), a0.getCustomFields(), links);
+
+        assertTrue(a0.equals(a1)); // identical except links
+        assertFalse(a0.equals(aWithLink)); // links differ
+        assertFalse(aWithLink.equals(a0)); // symmetric
+    }
+
+    @Test
     public void toStringMethod() {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
                 + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", tags=" + ALICE.getTags() + "}";
         assertEquals(expected, ALICE.toString());
     }
 }
+

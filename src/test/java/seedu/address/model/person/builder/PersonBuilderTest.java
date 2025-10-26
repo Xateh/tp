@@ -2,6 +2,7 @@ package seedu.address.model.person.builder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -28,10 +29,24 @@ public class PersonBuilderTest {
     private static final Set<Tag> DEFAULT_TAGS = Set.of(new Tag("friend"));
     private static final Map<String, String> DEFAULT_CUSTOM_FIELDS = Map.of("Nickname", "Ali");
 
-    // New: shared empty links set for expected Person constructions
+    // Links: shared empty set for expectations
     private static final Set<Link> EMPTY_LINKS = new HashSet<>();
 
-    // --- Test Cases ---
+    // --- Helpers ---
+    /** Minimal person factory with unique contacts so Person.equals works deterministically. */
+    private static Person mkPerson(String fullName, String phone, String email) {
+        return new Person(
+                new Name(fullName),
+                new Phone(phone),
+                new Email(email),
+                DEFAULT_ADDRESS,
+                new HashSet<>(),
+                new LinkedHashMap<>(),
+                new HashSet<>()
+        );
+    }
+
+    // --- Existing Tests ---
 
     @Test
     public void constructor_default_buildSuccess() {
@@ -153,6 +168,56 @@ public class PersonBuilderTest {
         Person expectedPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
                 DEFAULT_ADDRESS, DEFAULT_TAGS, newCustomFields, EMPTY_LINKS);
         assertEquals(expectedPerson, modifiedPerson);
+    }
+
+    // --- New: Links tests ---
+
+    @Test
+    public void build_withLinks_success() {
+        // Prepare two base persons to reference from Link
+        Person alex = mkPerson("Alex Yeoh", "87438807", "alex@example.com");
+        Person bernice = mkPerson("Bernice Yu", "99272758", "bernice@example.com");
+
+        Link lawyer = new Link(alex, bernice, "lawyer");
+
+        // Build a new Person from Alex with links set
+        Person alexWithLink = new PersonBuilder(alex)
+                .withLinks(Set.of(lawyer))
+                .build();
+
+        assertEquals(1, alexWithLink.getLinks().size());
+        assertTrue(alexWithLink.getLinks().contains(lawyer));
+    }
+
+    @Test
+    public void constructor_copyPerson_preservesLinks() {
+        Person alex = mkPerson("Alex Yeoh", "87438807", "alex@example.com");
+        Person bernice = mkPerson("Bernice Yu", "99272758", "bernice@example.com");
+        Link lawyer = new Link(alex, bernice, "lawyer");
+
+        Person source = new PersonBuilder(alex).withLinks(Set.of(lawyer)).build();
+        Person copy = new PersonBuilder(source).build();
+
+        assertEquals(source, copy);
+        assertEquals(source.getLinks(), copy.getLinks());
+    }
+
+    @Test
+    public void build_modifyLinks_success() {
+        Person alex = mkPerson("Alex Yeoh", "87438807", "alex@example.com");
+        Person bernice = mkPerson("Bernice Yu", "99272758", "bernice@example.com");
+        Person charlotte = mkPerson("Charlotte Oliveiro", "93210283", "charlotte@example.com");
+
+        Link lawyer = new Link(alex, bernice, "lawyer");
+        Link mentor = new Link(alex, charlotte, "mentor");
+
+        Person base = new PersonBuilder(alex).withLinks(Set.of(lawyer)).build();
+
+        // Replace links with a different set
+        Person edited = new PersonBuilder(base).withLinks(Set.of(mentor)).build();
+
+        assertEquals(1, edited.getLinks().size());
+        assertTrue(edited.getLinks().contains(mentor));
     }
 
     // --- Failure Cases ---

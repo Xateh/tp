@@ -18,7 +18,7 @@ import seedu.address.model.person.Person;
  *
  * <p>
  * The actual {@link Link} objects can be reconstructed later during a second-pass
- * resolution phase (e.g., in {@link JsonAdaptedPerson#resolveLinksByName(Person, java.util.function.Function)})
+ * resolution phase (e.g., in {@link JsonAdaptedPerson#resolveLinks(Person, java.util.function.Function)})
  * once all {@link Person} instances are available.
  * </p>
  */

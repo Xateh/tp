@@ -1,9 +1,6 @@
 package seedu.address.logic.commands.extractors;
 
 import static seedu.address.logic.grammars.command.BareCommand.Parameter;
-import static seedu.address.logic.grammars.command.BareCommand.Parameter.ParameterKind;
-
-import java.util.List;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.LinkCommand;
@@ -27,17 +24,11 @@ public class LinkCommandExtractor {
     public static final String MESSAGE_LINK_NAME_INVALID = Link.MESSAGE_CONSTRAINTS;
     public static final String MESSAGE_PARAM_KIND =
             "Only normal positional parameters are allowed for 'link' (no + / - kinds).";
+    public static final String MESSAGE_SAME_PERSON = "Cannot link a person to themselves.";
 
     private LinkCommandExtractor() {
     }
 
-    /**
-     * Extracts command parameters from the given Command object. Performs input validation as well.
-     *
-     * @param bareCommand Command to extract parameters from.
-     * @return LinkCommand that can be executed.
-     * @throws ValidationException When the command parameters fail to validate.
-     */
     /**
      * Extracts and validates parameters for {@code LinkCommand}.
      *
@@ -70,6 +61,9 @@ public class LinkCommandExtractor {
         }
         if (!Link.isValidLinkName(linkName)) {
             throw new ValidationException(MESSAGE_LINK_NAME_INVALID);
+        }
+        if (linkerIndex.equals(linkeeIndex)) {
+            throw new ValidationException(MESSAGE_SAME_PERSON);
         }
 
         return new LinkCommand(linkerIndex, linkName, linkeeIndex);

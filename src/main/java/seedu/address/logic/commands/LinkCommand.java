@@ -33,11 +33,23 @@ public class LinkCommand extends Command {
     public static final String MESSAGE_SUCCESS = "%1$s is now %2$s of %3$s";
     public static final String MESSAGE_DUPLICATE_LINK = "No change: that link already exists.";
     public static final String MESSAGE_SAME_PERSON = "Cannot link a person to themselves.";
+    private final Index linkerIndex; // INDEX1
+    private final String linkName; // LINK_NAME
+    private final Index linkeeIndex; // INDEX2
 
-    private final Index linkerIndex;   // INDEX1
-    private final String linkName;     // LINK_NAME
-    private final Index linkeeIndex;   // INDEX2
-
+    /**
+     * Constructs a {@code LinkCommand} that creates a named link between two persons in the address book.
+     * <p>
+     * The command connects the person identified by {@code linkerIndex} to the person identified by
+     * {@code linkeeIndex} using the specified {@code linkName}. This association will be shown in both
+     * persons’ link lists in the UI and persisted in storage.
+     * </p>
+     *
+     * @param linkerIndex Index of the person initiating the link (the linker)
+     * @param linkName    The descriptive name of the link (e.g., "lawyer", "client", "colleague")
+     * @param linkeeIndex Index of the person being linked to (the linkee)
+     * @throws NullPointerException if any of the arguments are {@code null}
+     */
     public LinkCommand(Index linkerIndex, String linkName, Index linkeeIndex) {
         requireNonNull(linkerIndex);
         requireNonNull(linkName);
@@ -57,9 +69,7 @@ public class LinkCommand extends Command {
             throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
         }
 
-        if (linkerIndex.equals(linkeeIndex)) {
-            throw new CommandException(MESSAGE_SAME_PERSON);
-        }
+        assert linkerIndex != linkeeIndex; // checked in extractor
 
         Person linker = lastShownList.get(linkerIndex.getZeroBased());
         Person linkee = lastShownList.get(linkeeIndex.getZeroBased());
@@ -73,7 +83,6 @@ public class LinkCommand extends Command {
         if (linkerLinks.contains(newLink)) {
             return new CommandResult(MESSAGE_DUPLICATE_LINK);
         }
-
 
         // Add the corresponding Link instance to both persons
         linkerLinks.add(newLink);

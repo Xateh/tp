@@ -71,8 +71,7 @@ class JsonSerializableAddressBook {
         Map<String, Person> byName = builtPersons.stream()
                 .collect(Collectors.toMap(
                         p -> p.getName().fullName,
-                        p -> p,
-                        (a, b) -> a, // keep the first on collision
+                        p -> p, (a, b) -> a, // keep the first on collision
                         LinkedHashMap::new
                 ));
 
@@ -99,14 +98,18 @@ class JsonSerializableAddressBook {
                 // 2) Mirror for each linkee (in-memory only)
                 for (Link out : resolvedLinks) {
                     Person linkee = out.getLinkee();
-                    if (withLinks.isSamePerson(linkee)) continue;
+                    if (withLinks.isSamePerson(linkee)) {
+                        continue;
+                    }
 
                     Person currentLinkee = byName.get(linkee.getName().fullName);
-                    if (currentLinkee == null) continue;
+                    if (currentLinkee == null) {
+                        continue;
+                    }
 
                     Set<Link> linkeeLinks = new java.util.HashSet<>(currentLinkee.getLinks());
 
-                    // ✅ keep original direction
+                    //keep original link
                     Link incoming = new Link(out.getLinker(), out.getLinkee(), out.getLinkName());
 
                     if (linkeeLinks.add(incoming)) {
