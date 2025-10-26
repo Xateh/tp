@@ -246,7 +246,7 @@ public class CommandLexer {
         LexerError lexerError = new LexerError(type, this.ingest, offendingLiteral, new Location(start, current));
         LexerException lexerException = new LexerException(lexerError);
 
-        logger.severe(lexerException.getMessage());
+        logger.severe(lexerError.getLogString());
 
         throw lexerException;
     }
