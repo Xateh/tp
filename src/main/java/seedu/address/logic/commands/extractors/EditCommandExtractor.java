@@ -13,7 +13,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 /**
  * Extractor that builds {@code EditCommand}s.
  */
-public class EditCommandExtractor {
+public final class EditCommandExtractor {
     // Messages for extraction
     public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
 

@@ -16,7 +16,7 @@ import seedu.address.model.tag.Tag;
 /**
  * Extractor that builds {@code TagCommand}s.
  */
-public class TagCommandExtractor {
+public final class TagCommandExtractor {
     // Messages for extraction
     public static final String MESSAGE_TAGS_UNSPECIFIED = "At least one tag must be specified.";
 
