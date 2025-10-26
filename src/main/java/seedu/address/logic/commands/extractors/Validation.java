@@ -25,6 +25,16 @@ import seedu.address.model.tag.Tag;
  * the validator will throw a {@code ValidationException} when validation fails with a generic failure message. Callers
  * should enrich the message where possible, by rethrowing a new exception after appending more details to the exception
  * message.
+ * <p>
+ * All methods here should perform some significant validation. Commonly, they should do one of the following: (1.)
+ * Accept a {@code BareCommand} along with any required additional information and extracts and validates out
+ * {@code String}s or {@code List<String>}s, (2.) Accept a {@code String} or {@code List<String>} and validates them
+ * into some container class, or (3.) does both simultaneously.
+ * <p>
+ * Furthermore, it is expected that each method here will throw at least one {@code ValidationException} as a result of
+ * its validation rule(s). If you are implementing a method here but find that it is too simple and/or does not conform
+ * to the above, it might mean that your validation rule is too specific or simple, and it should just be done in your
+ * command extractor instead.
  */
 public class Validation {
     public static final String MESSAGE_INSUFFICIENT_PARAMETERS_SINGLE =
