@@ -12,6 +12,9 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BOB;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.testutil.PersonBuilder;
@@ -95,5 +98,21 @@ public class PersonTest {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
                 + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", tags=" + ALICE.getTags() + "}";
         assertEquals(expected, ALICE.toString());
+    }
+
+    @Test
+    public void toString_withCustomFields_appendsFormattedFields() {
+        Map<String, String> customFields = new LinkedHashMap<>();
+        customFields.put("Company", "Acme");
+        customFields.put("Twitter", "@alice");
+
+        Person base = new PersonBuilder(ALICE).build();
+        Person withCustomFields = base.withCustomFields(customFields);
+
+        String expected = Person.class.getCanonicalName() + "{name=" + withCustomFields.getName()
+                + ", phone=" + withCustomFields.getPhone() + ", email=" + withCustomFields.getEmail()
+                + ", address=" + withCustomFields.getAddress() + ", tags=" + withCustomFields.getTags()
+                + ", customFields= {Company=Acme, Twitter=@alice}}";
+        assertEquals(expected, withCustomFields.toString());
     }
 }
