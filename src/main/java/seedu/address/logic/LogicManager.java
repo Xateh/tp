@@ -33,6 +33,7 @@ public class LogicManager implements Logic {
     private final Model model;
     private final AddressBookParser addressBookParser;
     private final SessionRecorder sessionRecorder;
+    private final Storage storage;
 
     /**
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
@@ -50,6 +51,8 @@ public class LogicManager implements Logic {
      */
     public LogicManager(Model model, Storage storage, Optional<SessionData> initialSession) {
         this.model = model;
+        this.storage = storage;
+
         CommandHistory initialHistory = loadCommandHistory(storage);
         this.addressBookParser = new AddressBookParser();
         this.model.setCommandHistory(initialHistory);
@@ -68,6 +71,16 @@ public class LogicManager implements Logic {
         boolean addressBookChanged = !beforeState.equals(afterState);
 
         model.getCommandHistory().add(commandText);
+
+        if (addressBookChanged) {
+            try {
+                storage.saveAddressBook(model.getAddressBook());
+            } catch (Exception e) {
+                // surface as a user-visible error consistent with AB style
+                throw new CommandException("Could not save data to file: " + e.getMessage(), e);
+            }
+        }
+
         sessionRecorder.afterSuccessfulCommand(command, addressBookChanged);
 
         return commandResult;

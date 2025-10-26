@@ -274,6 +274,29 @@ Examples:
 * `find 99999999 /phone` returns all persons whose phone number is `99999999`.
 * `find test /name /email` returns all persons whose name or email contains the word `test`.
 
+### Creating links between persons: `link`
+
+Creates a relationship link between two persons in the address book.
+
+Format: `link <index1> <linkName> <index2>`
+
+* Establishes a directed relationship where the person at <index1> is the <linkName> of the person at <index2>.
+* Both persons will display the link in their contact cards.
+* Self-links (e.g. linking a person to themselves) are not allowed.
+* If the same link already exists, the command will have no effect.
+
+**Parameters**
+
+* `<index1>` (index): index of the linker (the person initiating the link)
+* `<linkName>` (string): name of the relationship (eg., lawyer, client)
+* `<index2>` (index): index of the linkee (the person being linked to)
+
+Examples:
+
+* list followed by link 1 lawyer 2 — person 1 becomes the lawyer of person 2.
+* list followed by link 2 "best-friend" 3 — person 2 becomes the best-friend of person 3 (note that quotes allow link names with special characters).
+* list followed by link 2 client 1 — person 2 becomes the client of person 1.
+
 ### Deleting a person : `delete`
 
 Deletes the specified person from the address book.
