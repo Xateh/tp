@@ -1,9 +1,5 @@
 package seedu.address.logic.commands.extractors;
 
-import static seedu.address.logic.grammars.command.BareCommand.Parameter.ParameterKind;
-
-import java.util.List;
-
 import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.InfoCommand;
 import seedu.address.logic.commands.exceptions.ValidationException;
@@ -26,17 +22,13 @@ public class InfoCommandExtractor {
      * @throws ValidationException When the command parameters fail to validate.
      */
     public static InfoCommand extract(BareCommand bareCommand) throws ValidationException {
-        // Validate that we have exactly 1 parameter using existing validation utility
-        List<BareCommand.Parameter> parameters = Validation.validateVariableParametersWithMinimumMultiplicity(
-                bareCommand, 0, 1, ParameterKind.NORMAL);
-
-        // Check we don't have too many parameters
-        if (parameters.size() > 1) {
-            throw new ValidationException(MESSAGE_TOO_MANY_PARAMETERS);
-        }
-
         // Extract and validate the index using the standard validation
         Index index = Validation.validateIndex(bareCommand, 0);
+
+        // Check we don't have too many parameters
+        if (bareCommand.parameterCount() > 1) {
+            throw new ValidationException(MESSAGE_TOO_MANY_PARAMETERS);
+        }
 
         return new InfoCommand(index);
     }
