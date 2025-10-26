@@ -365,7 +365,7 @@ public class ValidationTest {
     @Nested
     class ValidateIndexTests {
         @Test
-        public void validateIndex_validIndex_success() throws ValidationException {
+        public void validateIndex_validIndex_success() {
             BareCommand cmd = new BareCommandBuilder()
                     .setImperative("command")
                     .addParameter("1")
@@ -377,7 +377,7 @@ public class ValidationTest {
         }
 
         @Test
-        public void validateIndex_largeValidIndex_success() throws ValidationException {
+        public void validateIndex_largeValidIndex_success() {
             BareCommand cmd = new BareCommandBuilder()
                     .setImperative("command")
                     .addParameter("100")
@@ -388,6 +388,20 @@ public class ValidationTest {
             assertEquals(expected, index);
         }
 
+        @Test
+        public void validateIndex_atypicalPosition_success() {
+            BareCommand cmd = new BareCommandBuilder()
+                    .setImperative("command")
+                    .addParameter("pad")
+                    .addParameter("pad")
+                    .addParameter("pad")
+                    .addParameter("2")
+                    .build();
+            Index expected = Index.fromOneBased(2);
+
+            Index index = assertDoesNotThrow(() -> Validation.validateIndex(cmd, 3));
+            assertEquals(expected, index);
+        }
 
         @Test
         public void validateIndex_invalidIndexOutOfRange_throwsException() {
