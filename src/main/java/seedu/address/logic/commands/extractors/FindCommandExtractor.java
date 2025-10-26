@@ -42,6 +42,8 @@ public final class FindCommandExtractor {
         boolean optEmail = bareCommand.hasOption("email");
         boolean optAddress = bareCommand.hasOption("address");
         boolean optTag = bareCommand.hasOption("tag");
+        boolean optLinker = bareCommand.hasOption("from");
+        boolean optLinkee = bareCommand.hasOption("to");
         List<String> keysToRemove = List.of("name", "phone", "email", "address", "tags", "tag");
         Map<String, List<String>> map = bareCommand.getAllOptions();
         Set<String> customKeys = map.keySet().stream()
@@ -50,7 +52,7 @@ public final class FindCommandExtractor {
                 .collect(Collectors.toSet());
 
         // check if user specified any options
-        boolean anyFlag = optName || optPhone || optEmail || optAddress || optTag;
+        boolean anyFlag = optName || optPhone || optEmail || optAddress || optTag || optLinker || optLinkee;
 
         FieldContainsKeywordsPredicate predicate;
         if (anyFlag || !customKeys.isEmpty()) {
@@ -62,10 +64,12 @@ public final class FindCommandExtractor {
                     optEmail,
                     optAddress,
                     optTag,
+                    optLinker,
+                    optLinkee,
                     customKeys
             );
         } else {
-            // No options provided, default to search all non custom fields
+            // No options provided, default to search all non-custom fields
             predicate = new FieldContainsKeywordsPredicate(keywords);
         }
 

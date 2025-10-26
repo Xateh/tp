@@ -20,12 +20,14 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
     private final boolean searchEmail;
     private final boolean searchAddress;
     private final boolean searchTag;
+    private final boolean searchLinker;
+    private final boolean searchLinkee;
     private final Set<String> customKeys;
 
 
     //if no option value provided, search all non-custom fields
     public FieldContainsKeywordsPredicate(List<String> keywords) {
-        this(keywords, true, true, true, true, true, Set.of());
+        this(keywords, true, true, true, true, true, true, true, Set.of());
     }
 
     /**
@@ -49,6 +51,8 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
                                           boolean searchEmail,
                                           boolean searchAddress,
                                           boolean searchTag,
+                                          boolean searchLinker,
+                                          boolean searchLinkee,
                                           Set<String> customKeys) {
         this.keywords = keywords;
         this.searchName = searchName;
@@ -56,6 +60,8 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
         this.searchEmail = searchEmail;
         this.searchAddress = searchAddress;
         this.searchTag = searchTag;
+        this.searchLinker = searchLinker;
+        this.searchLinkee = searchLinkee;
         this.customKeys = customKeys;
     }
 
@@ -116,6 +122,22 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
                             .anyMatch(tag -> StringUtil.containsWordIgnoreCase(tag.tagName, keyword))) {
                 return true;
             }
+            // checks if searchLinker(/from) flag is activated and
+            // finds all persons who is the linker with the given linkname
+            if (searchLinker && person.getLinks().stream()
+                    .anyMatch(link -> StringUtil.containsWordIgnoreCase(link.getLinkName(), keyword)
+                    && link.getLinker().getName().equals(person.getName()))) {
+                return true;
+            }
+
+            // checks if searchLinkee(/to) flag is activated and
+            // finds all persons who is the linkee of the link with the given linkname
+            if (searchLinkee && person.getLinks().stream()
+                    .anyMatch(link -> StringUtil.containsWordIgnoreCase(link.getLinkName(), keyword)
+                    && link.getLinkee().getName().equals(person.getName()))) {
+                return true;
+            }
+
             //checks if person has custom fields and there is custom fields passed in to search on
             if (customs != null && !customs.isEmpty() && customKeys != null && !customKeys.isEmpty()) {
                 //iterates through each key->value pair in the persons custom fields
