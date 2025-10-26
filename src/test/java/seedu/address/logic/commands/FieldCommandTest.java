@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.FieldCommand.MESSAGE_AT_LEAST_ONE_PAIR;
-import static seedu.address.logic.commands.FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK;
-import static seedu.address.logic.commands.FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,7 +36,7 @@ class FieldCommandTest {
     @Test
     void executeSinglePairSuccess() throws Exception {
         Map<String, String> input = new LinkedHashMap<>();
-        input.put(" company ", " Goldman Sachs ");
+        input.put("company", "Goldman Sachs");
         FieldCommand cmd = new FieldCommand(Index.fromOneBased(1), input);
 
         String feedback = cmd.execute(model).getFeedbackToUser();
@@ -85,42 +83,6 @@ class FieldCommandTest {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
                 new FieldCommand(Index.fromOneBased(1), Map.of()));
         assertEquals(MESSAGE_AT_LEAST_ONE_PAIR, ex.getMessage());
-    }
-
-    @Test
-    void constructorBlankKeyThrows() {
-        Map<String, String> pairs = new LinkedHashMap<>();
-        pairs.put("   ", "v"); // trims to empty -> validate fails
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                new FieldCommand(Index.fromOneBased(1), pairs));
-        assertEquals(MESSAGE_NAME_CANNOT_BE_BLANK, ex.getMessage());
-    }
-
-    @Test
-    void constructorBlankValueThrows() {
-        Map<String, String> pairs = new LinkedHashMap<>();
-        pairs.put("k", "   "); // trims to empty -> validate fails
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                new FieldCommand(Index.fromOneBased(1), pairs));
-        assertEquals(MESSAGE_VALUE_CANNOT_BE_BLANK, ex.getMessage());
-    }
-
-    @Test
-    void constructorNullKeyThrows() {
-        Map<String, String> pairs = new LinkedHashMap<>();
-        pairs.put(null, "v"); // null -> normalizeKey returns ""
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                new FieldCommand(Index.fromOneBased(1), pairs));
-        assertEquals(MESSAGE_NAME_CANNOT_BE_BLANK, ex.getMessage());
-    }
-
-    @Test
-    void constructorNullValueThrows() {
-        Map<String, String> pairs = new LinkedHashMap<>();
-        pairs.put("k", null); // null -> normalizeValue returns ""
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                new FieldCommand(Index.fromOneBased(1), pairs));
-        assertEquals(MESSAGE_VALUE_CANNOT_BE_BLANK, ex.getMessage());
     }
 }
 

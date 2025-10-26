@@ -34,14 +34,26 @@ public final class FieldCommandExtractor {
 
         Map<String, String> pairs = new LinkedHashMap<>();
         for (Map.Entry<String, List<String>> entry : options.entrySet()) {
+            String key = normalize(entry.getKey());
+            if (key.isEmpty()) {
+                throw new ValidationException(FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK);
+            }
             List<String> values = entry.getValue();
-            String firstValue = (values == null || values.isEmpty()) ? "" : values.get(0);
-            pairs.put(entry.getKey(), firstValue);
+            String rawValue = (values == null || values.isEmpty()) ? "" : values.get(0);
+            String value = normalize(rawValue);
+            if (value.isEmpty()) {
+                throw new ValidationException(FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK);
+            }
+            pairs.put(key, value);
         }
         try {
             return new FieldCommand(index, pairs);
         } catch (IllegalArgumentException e) {
             throw new ValidationException(e.getMessage());
         }
+    }
+
+    private static String normalize(String input) {
+        return input == null ? "" : input.trim();
     }
 }

@@ -40,6 +40,22 @@ class FieldCommandExtractorTest {
     }
 
     @Test
+    void extract_trimsKeysAndValues_success() throws Exception {
+        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
+        builder.setImperative("field");
+        builder.addParameter("1");
+        builder.setOption(" company ", " Goldman Sachs ");
+        BareCommand bare = builder.build();
+
+        FieldCommand command = FieldCommandExtractor.extract(bare);
+
+        String feedback = command.execute(model).getFeedbackToUser();
+        assertTrue(feedback.contains("company:Goldman Sachs"));
+        Person edited = model.getFilteredPersonList().get(0);
+        assertEquals("Goldman Sachs", edited.getCustomFields().get("company"));
+    }
+
+    @Test
     void extract_invalidIndex_throwsValidationException() throws Exception {
         BareCommand bare = BareCommand.parse("field x /k:v");
         ValidationException ex = assertThrows(ValidationException.class, () ->

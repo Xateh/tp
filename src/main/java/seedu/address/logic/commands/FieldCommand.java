@@ -39,20 +39,8 @@ public class FieldCommand extends Command {
         if (pairs.isEmpty()) {
             throw new IllegalArgumentException(MESSAGE_AT_LEAST_ONE_PAIR);
         }
-        Map<String, String> sanitized = new LinkedHashMap<>();
-        for (Map.Entry<String, String> entry : pairs.entrySet()) {
-            String key = normalize(entry.getKey());
-            String value = normalize(entry.getValue());
-            if (key.isEmpty()) {
-                throw new IllegalArgumentException(MESSAGE_NAME_CANNOT_BE_BLANK);
-            }
-            if (value.isEmpty()) {
-                throw new IllegalArgumentException(MESSAGE_VALUE_CANNOT_BE_BLANK);
-            }
-            sanitized.put(key, value);
-        }
         this.index = index;
-        this.pairs = sanitized;
+        this.pairs = new LinkedHashMap<>(pairs);
     }
 
     /**
@@ -90,10 +78,6 @@ public class FieldCommand extends Command {
         }
         sb.append(" for ").append(edited.getName().fullName);
         return new CommandResult(sb.toString());
-    }
-
-    private static String normalize(String input) {
-        return input == null ? "" : input.trim();
     }
 }
 
