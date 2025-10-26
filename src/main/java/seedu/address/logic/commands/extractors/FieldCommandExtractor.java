@@ -40,6 +40,9 @@ public final class FieldCommandExtractor {
             if (key.isEmpty()) {
                 throw new ValidationException(FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK);
             }
+            if (Validation.isDisallowedCustomFieldName(key)) {
+                throw new ValidationException(String.format(FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME, key));
+            }
             List<String> values = entry.getValue();
             String rawValue = "";
             if (values != null && !values.isEmpty()) {

@@ -26,6 +26,8 @@ public class FieldCommand extends Command {
             + "Parameters: INDEX (must be a positive integer) /KEY[:VALUE]...\n"
             + "Example: " + COMMAND_WORD + " 1 /company:\"Goldman Sachs\" /nickname";
     public static final String MESSAGE_NAME_CANNOT_BE_BLANK = "Field name cannot be blank.";
+    public static final String MESSAGE_DISALLOWED_FIELD_NAME =
+            "Field name '%s' is reserved and cannot be used.";
     public static final String MESSAGE_AT_LEAST_ONE_PAIR =
             "Provide at least one /key or /key:value option. Usage: field <index> /key[:value] ...";
     private final Index index;

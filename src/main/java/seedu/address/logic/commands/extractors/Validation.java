@@ -37,6 +37,17 @@ public class Validation {
     }
 
     /**
+     * Returns true if the provided custom field name is disallowed.
+     *
+     * @param key Custom field name to validate.
+     * @return {@code true} if the key is disallowed, {@code false} otherwise.
+     */
+    public static boolean isDisallowedCustomFieldName(String key) {
+        requireNonNull(key);
+        return DISALLOWED_CUSTOM_FIELD_NAMES.contains(key.toLowerCase());
+    }
+
+    /**
      * Validate a parameter's kind and position. Note that further validation may still be required.
      *
      * @param bareCommand    BareCommand to extract parameter from.

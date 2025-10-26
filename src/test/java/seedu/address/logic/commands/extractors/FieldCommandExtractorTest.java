@@ -85,6 +85,24 @@ class FieldCommandExtractorTest {
     }
 
     @Test
+    void extract_disallowedLowercaseKey_throwsValidationException() throws Exception {
+        BareCommand bare = BareCommand.parse("field 1 /name:value");
+
+        ValidationException ex = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(bare));
+        assertEquals(String.format(FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME, "name"), ex.getMessage());
+    }
+
+    @Test
+    void extract_disallowedMixedCaseKey_throwsValidationException() throws Exception {
+        BareCommand bare = BareCommand.parse("field 1 /Email:value");
+
+        ValidationException ex = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(bare));
+        assertEquals(String.format(FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME, "Email"), ex.getMessage());
+    }
+
+    @Test
     void extract_blankValue_removesField() throws Exception {
         Person withField = model.getFilteredPersonList().get(0)
                 .withCustomFields(java.util.Map.of("company", "Existing"));
@@ -103,7 +121,6 @@ class FieldCommandExtractorTest {
         Person edited = model.getFilteredPersonList().get(0);
         assertTrue(edited.getCustomFields().isEmpty());
     }
-
 
     @Test
     void extract_missingOptionValue_removesField() throws Exception {
