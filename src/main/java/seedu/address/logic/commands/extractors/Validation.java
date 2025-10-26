@@ -206,6 +206,7 @@ public class Validation {
      */
     public static Address validateAddress(String address) throws ValidationException {
         requireNonNull(address);
+        System.out.println(address);
         String trimmedAddress = address.trim();
         if (!Address.isValidAddress(trimmedAddress)) {
             throw new ValidationException(Address.MESSAGE_CONSTRAINTS);
