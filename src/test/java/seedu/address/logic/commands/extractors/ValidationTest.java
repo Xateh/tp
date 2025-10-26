@@ -573,7 +573,8 @@ public class ValidationTest {
 
         @Test
         public void validateTags_collectionWithInvalidTags_throwsValidationException() {
-            Assert.assertThrows(ValidationException.class, () -> Validation.validateTags(Arrays.asList(VALID_TAG_1, INVALID_TAG)));
+            Assert.assertThrows(ValidationException.class, () -> Validation.validateTags(
+                    Arrays.asList(VALID_TAG_1, INVALID_TAG)));
         }
 
         @Test

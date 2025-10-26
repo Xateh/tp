@@ -52,14 +52,24 @@ import seedu.address.storage.StorageManager;
 import seedu.address.testutil.PersonBuilder;
 
 public class LogicManagerTest {
+    private static final String SAMPLE_ADD_COMMAND_INPUT_AMY = String.format("%s %s %s %s %s",
+            AddCommand.COMMAND_WORD,
+            escapeWithQuotes(VALID_NAME_AMY),
+            escapeWithQuotes(VALID_PHONE_AMY),
+            escapeWithQuotes(VALID_ADDRESS_AMY),
+            escapeWithQuotes(VALID_EMAIL_AMY));
+    private static final String SAMPLE_ADD_COMMAND_INPUT_BOB = String.format("%s %s %s %s %s",
+            AddCommand.COMMAND_WORD,
+            escapeWithQuotes(VALID_NAME_BOB),
+            escapeWithQuotes(VALID_PHONE_BOB),
+            escapeWithQuotes(VALID_ADDRESS_BOB),
+            escapeWithQuotes(VALID_EMAIL_BOB));
+
     @TempDir
     public Path temporaryFolder;
 
     private Model model = new ModelManager();
     private Logic logic;
-
-    private static final String SAMPLE_ADD_COMMAND_INPUT_AMY = String.format("%s %s %s %s %s", AddCommand.COMMAND_WORD, escapeWithQuotes(VALID_NAME_AMY), escapeWithQuotes(VALID_PHONE_AMY), escapeWithQuotes(VALID_ADDRESS_AMY), escapeWithQuotes(VALID_EMAIL_AMY));
-    private static final String SAMPLE_ADD_COMMAND_INPUT_BOB = String.format("%s %s %s %s %s", AddCommand.COMMAND_WORD, escapeWithQuotes(VALID_NAME_BOB), escapeWithQuotes(VALID_PHONE_BOB), escapeWithQuotes(VALID_ADDRESS_BOB), escapeWithQuotes(VALID_EMAIL_BOB));
 
     @BeforeEach
     public void setUp() {
