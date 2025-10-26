@@ -12,6 +12,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Info;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.builder.PersonBuilder;
 import seedu.address.ui.UiManager;
 
 /**
@@ -73,15 +74,7 @@ public class InfoCommand extends Command {
             uiManager.showInfoEditor(personToEdit, targetIndex.getZeroBased());
             return new CommandResult(String.format(MESSAGE_INFO_EDIT_SUCCESS, Messages.format(personToEdit)));
         } else {
-            // If updatedInfo is provided, we're saving the changes
-            Person editedPerson = new Person(
-                    personToEdit.getName(),
-                    personToEdit.getPhone(),
-                    personToEdit.getEmail(),
-                    personToEdit.getAddress(),
-                    personToEdit.getTags(),
-                    personToEdit.getCustomFields(),
-                    updatedInfo);
+            Person editedPerson = new PersonBuilder(personToEdit).withInfo(updatedInfo).build();
 
             model.setPerson(personToEdit, editedPerson);
             model.updateFilteredPersonList(Model.PREDICATE_SHOW_ALL_PERSONS);
