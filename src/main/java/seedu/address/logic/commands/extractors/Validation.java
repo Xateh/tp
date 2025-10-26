@@ -160,6 +160,6 @@ public class Validation {
     public static Index validateIndex(BareCommand bareCommand, int position) throws ValidationException {
         requireNonNull(bareCommand);
         return Validation.validateIndex(
-                Validation.validateParameter(bareCommand, 0, ParameterKind.NORMAL).getValue());
+                Validation.validateParameter(bareCommand, position, ParameterKind.NORMAL).getValue());
     }
 }
