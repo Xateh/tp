@@ -2,6 +2,7 @@ package seedu.address.ui;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javafx.fxml.FXML;
@@ -11,6 +12,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Person;
 
 /**
@@ -83,10 +85,16 @@ public class PersonCard extends UiPart<Region> {
                             .compareToIgnoreCase(b.getLinkee().getName().fullName);
                 })
                 .forEach(link -> {
-                    Label pill = new Label(link.getLinkName() + " \u2192 " + link.getLinkee().getName().fullName);
+                    boolean isLinker = link.getLinker().isSamePerson(person);
+                    String otherName = isLinker
+                            ? link.getLinkee().getName().fullName
+                            : link.getLinker().getName().fullName;
+                    String arrow = isLinker ? "→" : "←";
+                    Label pill = new Label(link.getLinkName() + " " + arrow + " " + otherName);
                     pill.getStyleClass().add("link-label");
                     links.getChildren().add(pill);
                 });
+
 
         if (links.getChildren().isEmpty()) {
             hide(links);

@@ -67,7 +67,9 @@ class JsonAdaptedPerson {
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
         customFields.putAll(source.getCustomFields()); // preserve order
+        // only serialize outgoing links
         links.addAll(source.getLinks().stream()
+                .filter(l -> l.getLinker().getName().equals(source.getName()))
                 .map(JsonAdaptedLink::new)
                 .collect(Collectors.toList()));
     }
@@ -139,6 +141,11 @@ class JsonAdaptedPerson {
             if (linkee == null) {
                 continue;
             }
+
+            if (self.isSamePerson(linkee)) {
+                continue;
+            }
+
             out.add(new Link(self, linkee, jl.getLinkName()));
         }
         return out;

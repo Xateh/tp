@@ -73,7 +73,9 @@ public class LinkCommand extends Command {
         if (linkerLinks.contains(newLink)) {
             return new CommandResult(MESSAGE_DUPLICATE_LINK);
         }
-        // Add the same Link instance to both persons
+
+
+        // Add the corresponding Link instance to both persons
         linkerLinks.add(newLink);
         linkeeLinks.add(newLink);
 

@@ -72,7 +72,7 @@ class JsonSerializableAddressBook {
                 .collect(Collectors.toMap(
                         p -> p.getName().fullName,
                         p -> p,
-                        (a, b) -> a,            // keep the first on collision
+                        (a, b) -> a, // keep the first on collision
                         LinkedHashMap::new
                 ));
 
@@ -81,29 +81,53 @@ class JsonSerializableAddressBook {
             JsonAdaptedPerson jap = persons.get(i);
             Person base = builtPersons.get(i);
 
-            // ✅ Your helper method name here
+            // resolve outgoing links: base -> someone
             Set<Link> resolvedLinks = jap.resolveLinks(base, byName::get);
 
             if (!resolvedLinks.isEmpty()) {
+                // 1) Update the linker with outgoing edges
+                Set<Link> newLinksForBase = new java.util.HashSet<>(base.getLinks());
+                newLinksForBase.addAll(resolvedLinks);
                 Person withLinks = new Person(
-                        base.getName(),
-                        base.getPhone(),
-                        base.getEmail(),
-                        base.getAddress(),
-                        base.getTags(),
-                        base.getCustomFields(),
-                        resolvedLinks
+                        base.getName(), base.getPhone(), base.getEmail(), base.getAddress(),
+                        base.getTags(), base.getCustomFields(), newLinksForBase
                 );
-
-                // Replace in both the AddressBook and the local list
                 addressBook.setPerson(base, withLinks);
                 builtPersons.set(i, withLinks);
-
-                // Keep the lookup map in sync for later links
                 byName.put(withLinks.getName().fullName, withLinks);
+
+                // 2) Mirror for each linkee (in-memory only)
+                for (Link out : resolvedLinks) {
+                    Person linkee = out.getLinkee();
+                    if (withLinks.isSamePerson(linkee)) continue;
+
+                    Person currentLinkee = byName.get(linkee.getName().fullName);
+                    if (currentLinkee == null) continue;
+
+                    Set<Link> linkeeLinks = new java.util.HashSet<>(currentLinkee.getLinks());
+
+                    // ✅ keep original direction
+                    Link incoming = new Link(out.getLinker(), out.getLinkee(), out.getLinkName());
+
+                    if (linkeeLinks.add(incoming)) {
+                        Person updatedLinkee = new Person(
+                                currentLinkee.getName(), currentLinkee.getPhone(), currentLinkee.getEmail(),
+                                currentLinkee.getAddress(), currentLinkee.getTags(), currentLinkee.getCustomFields(),
+                                linkeeLinks
+                        );
+                        addressBook.setPerson(currentLinkee, updatedLinkee);
+                        byName.put(updatedLinkee.getName().fullName, updatedLinkee);
+
+                        for (int k = 0; k < builtPersons.size(); k++) {
+                            if (builtPersons.get(k).isSamePerson(currentLinkee)) {
+                                builtPersons.set(k, updatedLinkee);
+                                break;
+                            }
+                        }
+                    }
+                }
             }
         }
-
         return addressBook;
     }
 }
