@@ -166,7 +166,7 @@ Format: `edit <index> [/<field>:<new-value>]+`
 
 **Parameters**
 
-* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit 
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit
 
 **Options**
 
@@ -205,8 +205,11 @@ Edits information about a person given its index.
 Format: `info <index>`
 
 * Displays an editable text box for the person at the given `<index>` in the displayed list.
-* The `<index>` refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
 * If there is existing information attached to the person, it will be shown and editable in the text box.
+
+**Parameters**
+
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
 
 Examples:
 * `list` followed by `info 2` will bring up an editable text box for the 2nd person in the address book.
