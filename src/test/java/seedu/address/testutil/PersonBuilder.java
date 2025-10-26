@@ -2,6 +2,7 @@ package seedu.address.testutil;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import seedu.address.model.person.Address;
@@ -29,6 +30,7 @@ public class PersonBuilder {
     private Email email;
     private Address address;
     private Set<Tag> tags;
+    private Map<String, String> customFields;
     private Info info;
 
     /**
@@ -40,6 +42,7 @@ public class PersonBuilder {
         email = new Email(DEFAULT_EMAIL);
         address = new Address(DEFAULT_ADDRESS);
         tags = new HashSet<>();
+        customFields = new LinkedHashMap<>();
         info = new Info(DEFAULT_INFO);
     }
 
@@ -52,6 +55,7 @@ public class PersonBuilder {
         email = personToCopy.getEmail();
         address = personToCopy.getAddress();
         tags = new HashSet<>(personToCopy.getTags());
+        customFields = new LinkedHashMap<>(personToCopy.getCustomFields());
         info = personToCopy.getInfo();
     }
 
@@ -103,8 +107,15 @@ public class PersonBuilder {
         return this;
     }
 
-    public Person build() {
-        return new Person(name, phone, email, address, tags, new LinkedHashMap<>(), info);
+    /**
+     * Sets the {@code customField} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withCustomFields(Map<String, String> customFields) {
+        this.customFields = new LinkedHashMap<>(customFields);
+        return this;
     }
 
+    public Person build() {
+        return new Person(name, phone, email, address, tags, customFields, info);
+    }
 }
