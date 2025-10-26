@@ -1,9 +1,7 @@
 @startuml
-!include ../style.puml
-skinparam arrowThickness 1.1
-skinparam arrowColor LOGIC_COLOR
-skinparam classBackgroundColor LOGIC_COLOR
-skinparam genericDisplay old
+skinparam style strictuml
+skinparam classAttributeIconSize 0
+hide empty members
 !define INTERFACE interface
 
 class Decoder {
@@ -28,13 +26,6 @@ class BareCommand {
 
 package "Resolution" {
     enum Bindings {
-        TAG("tag", TagCommandExtractor::extract)
-        __
-        - imperative: String
-        - extractor: CommandExtractor<?>
-        __
-        + {static} resolveBindings(Predicate<String>): CommandExtractor<?>[]
-        + {static} resolveExactBinding(Predicate<String>): CommandExtractor<?>
     }
 }
 

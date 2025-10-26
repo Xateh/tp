@@ -1,9 +1,7 @@
 @startuml
-!include ../style.puml
-skinparam arrowThickness 1.1
-skinparam arrowColor LOGIC_COLOR
-skinparam classBackgroundColor LOGIC_COLOR
-skinparam genericDisplay old
+skinparam style strictuml
+skinparam classAttributeIconSize 0
+hide empty members
 !define ABSTRACT_CLASS abstract class
 !define INTERFACE interface
 !define ABSTRACT_METHOD {abstract}
