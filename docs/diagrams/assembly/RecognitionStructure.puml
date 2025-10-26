@@ -16,19 +16,6 @@ package "Lexer" {
 
     class TokenisedCommand {
     }
-
-    class Token {
-    }
-
-    enum TokenType {
-        WORD
-        TEXT
-        SLASH
-        COLON
-        PLUS
-        MINUS
-        TERMINAL
-    }
 }
 
 package "Parser" {
@@ -85,8 +72,6 @@ class BareCommandBuilder {
 
 ' Relationships - Lexer
 CommandLexer ..> TokenisedCommand : creates
-TokenisedCommand *-> "*" Token
-Token --> "type" TokenType
 
 ' Relationships - Parser
 CommandParser --> TokenisedCommand : uses
@@ -97,7 +82,6 @@ AstNode ..> AstVisitor : accepts
 CommandExtractor ..> BareCommandBuilder : uses
 
 ' Relationships - Interface
-BareCommand +-- BareCommandBuilder
 BareCommand ..> CommandLexer : uses
 BareCommand ..> CommandParser : uses
 BareCommand ..> CommandExtractor : uses
