@@ -203,6 +203,7 @@ Format(s):
 * Existing values will be updated to the input values.
 * When editing tags, the existing tags of the person will be removed i.e adding of tags is not cumulative.
 * You can remove all the person’s tags by typing `/tag` without specifying any tags after it.
+* Edit cannot be used to modify fields or links.
 
 **Parameters**
 
@@ -210,7 +211,7 @@ Format(s):
 
 **Options**
 
-* #m#At least one optional field must be provided.##
+* #r#At least one optional field must be provided.##
 * `<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
 * `<new-value>` (string): any valid field entry (dependent on the modified field)
   * For options other than `tag`, a value **must** be specified.
@@ -219,12 +220,14 @@ Format(s):
 
 **Examples**
 
-* `edit 1 /phone:91234567 /email:"johndoe@example.com"` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
-* `edit 2 /name:"Betsy Crower" /tag` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+* `edit 1 /phone:91234567 /email:"johndoe@example.com"` edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
+* `edit 2 /name:"Betsy Crower" /tag` edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+* `edit 3 /tag:friend /tag:colleague` edits the tags of the 3rd person to be `friend` and `colleague` only, clearing all previous tags.
+* `edit 3 /tag /tag:friend /tag:colleague` edits the tags of the 3rd person to be `friend` and `colleague` only, clearing all previous tags; this is functionally identical to the previous example.
 
 **Warnings and Errors**
 
-* #m#Edit cannot be used to modify fields or links.##
+* #m#If the `tag` field is specified with values, any boolean options specified for `tag` are ignored (see above examples).##
 * #r#Values for each field must conform to the listed restrictions above.##
 
 ### Modifying tags : `tag`
