@@ -37,14 +37,31 @@ public class Validation {
     }
 
     /**
-     * Returns true if the provided custom field name is disallowed.
+     * Validates a custom field name, ensuring it is non-blank after trimming and not reserved.
      *
-     * @param key Custom field name to validate.
-     * @return {@code true} if the key is disallowed, {@code false} otherwise.
+     * @param rawKey                  Key to validate.
+     * @param emptyMessage            Message to use when the key is blank.
+     * @param disallowedMessageFormat Message format to use when the key is disallowed. The invalid key will be passed
+     *                                as the sole format argument.
+     * @return Sanitised key suitable for downstream use.
+     * @throws ValidationException When validation fails.
      */
-    public static boolean isDisallowedCustomFieldName(String key) {
-        requireNonNull(key);
-        return DISALLOWED_CUSTOM_FIELD_NAMES.contains(key.toLowerCase());
+    public static String validateCustomFieldName(String rawKey, String emptyMessage, String disallowedMessageFormat)
+            throws ValidationException {
+        requireNonNull(rawKey);
+        requireNonNull(emptyMessage);
+        requireNonNull(disallowedMessageFormat);
+
+        String trimmed = rawKey.trim();
+        if (trimmed.isEmpty()) {
+            throw new ValidationException(emptyMessage);
+        }
+
+        if (DISALLOWED_CUSTOM_FIELD_NAMES.contains(trimmed.toLowerCase())) {
+            throw new ValidationException(String.format(disallowedMessageFormat, trimmed));
+        }
+
+        return trimmed;
     }
 
     /**

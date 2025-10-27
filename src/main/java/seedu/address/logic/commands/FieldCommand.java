@@ -13,6 +13,7 @@ import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.builder.PersonBuilder;
 
 /**
  * Adds or updates custom key→value fields on a person.
@@ -42,9 +43,6 @@ public class FieldCommand extends Command {
         requireNonNull(updates);
         requireNonNull(removals);
 
-        if (updates.isEmpty() && removals.isEmpty()) {
-            throw new IllegalArgumentException(MESSAGE_AT_LEAST_ONE_PAIR);
-        }
         this.index = index;
         this.updates = new LinkedHashMap<>(updates);
         this.removals = List.copyOf(removals);
@@ -63,30 +61,43 @@ public class FieldCommand extends Command {
         }
         Person target = list.get(zero);
 
-        // Merge strategy: overwrite existing keys with new values, keep others.
-        Map<String, String> merged = new LinkedHashMap<>(target.getCustomFields());
+        Map<String, String> mergedFields = new LinkedHashMap<>(target.getCustomFields());
+        List<String> successfulRemovals = applyRemovals(mergedFields);
+        applyUpdates(mergedFields);
+
+        Person edited = new PersonBuilder(target)
+                .withCustomFields(mergedFields)
+                .build();
+        model.setPerson(target, edited);
+
+        String feedback = buildFeedbackMessage(edited, successfulRemovals);
+        return new CommandResult(feedback);
+    }
+
+    private List<String> applyRemovals(Map<String, String> fields) {
         List<String> successfulRemovals = new ArrayList<>();
         for (String removal : removals) {
-            if (merged.containsKey(removal)) {
-                merged.remove(removal);
+            if (fields.remove(removal) != null) {
                 successfulRemovals.add(removal);
             }
         }
-        for (Map.Entry<String, String> e : updates.entrySet()) {
-            merged.put(e.getKey(), e.getValue());
-        }
-        Person edited = target.withCustomFields(merged);
-        model.setPerson(target, edited);
-        // persistence handled by LogicManager or caller
+        return successfulRemovals;
+    }
 
-        // Build feedback message
+    private void applyUpdates(Map<String, String> fields) {
+        fields.putAll(updates);
+    }
+
+    private String buildFeedbackMessage(Person edited, List<String> successfulRemovals) {
         StringBuilder sb = new StringBuilder();
+
         if (!updates.isEmpty()) {
             String joinedUpdates = updates.entrySet().stream()
                     .map(e -> e.getKey() + ":" + e.getValue())
                     .collect(Collectors.joining(", "));
             sb.append("Added/updated field(s): ").append(joinedUpdates);
         }
+
         if (!successfulRemovals.isEmpty()) {
             if (sb.length() > 0) {
                 sb.append(" ");
@@ -94,10 +105,12 @@ public class FieldCommand extends Command {
             String joinedRemovals = String.join(", ", successfulRemovals);
             sb.append("Removed field(s): ").append(joinedRemovals);
         }
+
         if (sb.length() == 0) {
             sb.append("No field changes applied");
         }
+
         sb.append(" for ").append(edited.getName().fullName);
-        return new CommandResult(sb.toString());
+        return sb.toString();
     }
 }

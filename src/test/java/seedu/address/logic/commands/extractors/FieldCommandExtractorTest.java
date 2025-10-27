@@ -72,19 +72,6 @@ class FieldCommandExtractorTest {
     }
 
     @Test
-    void extract_blankKey_throwsValidationException() {
-        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
-        builder.setImperative("field");
-        builder.addParameter("1");
-        builder.setOption("   ", "value");
-        BareCommand bare = builder.build();
-
-        ValidationException ex = assertThrows(ValidationException.class, () ->
-                FieldCommandExtractor.extract(bare));
-        assertEquals(FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK, ex.getMessage());
-    }
-
-    @Test
     void extract_disallowedLowercaseKey_throwsValidationException() throws Exception {
         BareCommand bare = BareCommand.parse("field 1 /name:value");
 

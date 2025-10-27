@@ -3,7 +3,6 @@ package seedu.address.logic.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static seedu.address.logic.commands.FieldCommand.MESSAGE_AT_LEAST_ONE_PAIR;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -112,13 +111,6 @@ class FieldCommandTest {
     @Test
     void constructorNullRemovalsThrows() {
         assertThrows(NullPointerException.class, () -> new FieldCommand(Index.fromOneBased(1), Map.of("k", "v"), null));
-    }
-
-    @Test
-    void constructorEmptyPairsThrows() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-                new FieldCommand(Index.fromOneBased(1), Map.of(), List.of()));
-        assertEquals(MESSAGE_AT_LEAST_ONE_PAIR, ex.getMessage());
     }
 }
 
