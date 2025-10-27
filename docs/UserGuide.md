@@ -163,8 +163,8 @@ Format: `add <name> <phone> <address> <email> [/tag:<tag>]*`
 **Examples**
 
 * `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com"`
-* `add "Betsy Crowe" "1234567" "betsycrowe@example.com" "Newgate Prison" /tag:friend /tag:criminal`
-
+* `add "Betsy Crowe" "1234567" "Newgate Prison" "betsycrowe@example.com" /tag:friend /tag:criminal`
+* 
 **Warnings and Errors**
 
 * #r#Values for each field must conform to the listed restrictions above.##
@@ -198,7 +198,7 @@ Edits an existing person in the address book.
 
 Format(s):
 - `edit <index> [/<field>:<new-value>]+`
-- `edit <index> [/<field>:<new-value>]+ [/tag] `
+- `edit <index> [/<field>:<new-value>]+ [/tag]`
 
 * Existing values will be updated to the input values.
 * When editing tags, the existing tags of the person will be removed i.e adding of tags is not cumulative.
@@ -446,9 +446,9 @@ _Details coming soon ..._
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add**    | `add <name> <phone> <address> <email> [/tag:<tag>]*` <br> e.g., `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com" /tag:friend`
 **List**   | `list`
-**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag`
 **Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
 **Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
 **Edit Info** | `infoedit INDEX` <br> e.g., `infoedit 2`
