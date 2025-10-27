@@ -45,15 +45,13 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
 ## Features
 
-<box type="info" seamless>
-
-#### Basic Command Structure
+<box type="info" seamless header="Basic Command Structure">
 
 **NOTE TO REVIEWERS**: This part of the UG contains the updated command syntax that the app will eventually use. However, not all of the rest of the UG has been updated to be aligned with this new syntax. This **will be fixed** in a later version.
 
 All commands follow the same simple format:
 
-`command <parameters…> <options…>`
+`command <parameters...> <options...>`
 
 1. **Command:** The action you want to perform (e.g., `add`, `list`, `delete`).
 2. **Parameters:** Inputs the command _needs_ to work. These are usually **required**, and their **order matters**.
@@ -80,6 +78,8 @@ Options are optional settings to customise your command. They always come _after
     - **Example:** `add "Finish report" /priority:high`
     - If the value has spaces, wrap the value in quotes: `add "New event" /due:"tomorrow at 5"`
 
+#g#To avoid cluttering the syntax for each command, options may be specified in a particular order in the formats given below for better readability. But, it is always fine to specify the options in **any order**.##
+
 When you look at the help for a command, you'll see this notation:
 
 - **Parameter Variants:**
@@ -96,14 +96,42 @@ When you look at the help for a command, you'll see this notation:
     - `<item>?`: Zero or one (it's optional).
     - `<item>+`: One or more are required.
     - `<item>*`: Zero or more (it's optional and you can provide many).
+    - Multiple items may be grouped with square brackets `[]` and assigned a multiplicity. In such a case, the entire group may be repeated as many times as specified.
 
-**Example:** `tag <index>+ <tag>+` means you must provide at least one index, followed by at least one tag.
+_Example:_ `tag <index>+ [/tag:<tag>]+` means you must provide at least one index, followed by at least one tag with option key `tag`. These are all acceptable inputs:
+    - `tag 1 /tag:friend`
+    - `tag 1 /tag:enemy`
+    - `tag 1 /tag:`
+    - `tag 1 /tag:friend`
+    - `tag 1 /tag:friend`
+
+**Whitespace and Special Characters**
+
+- #m#Whitespace is ignored unless it is wrapped in quotes (`""`).##
+- #m#If you wish to pass special characters (non-alphanumeric: anything that is not a letter or number) to a field, you must wrap it in quotes (`""`).##
 
 **Extraneous Parameters and Options**
 
 By default:
-- The number of parameters are fixed for commands and should be strictly adhered to. Using an number of parameters that does not conform to the requirements of the command format is **undefined behaviour**. Some commands may gracefully handle extraneous parameters if it is sensible to do so, but this behaviour _should not be relied on_.
-- Extraneous options are *always* ignored, unless the command allows loose option key specification.
+- #r#The number of parameters are fixed for commands and should be strictly adhered to. Using a number of parameters that does not conform to the requirements of the command format is **undefined behaviour** (we leave it to individual commands to decide what to do). In most cases, this is an error.##
+- #m#Some commands may gracefully handle extraneous parameters if it is sensible to do so, but this behaviour _should not be relied on_.##
+- #m#Extraneous options are *always* ignored, unless the command allows variable option keys (it cannot tell what the difference is between a legitimate option key and one that is extraneous.##
+- #m#If an option name is specified multiple times when the command expects it to be specified only once, it will accept the first value specified.##
+
+</box>
+
+<box type="important" seamless header="Built-in and Custom Fields">
+
+There are additional restrictions on built-in fields:
+- `name`s must only contain letters, numbers, or spaces, and it should not be blank
+- `phone`s must only contain numbers, and it should be at least 3 digits long
+- `address`s must not be blank
+- `email`s must be of a valid email address form
+- `tag`s must only contain letters and numbers
+
+Furthermore:
+- Custom field names must only contain letters and numbers
+- Custom field values must not be blank
 
 </box>
 
