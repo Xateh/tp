@@ -64,6 +64,30 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
         return List.copyOf(keywords);
     }
 
+    public boolean isSearchName() {
+        return searchName;
+    }
+
+    public boolean isSearchPhone() {
+        return searchPhone;
+    }
+
+    public boolean isSearchEmail() {
+        return searchEmail;
+    }
+
+    public boolean isSearchAddress() {
+        return searchAddress;
+    }
+
+    public boolean isSearchTag() {
+        return searchTag;
+    }
+
+    public Set<String> getCustomKeys() {
+        return customKeys;
+    }
+
     /**
      * Tests whether any of the specified {@code keywords} matches at least one of the selected
      * {@link Person} fields, including both built-in and user-defined custom fields.

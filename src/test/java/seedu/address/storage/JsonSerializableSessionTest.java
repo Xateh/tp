@@ -8,6 +8,7 @@ import java.awt.Point;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -177,5 +178,36 @@ class JsonSerializableSessionTest {
                 + "\"searchKeywords\":[\"Alice\"],\"guiSettings\":{\"windowWidth\":800,"
                 + "\"windowHeight\":600,\"windowX\":10,\"windowY\":10}}",
                 "2025-10-14T00:00:00Z", ADDRESS_BOOK_JSON);
+    }
+
+    @Test
+    void toModelType_persistsFindFlagsAndCustomKeys() throws IllegalValueException {
+        // Create a SessionData with specific flags and custom keys
+        SessionData original = new SessionData(
+                Instant.parse("2025-10-14T00:00:00Z"),
+                new AddressBook(),
+                List.of("Alice"),
+                /* searchName */ false,
+                /* searchPhone */ true,
+                /* searchEmail */ false,
+                /* searchAddress */ true,
+                /* searchTag */ false,
+                List.of("company", "assetClass"),
+                GUI_SETTINGS);
+
+        JsonSerializableSession jsonSession = new JsonSerializableSession(original);
+        SessionData converted = jsonSession.toModelType();
+
+        assertEquals(original.getSearchKeywords(), converted.getSearchKeywords());
+        assertEquals(original.isSearchName(), converted.isSearchName());
+        assertEquals(original.isSearchPhone(), converted.isSearchPhone());
+        assertEquals(original.isSearchEmail(), converted.isSearchEmail());
+        assertEquals(original.isSearchAddress(), converted.isSearchAddress());
+        assertEquals(original.isSearchTag(), converted.isSearchTag());
+        // custom keys should be preserved (order is not important) - compare as sets
+        assertEquals(
+                Set.copyOf(original.getCustomKeys()),
+                Set.copyOf(converted.getCustomKeys())
+        );
     }
 }

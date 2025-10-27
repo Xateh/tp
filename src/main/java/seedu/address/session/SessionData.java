@@ -20,6 +20,12 @@ public class SessionData {
     private final Instant savedAt;
     private final AddressBook addressBook;
     private final List<String> searchKeywords;
+    private final boolean searchName;
+    private final boolean searchPhone;
+    private final boolean searchEmail;
+    private final boolean searchAddress;
+    private final boolean searchTag;
+    private final List<String> customKeys;
     private final GuiSettings guiSettings;
 
     /**
@@ -31,12 +37,30 @@ public class SessionData {
      * @param guiSettings GUI settings to restore on the next launch
      */
     public SessionData(Instant savedAt, ReadOnlyAddressBook addressBook,
-            List<String> searchKeywords, GuiSettings guiSettings) {
+        List<String> searchKeywords, boolean searchName, boolean searchPhone,
+        boolean searchEmail, boolean searchAddress, boolean searchTag,
+        List<String> customKeys, GuiSettings guiSettings) {
         this.savedAt = requireNonNull(savedAt);
         requireNonNull(addressBook);
         this.addressBook = new AddressBook(addressBook);
         this.searchKeywords = List.copyOf(requireNonNull(searchKeywords));
+        this.searchName = searchName;
+        this.searchPhone = searchPhone;
+        this.searchEmail = searchEmail;
+        this.searchAddress = searchAddress;
+        this.searchTag = searchTag;
+        this.customKeys = List.copyOf(requireNonNull(customKeys));
         this.guiSettings = requireNonNull(guiSettings);
+    }
+
+    /**
+     * Backwards-compatible constructor that preserves previous behaviour.
+     * Defaults to searching all non-custom fields and no custom keys.
+     */
+    public SessionData(Instant savedAt, ReadOnlyAddressBook addressBook,
+            List<String> searchKeywords, GuiSettings guiSettings) {
+        this(savedAt, addressBook, searchKeywords, true, true, true, true, true,
+                List.of(), guiSettings);
     }
 
     public String getFormatVersion() {
@@ -53,6 +77,30 @@ public class SessionData {
 
     public List<String> getSearchKeywords() {
         return searchKeywords;
+    }
+
+    public boolean isSearchName() {
+        return searchName;
+    }
+
+    public boolean isSearchPhone() {
+        return searchPhone;
+    }
+
+    public boolean isSearchEmail() {
+        return searchEmail;
+    }
+
+    public boolean isSearchAddress() {
+        return searchAddress;
+    }
+
+    public boolean isSearchTag() {
+        return searchTag;
+    }
+
+    public List<String> getCustomKeys() {
+        return customKeys;
     }
 
     public GuiSettings getGuiSettings() {
@@ -73,12 +121,19 @@ public class SessionData {
         return savedAt.equals(otherData.savedAt)
             && addressBook.equals(otherData.addressBook)
             && searchKeywords.equals(otherData.searchKeywords)
+            && searchName == otherData.searchName
+            && searchPhone == otherData.searchPhone
+            && searchEmail == otherData.searchEmail
+            && searchAddress == otherData.searchAddress
+            && searchTag == otherData.searchTag
+            && customKeys.equals(otherData.customKeys)
             && guiSettings.equals(otherData.guiSettings);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(savedAt, addressBook, searchKeywords, guiSettings);
+        return Objects.hash(savedAt, addressBook, searchKeywords, searchName, searchPhone,
+            searchEmail, searchAddress, searchTag, customKeys, guiSettings);
     }
 
     @Override
@@ -88,6 +143,12 @@ public class SessionData {
                 + ", savedAt=" + savedAt
                 + ", addressBookPersons=" + addressBook.getPersonList().size()
                 + ", searchKeywords=" + searchKeywords
+                + ", searchName=" + searchName
+                + ", searchPhone=" + searchPhone
+                + ", searchEmail=" + searchEmail
+                + ", searchAddress=" + searchAddress
+                + ", searchTag=" + searchTag
+                + ", customKeys=" + customKeys
                 + ", guiSettings=" + guiSettings
                 + '}';
     }

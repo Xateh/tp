@@ -24,6 +24,12 @@ class JsonSerializableSession {
     private final String savedAt;
     private final JsonSerializableAddressBook addressBook;
     private final List<String> searchKeywords;
+    private final Boolean searchName;
+    private final Boolean searchPhone;
+    private final Boolean searchEmail;
+    private final Boolean searchAddress;
+    private final Boolean searchTag;
+    private final List<String> customKeys;
     private final JsonGuiSettings guiSettings;
 
     @JsonCreator
@@ -31,11 +37,23 @@ class JsonSerializableSession {
             @JsonProperty("savedAt") String savedAt,
             @JsonProperty("addressBook") JsonSerializableAddressBook addressBook,
             @JsonProperty("searchKeywords") List<String> searchKeywords,
+            @JsonProperty("searchName") Boolean searchName,
+            @JsonProperty("searchPhone") Boolean searchPhone,
+            @JsonProperty("searchEmail") Boolean searchEmail,
+            @JsonProperty("searchAddress") Boolean searchAddress,
+            @JsonProperty("searchTag") Boolean searchTag,
+            @JsonProperty("customKeys") List<String> customKeys,
             @JsonProperty("guiSettings") JsonGuiSettings guiSettings) {
         this.formatVersion = formatVersion;
         this.savedAt = savedAt;
         this.addressBook = addressBook;
         this.searchKeywords = searchKeywords != null ? new ArrayList<>(searchKeywords) : new ArrayList<>();
+        this.searchName = searchName;
+        this.searchPhone = searchPhone;
+        this.searchEmail = searchEmail;
+        this.searchAddress = searchAddress;
+        this.searchTag = searchTag;
+        this.customKeys = customKeys != null ? new ArrayList<>(customKeys) : new ArrayList<>();
         this.guiSettings = guiSettings;
     }
 
@@ -44,6 +62,12 @@ class JsonSerializableSession {
         this.savedAt = source.getSavedAt().toString();
         this.addressBook = new JsonSerializableAddressBook(source.getAddressBook());
         this.searchKeywords = new ArrayList<>(source.getSearchKeywords());
+        this.searchName = source.isSearchName();
+        this.searchPhone = source.isSearchPhone();
+        this.searchEmail = source.isSearchEmail();
+        this.searchAddress = source.isSearchAddress();
+        this.searchTag = source.isSearchTag();
+        this.customKeys = new ArrayList<>(source.getCustomKeys());
         this.guiSettings = new JsonGuiSettings(source.getGuiSettings());
     }
 
@@ -74,7 +98,17 @@ class JsonSerializableSession {
         AddressBook modelAddressBook = addressBook.toModelType();
         GuiSettings modelGuiSettings = guiSettings.toModelType();
 
-        return new SessionData(parsedSavedAt, modelAddressBook, searchKeywords, modelGuiSettings);
+        // Default flags when absent in older session files: treat as searching all non-custom fields.
+        boolean modelSearchName = searchName != null ? searchName : true;
+        boolean modelSearchPhone = searchPhone != null ? searchPhone : true;
+        boolean modelSearchEmail = searchEmail != null ? searchEmail : true;
+        boolean modelSearchAddress = searchAddress != null ? searchAddress : true;
+        boolean modelSearchTag = searchTag != null ? searchTag : true;
+        List<String> modelCustomKeys = customKeys != null ? new ArrayList<>(customKeys) : new ArrayList<>();
+
+        return new SessionData(parsedSavedAt, modelAddressBook, searchKeywords,
+            modelSearchName, modelSearchPhone, modelSearchEmail, modelSearchAddress,
+            modelSearchTag, modelCustomKeys, modelGuiSettings);
     }
 
     private static class JsonGuiSettings {

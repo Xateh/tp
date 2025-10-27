@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -201,6 +202,26 @@ public class SessionRecorderTest {
         SessionRecorder recorder = new SessionRecorder(ab, DEFAULT_GUI_SETTINGS, Optional.of(previous));
         SessionData snapshot = recorder.buildSnapshot(ab, DEFAULT_GUI_SETTINGS);
         assertEquals(keywords, snapshot.getSearchKeywords());
+    }
+
+    @Test
+    public void findCommand_capturesFlagsAndCustomKeys() {
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
+        List<String> keywords = List.of("alice");
+        FieldContainsKeywordsPredicate predicate = new FieldContainsKeywordsPredicate(
+                keywords, /*name*/false, /*phone*/true, /*email*/false, /*address*/true, /*tag*/false,
+                Set.of("company", "assetclass")
+        );
+        recorder.afterSuccessfulCommand(new FindCommand(predicate), false);
+
+        SessionData snapshot = recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS);
+        assertEquals(keywords, snapshot.getSearchKeywords());
+        assertFalse(snapshot.isSearchName());
+        assertTrue(snapshot.isSearchPhone());
+        assertFalse(snapshot.isSearchEmail());
+        assertTrue(snapshot.isSearchAddress());
+        assertFalse(snapshot.isSearchTag());
+        assertEquals(Set.of("company", "assetclass"), Set.copyOf(snapshot.getCustomKeys()));
     }
 }
 

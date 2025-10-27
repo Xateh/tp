@@ -1,8 +1,11 @@
 package seedu.address.logic;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
@@ -139,7 +142,20 @@ public class LogicManager implements Logic {
 
     private void restoreSessionState(SessionData sessionData) {
         if (!sessionData.getSearchKeywords().isEmpty()) {
-            model.updateFilteredPersonList(new FieldContainsKeywordsPredicate(sessionData.getSearchKeywords()));
+            // Use stored flags and custom keys when restoring the predicate
+            List<String> keywords = sessionData.getSearchKeywords();
+            boolean sName = sessionData.isSearchName();
+            boolean sPhone = sessionData.isSearchPhone();
+            boolean sEmail = sessionData.isSearchEmail();
+            boolean sAddress = sessionData.isSearchAddress();
+            boolean sTag = sessionData.isSearchTag();
+            Set<String> customKeys = sessionData.getCustomKeys().stream()
+                    .map(k -> k != null ? k.trim().toLowerCase() : "")
+                    .filter(k -> !k.isEmpty())
+                    .collect(Collectors.toSet());
+
+            model.updateFilteredPersonList(new FieldContainsKeywordsPredicate(
+                    keywords, sName, sPhone, sEmail, sAddress, sTag, customKeys));
         }
     }
 }
