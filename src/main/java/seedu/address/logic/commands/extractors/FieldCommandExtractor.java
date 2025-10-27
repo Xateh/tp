@@ -1,5 +1,7 @@
 package seedu.address.logic.commands.extractors;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,6 +19,8 @@ import seedu.address.logic.grammars.command.BareCommand;
 public final class FieldCommandExtractor {
     public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
     public static final String MESSAGE_WRONG_IMPERATIVE = "Wrong imperative for FieldCommand";
+    private static final List<String> DISALLOWED_CUSTOM_FIELD_NAMES = List.of("name", "email", "phone",
+                                    "address", "tag", "field", "link", "find");
 
     private FieldCommandExtractor() {}
 
@@ -38,7 +42,7 @@ public final class FieldCommandExtractor {
         List<String> removals = new ArrayList<>();
 
         for (String rawKey : optionKeys) {
-            String key = Validation.validateCustomFieldName(rawKey,
+            String key = validateCustomFieldName(rawKey,
                     FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK,
                     FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME);
 
@@ -62,6 +66,24 @@ public final class FieldCommandExtractor {
             removals.add(key);
         }
         return new FieldCommand(index, updates, removals);
+    }
+
+    private static String validateCustomFieldName(String rawKey, String emptyMessage,
+            String disallowedMessageFormat) throws ValidationException {
+        requireNonNull(rawKey);
+        requireNonNull(emptyMessage);
+        requireNonNull(disallowedMessageFormat);
+
+        String trimmed = rawKey.trim();
+        if (trimmed.isEmpty()) {
+            throw new ValidationException(emptyMessage);
+        }
+
+        if (DISALLOWED_CUSTOM_FIELD_NAMES.contains(trimmed.toLowerCase())) {
+            throw new ValidationException(String.format(disallowedMessageFormat, trimmed));
+        }
+
+        return trimmed;
     }
 
     private static String normalize(String input) {

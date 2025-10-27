@@ -90,6 +90,24 @@ class FieldCommandExtractorTest {
     }
 
     @Test
+    void extract_disallowedLinkKey_throwsValidationException() throws Exception {
+        BareCommand bare = BareCommand.parse("field 1 /link:value");
+
+        ValidationException ex = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(bare));
+        assertEquals(String.format(FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME, "link"), ex.getMessage());
+    }
+
+    @Test
+    void extract_disallowedFindKey_throwsValidationException() throws Exception {
+        BareCommand bare = BareCommand.parse("field 1 /Find:value");
+
+        ValidationException ex = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(bare));
+        assertEquals(String.format(FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME, "Find"), ex.getMessage());
+    }
+
+    @Test
     void extract_blankValue_removesField() throws Exception {
         Person withField = model.getFilteredPersonList().get(0)
                 .withCustomFields(java.util.Map.of("company", "Existing"));
