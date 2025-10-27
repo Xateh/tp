@@ -28,13 +28,13 @@ class JsonAdaptedPerson {
 
     public static final String MISSING_FIELD_MESSAGE_FORMAT = "Person's %s field is missing!";
 
+    final List<JsonAdaptedLink> links = new ArrayList<>(); //package private to use in test
     private final String name;
     private final String phone;
     private final String email;
     private final String address;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
     private final Map<String, String> customFields = new LinkedHashMap<>();
-    private final List<JsonAdaptedLink> links = new ArrayList<>();
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.

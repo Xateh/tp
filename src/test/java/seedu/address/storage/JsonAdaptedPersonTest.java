@@ -2,13 +2,18 @@ package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.storage.JsonAdaptedPerson.MISSING_FIELD_MESSAGE_FORMAT;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -16,8 +21,11 @@ import org.junit.jupiter.api.Test;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
+import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.tag.Tag;
 
 public class JsonAdaptedPersonTest {
     private static final String INVALID_NAME = "R@chel";
@@ -33,8 +41,6 @@ public class JsonAdaptedPersonTest {
     private static final List<JsonAdaptedTag> VALID_TAGS = BENSON.getTags().stream()
             .map(JsonAdaptedTag::new)
             .collect(Collectors.toList());
-
-    // New: shared empty links list for constructor calls
     private static final List<JsonAdaptedLink> EMPTY_LINKS = Collections.emptyList();
 
     @Test
@@ -140,6 +146,132 @@ public class JsonAdaptedPersonTest {
 
         // This layer should NOT throw; invalid name will be caught when Links are constructed/resolved
         assertDoesNotThrow(person::toModelType);
+    }
+
+    // ===== Helpers for link tests =====
+    private static Person mkPerson(String fullName, String phone, String email, String address) {
+        return new Person(
+                new Name(fullName),
+                new Phone(phone),
+                new Email(email),
+                new Address(address),
+                new HashSet<Tag>(),
+                new java.util.LinkedHashMap<>(),
+                new HashSet<Link>()
+        );
+    }
+
+    // ===== resolveLinks() tests =====
+    @Test
+    public void resolveLinks_validSingleOutgoingLink_success() throws Exception {
+        Person alice = mkPerson("Alice", "11111111", "alice@example.com", "1 Road");
+        Person bob = mkPerson("Bob", "22222222", "bob@example.com", "2 Road");
+
+        JsonAdaptedPerson japAlice = new JsonAdaptedPerson(
+                "Alice", "11111111", "alice@example.com", "1 Road",
+                VALID_TAGS,
+                List.of(new JsonAdaptedLink("lawyer", "Bob"))
+        );
+
+        Map<String, Person> byName = new HashMap<>();
+        byName.put("Alice", alice);
+        byName.put("Bob", bob);
+
+        Set<Link> links = japAlice.resolveLinks(alice, byName::get);
+        assertEquals(1, links.size());
+        Link link = links.iterator().next();
+        assertEquals("lawyer", link.getLinkName());
+        assertEquals(alice.getName(), link.getLinker().getName());
+        assertEquals(bob.getName(), link.getLinkee().getName());
+    }
+
+    @Test
+    public void resolveLinks_ignoresInvalidLinkName() throws Exception {
+        Person a = mkPerson("A", "11111111", "a@x.com", "addr");
+        Person b = mkPerson("B", "22222222", "b@x.com", "addr");
+
+        JsonAdaptedPerson japA = new JsonAdaptedPerson(
+                "A", "11111111", "a@x.com", "addr",
+                VALID_TAGS,
+                List.of(new JsonAdaptedLink("@@@", "B")) // invalid per Link regex
+        );
+
+        Map<String, Person> byName = Map.of("A", a, "B", b);
+
+        assertTrue(japA.resolveLinks(a, byName::get).isEmpty(), "Invalid link name should be ignored");
+    }
+
+    @Test
+    public void resolveLinks_ignoresUnknownLinkee() throws Exception {
+        Person a = mkPerson("A", "11111111", "a@x.com", "addr");
+
+        JsonAdaptedPerson japA = new JsonAdaptedPerson(
+                "A", "11111111", "a@x.com", "addr",
+                VALID_TAGS,
+                List.of(new JsonAdaptedLink("mentor", "Missing"))
+        );
+
+        Map<String, Person> byName = Map.of("A", a);
+
+        assertTrue(japA.resolveLinks(a, byName::get).isEmpty(), "Unresolvable linkee should be skipped");
+    }
+
+    @Test
+    public void resolveLinks_ignoresSelfLink() throws Exception {
+        Person a = mkPerson("A", "11111111", "a@x.com", "addr");
+
+        JsonAdaptedPerson japA = new JsonAdaptedPerson(
+                "A", "11111111", "a@x.com", "addr",
+                VALID_TAGS,
+                List.of(new JsonAdaptedLink("buddy", "A")) // self
+        );
+
+        Map<String, Person> byName = Map.of("A", a);
+
+        assertTrue(japA.resolveLinks(a, byName::get).isEmpty(), "Self-link should be ignored");
+    }
+
+    // ===== constructor(Person) link filtering =====
+    @Test
+    public void constructor_fromModel_serializesOnlyOutgoingLinks() throws Exception {
+        Person alice = mkPerson("Alice", "11111111", "alice@example.com", "1 Road");
+        Person bob = mkPerson("Bob", "22222222", "bob@example.com", "2 Road");
+
+        Link ab = new Link(alice, bob, "colleague");
+
+        // give both Persons the same Link instance (one is "incoming" for Bob)
+        Set<Link> aliceLinks = new HashSet<>();
+        aliceLinks.add(ab);
+        Person aliceWith = new Person(
+                alice.getName(), alice.getPhone(), alice.getEmail(), alice.getAddress(),
+                alice.getTags(), alice.getCustomFields(), aliceLinks
+        );
+
+        Set<Link> bobLinks = new HashSet<>();
+        bobLinks.add(ab);
+        Person bobWith = new Person(
+                bob.getName(), bob.getPhone(), bob.getEmail(), bob.getAddress(),
+                bob.getTags(), bob.getCustomFields(), bobLinks
+        );
+
+        JsonAdaptedPerson japAlice = new JsonAdaptedPerson(aliceWith);
+        JsonAdaptedPerson japBob = new JsonAdaptedPerson(bobWith);
+
+        Map<String, Person> byName = new HashMap<>();
+        byName.put("Alice", alice);
+        byName.put("Bob", bob);
+
+        // Alice should resolve one outgoing link to Bob
+        Set<Link> aliceResolved = japAlice.resolveLinks(alice, byName::get);
+        assertEquals(1, aliceResolved.size());
+        Link aliceOut = aliceResolved.iterator().next();
+        assertEquals("colleague", aliceOut.getLinkName());
+        assertEquals("Bob", aliceOut.getLinkee().getName().fullName);
+
+        // Bob should resolve none (his set contains only the incoming counterpart)
+        Set<Link> bobResolved = japBob.resolveLinks(bob, byName::get);
+        assertTrue(((java.util.Set<?>) bobResolved).isEmpty(),
+                "Only outgoing links should be serialized and thus resolvable");
     }
 }
 

@@ -76,7 +76,6 @@ public class LogicManager implements Logic {
             try {
                 storage.saveAddressBook(model.getAddressBook());
             } catch (Exception e) {
-                // surface as a user-visible error consistent with AB style
                 throw new CommandException("Could not save data to file: " + e.getMessage(), e);
             }
         }
