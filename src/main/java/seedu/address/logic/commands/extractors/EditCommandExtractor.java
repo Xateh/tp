@@ -12,6 +12,9 @@ import seedu.address.logic.grammars.command.BareCommand;
  * Extractor that builds {@code EditCommand}s.
  */
 public final class EditCommandExtractor {
+    // Messages
+    public static final String MESSAGE_NO_EDITS_MADE = "Must specify at least one edit to be made.";
+
     // Options
     public static final String OPTION_KEY_NAME = "name";
     public static final String OPTION_KEY_PHONE = "phone";
@@ -54,6 +57,10 @@ public final class EditCommandExtractor {
         if (bareCommand.hasOption(OPTION_KEY_TAG)) {
             editPersonDescriptor.setTags(
                     Validation.validateTags(bareCommand.getOptionAllValues(OPTION_KEY_TAG).get()));
+        }
+
+        if (!editPersonDescriptor.isAnyFieldEdited()) {
+            throw new ValidationException(MESSAGE_NO_EDITS_MADE);
         }
 
         return new EditCommand(index, editPersonDescriptor);
