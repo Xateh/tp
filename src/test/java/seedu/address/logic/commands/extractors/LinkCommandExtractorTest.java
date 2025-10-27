@@ -62,4 +62,56 @@ public class LinkCommandExtractorTest {
         assertThrows(ValidationException.class, () -> LinkCommandExtractor.extract(bare),
                 "Cannot link a person to themselves.");
     }
+    @Test
+    public void extract_additiveParamKind_throwsValidationException()
+            throws LexerException, ParserException {
+        // “+1” should be ADDITIVE kind → rejected
+        assertThrows(ValidationException.class, () ->
+                LinkCommandExtractor.extract(BareCommand.parse("link +1 mentor 2")));
+    }
+
+    @Test
+    public void extract_subtractiveParamKind_throwsValidationException()
+            throws LexerException, ParserException {
+        // “-2” should be SUBTRACTIVE kind → rejected
+        assertThrows(ValidationException.class, () ->
+                LinkCommandExtractor.extract(BareCommand.parse("link 1 mentor -2")));
+    }
+
+    @Test
+    public void extract_tooManyParams_throwsValidationException()
+            throws LexerException, ParserException {
+        assertThrows(ValidationException.class, () ->
+                LinkCommandExtractor.extract(BareCommand.parse("link 1 mentor 2 3")));
+    }
+
+    @Test
+    public void extract_zeroIndex_throwsValidationException()
+            throws LexerException, ParserException {
+        assertThrows(ValidationException.class, () ->
+                LinkCommandExtractor.extract(BareCommand.parse("link 0 mentor 2")));
+    }
+
+    @Test
+    public void extract_negativeIndex_throwsValidationException()
+            throws LexerException, ParserException {
+        assertThrows(ValidationException.class, () ->
+                LinkCommandExtractor.extract(BareCommand.parse("link -1 mentor 2")));
+    }
+
+    @Test
+    public void extract_invalidLinkNameChars_throwsValidationException()
+            throws LexerException, ParserException {
+        // Depends on your Link.isValidLinkName(), “@@@” should fail
+        assertThrows(ValidationException.class, () ->
+                LinkCommandExtractor.extract(BareCommand.parse("link 1 \"@@@\" 2")));
+    }
+
+    @Test
+    public void extract_validLinkNameChars_success() throws Exception {
+        BareCommand bare = BareCommand.parse("link 3 \"lawyer #1\" 5");
+        LinkCommand cmd = LinkCommandExtractor.extract(bare);
+        LinkCommand expected = new LinkCommand(Index.fromOneBased(3), "lawyer #1", Index.fromOneBased(5));
+        assertEquals(cmd, expected);
+    }
 }

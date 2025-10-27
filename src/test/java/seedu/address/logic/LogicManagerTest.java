@@ -432,4 +432,37 @@ public class LogicManagerTest {
 
         assertEquals(model.getFilteredPersonList(), logic.getFilteredPersonList());
     }
+
+    @Test
+    public void execute_validLinkCommand_success() throws Exception {
+        // Add two people first
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
+                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_BOB + PHONE_DESC_BOB
+                + EMAIL_DESC_BOB + ADDRESS_DESC_BOB);
+
+        // Execute a valid link
+        CommandResult result = logic.execute("link 1 mentor 2");
+        String feedback = result.getFeedbackToUser();
+        assertTrue(feedback.contains("mentor"));
+        assertTrue(feedback.contains("is now"));
+        assertTrue(feedback.contains("Amy"));
+        assertTrue(feedback.contains("Bob"));
+    }
+
+    @Test
+    public void execute_invalidLinkIndexes_throwsCommandException() {
+        // No persons added yet
+        assertThrows(CommandException.class, () -> logic.execute("link 1 friend 2"));
+    }
+
+    @Test
+    public void execute_selfLink_throwsValidationException() {
+        // Add one person
+        assertThrows(Exception.class, () -> {
+            logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
+                    + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+            logic.execute("link 1 buddy 1");
+        });
+    }
 }

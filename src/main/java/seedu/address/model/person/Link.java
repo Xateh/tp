@@ -46,11 +46,11 @@ public class Link {
      * Regular expression defining a valid link name:
      * <ul>
      *   <li>Must start with an alphanumeric character (no leading space/symbol)</li>
-     *   <li>May contain letters, digits, spaces, and limited punctuation (- _ & / ( ) .)</li>
+     *   <li>May contain letters, digits, spaces, and limited punctuation (- _ # & / ( ) .)</li>
      *   <li>Maximum length: 30 characters</li>
      * </ul>
      */
-    private static final String VALIDATION_REGEX = "[A-Za-z0-9][A-Za-z0-9 _&/().-]{0,29}";
+    private static final String VALIDATION_REGEX = "[A-Za-z0-9][A-Za-z0-9 _#&/().-]{0,29}";
 
     private final Person linker; // The person that initiates the relationship
     private final Person linkee; // The person that is the target of the relationship
