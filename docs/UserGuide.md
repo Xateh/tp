@@ -119,16 +119,27 @@ Format: `help`
 
 Adds a person to the address book.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
+Format: `add <name> <phone> <address> <email> [/tag:<tag>]*`
 
-<box type="tip" seamless>
+**Parameters**
 
-**Tip:** A person can have any number of tags (including 0)
-</box>
+* `<name>` (string): a valid name
+* `<phone>` (string): a valid phone number
+* `<address>` (string): a valid address
+* `<email>` (string): a valid email address
 
-Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+**Options**
+
+* `<tag>` (string): a valid tag name
+
+**Examples**
+
+* `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com"`
+* `add "Betsy Crowe" "1234567" "betsycrowe@example.com" "Newgate Prison" /tag:friend /tag:criminal`
+
+**Warnings and Errors**
+
+* #r#Values for each field must conform to the listed restrictions above.##
 
 ### Listing all persons : `list`
 
@@ -186,7 +197,7 @@ Format(s):
 **Warnings and Errors**
 
 * #m#Edit cannot be used to modify fields or links.##
-* #r#Field values must conform to listed restrictions.##
+* #r#Values for each field must conform to the listed restrictions above.##
 
 ### Modifying tags : `tag`
 
