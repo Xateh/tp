@@ -102,8 +102,8 @@ When you look at the help for a command, you'll see this notation:
 **Extraneous Parameters and Options**
 
 By default:
-- the number of parameters are fixed for commands and should be strictly adhered to. Using an number of parameters that does not conform to the requirements of the command format is **undefined behaviour**. Some commands may gracefully handle extraneous parameters if it is sensible to do so, but this behaviour _should not be relied on_.
-- extraneous options are *always* ignored.
+- The number of parameters are fixed for commands and should be strictly adhered to. Using an number of parameters that does not conform to the requirements of the command format is **undefined behaviour**. Some commands may gracefully handle extraneous parameters if it is sensible to do so, but this behaviour _should not be relied on_.
+- Extraneous options are *always* ignored, unless the command allows loose option key specification.
 
 </box>
 
@@ -114,7 +114,6 @@ Shows a message explaining how to access the help page.
 ![help message](images/helpMessage.png)
 
 Format: `help`
-
 
 ### Adding a person: `add`
 
@@ -138,6 +137,7 @@ Shows a list of all persons in the address book.
 Format: `list`
 
 ### Viewing command history : `history`
+
 Displays the list of commands previously entered.
 
 Format: `history`
@@ -157,9 +157,10 @@ Examples:
 
 Edits an existing person in the address book.
 
-Format: `edit <index> [/<field>:<new-value>]+`
+Format(s):
+- `edit <index> [/<field>:<new-value>]+`
+- `edit <index> [/<field>:<new-value>]+ [/tag] `
 
-* At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
 * When editing tags, the existing tags of the person will be removed i.e adding of tags is not cumulative.
 * You can remove all the person’s tags by typing `/tag` without specifying any tags after it.
@@ -170,13 +171,22 @@ Format: `edit <index> [/<field>:<new-value>]+`
 
 **Options**
 
-* `<field>` (word): one of any of the available fields on a person (one of `name`, `phone`, `address`, `email`)
+* #m#At least one optional field must be provided.##
+* `<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
 * `<new-value>` (string): any valid field entry (dependent on the modified field)
+  * For options other than `tag`, a value **must** be specified.
+  * If `tag` is specified without any value, all tags on the person are removed.
+  * The `tag` can be specified repeatedly with multiple distinct values.
 
-Examples:
+**Examples**
 
-*  `edit 1 /phone:91234567 /email:"johndoe@example.com"` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
-*  `edit 2 /name:"Betsy Crower" /tag` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+* `edit 1 /phone:91234567 /email:"johndoe@example.com"` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
+* `edit 2 /name:"Betsy Crower" /tag` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+
+**Warnings and Errors**
+
+* #m#Edit cannot be used to modify fields or links.##
+* #r#Field values must conform to listed restrictions.##
 
 ### Modifying tags : `tag`
 
