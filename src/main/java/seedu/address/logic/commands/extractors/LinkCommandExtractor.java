@@ -65,7 +65,7 @@ public class LinkCommandExtractor {
             throw new ValidationException(MESSAGE_LINK_NAME_INVALID);
         }
 
-        //link same person to itself
+        // validate not linking same person to itself
         if (linkerIndex.equals(linkeeIndex)) {
             throw new ValidationException(MESSAGE_SAME_PERSON);
         }

@@ -72,6 +72,7 @@ public class LogicManager implements Logic {
 
         model.getCommandHistory().add(commandText);
 
+        //ensures links added persists in address book
         if (addressBookChanged) {
             try {
                 storage.saveAddressBook(model.getAddressBook());
