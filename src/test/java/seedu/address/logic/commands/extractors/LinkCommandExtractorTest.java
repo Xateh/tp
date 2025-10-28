@@ -1,5 +1,7 @@
 package seedu.address.logic.commands.extractors;
 
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -79,9 +81,9 @@ public class LinkCommandExtractorTest {
     }
 
     @Test
-    public void extract_tooManyParams_throwsValidationException()
+    public void extract_tooManyParams_doesNotThrowValidationException()
             throws LexerException, ParserException {
-        assertThrows(ValidationException.class, () ->
+        assertDoesNotThrow(() ->
                 LinkCommandExtractor.extract(BareCommand.parse("link 1 mentor 2 3")));
     }
 

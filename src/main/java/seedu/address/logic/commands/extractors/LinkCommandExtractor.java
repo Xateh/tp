@@ -38,24 +38,18 @@ public class LinkCommandExtractor {
      */
     public static LinkCommand extract(BareCommand bareCommand) throws ValidationException {
         // checks if number of parameters passed in is correct
-        if (bareCommand.parameterCount() != 3) {
+        if (bareCommand.parameterCount() < 3) {
             throw new ValidationException(MESSAGE_EXPECTED_3_PARAMS + "\n" + MESSAGE_USAGE);
         }
 
-        // parameter kind checks (all must be NORMAL)
-        for (int i = 0; i < 3; i++) {
-            Parameter p = bareCommand.getParameter(i);
-            if (!p.isNormal()) {
-                throw new ValidationException(MESSAGE_PARAM_KIND + "\n" + MESSAGE_USAGE);
-            }
-        }
-
-        // parse indices (pos 0 and 2)
+        // parse indices and validate kind (pos 0 and 2)
         Index linkerIndex = Validation.validateIndex(bareCommand, 0);
         Index linkeeIndex = Validation.validateIndex(bareCommand, 2);
 
 
-        String linkName = bareCommand.getParameter(1).getValue();
+        Parameter linkNameParam = Validation.validateParameter(bareCommand, 1, Parameter.ParameterKind.NORMAL);
+        String linkName = linkNameParam.getValue();
+
         if (linkName == null || linkName.isBlank()) {
             throw new ValidationException(MESSAGE_LINK_NAME_REQUIRED + "\n" + MESSAGE_USAGE);
         }
