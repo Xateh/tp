@@ -120,6 +120,11 @@ public class LogicManager implements Logic {
     }
 
     @Override
+    public Model getModel() {
+        return model;
+    }
+
+    @Override
     public void markSessionSnapshotPersisted() {
         sessionRecorder.markSnapshotPersisted();
     }
