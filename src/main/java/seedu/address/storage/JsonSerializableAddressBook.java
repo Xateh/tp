@@ -61,7 +61,7 @@ class JsonSerializableAddressBook {
         for (JsonAdaptedPerson jap : persons) {
             Person person = jap.toModelType(); // Person with EMPTY links
             if (addressBook.hasPerson(person)) {
-                throw new IllegalValueException(MESSAGE_DUPLICATE_PERSON);
+                throw new IllegalStateException(MESSAGE_DUPLICATE_PERSON);
             }
             addressBook.addPerson(person);
             builtPersons.add(person);
