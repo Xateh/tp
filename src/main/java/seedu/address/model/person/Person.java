@@ -135,7 +135,7 @@ public class Person {
                 && address.equals(otherPerson.address)
                 && tags.equals(otherPerson.tags)
                 && customFields.equals(otherPerson.customFields)
-                && links.equals(otherPerson.links);
+                && links.equals(otherPerson.links)
                 && info.equals(otherPerson.info);
     }
 
@@ -143,7 +143,6 @@ public class Person {
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
         return Objects.hash(name, phone, email, address, tags, customFields, links, info);
-        return Objects.hash(name, phone, email, address, tags, customFields, info);
     }
 
     @Override

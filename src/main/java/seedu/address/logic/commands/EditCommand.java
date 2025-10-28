@@ -24,8 +24,8 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
-import seedu.address.model.person.Link;
 import seedu.address.model.person.Info;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -107,7 +107,8 @@ public class EditCommand extends Command {
         Map<String, String> customFields = personToEdit.getCustomFields();
         Set<Link> updatedLinks = personToEdit.getLinks();
         Info info = personToEdit.getInfo();
-        return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedTags, customFields, info);
+        return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress,
+                updatedTags, customFields, updatedLinks, info);
     }
 
     @Override

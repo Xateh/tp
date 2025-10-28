@@ -7,8 +7,8 @@ import java.util.Set;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
-import seedu.address.model.person.Link;
 import seedu.address.model.person.Info;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -112,8 +112,8 @@ public class PersonBuilder {
         return this;
     }
 
-     /** Sets the info {@code Info} of the {@code Person} we are building.
-     *
+    /**
+     * Sets the info {@code Info} of the {@code Person} we are building.
      * @return This builder instance for fluent chaining.
      */
     public PersonBuilder withInfo(Info info) {

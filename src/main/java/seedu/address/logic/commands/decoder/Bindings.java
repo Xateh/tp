@@ -11,11 +11,8 @@ import seedu.address.logic.commands.extractors.EditCommandExtractor;
 import seedu.address.logic.commands.extractors.FieldCommandExtractor;
 import seedu.address.logic.commands.extractors.FindCommandExtractor;
 import seedu.address.logic.commands.extractors.HistoryCommandExtractor;
-<<<<<<< HEAD
-import seedu.address.logic.commands.extractors.LinkCommandExtractor;
-=======
 import seedu.address.logic.commands.extractors.InfoCommandExtractor;
->>>>>>> master
+import seedu.address.logic.commands.extractors.LinkCommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
 
 /**
