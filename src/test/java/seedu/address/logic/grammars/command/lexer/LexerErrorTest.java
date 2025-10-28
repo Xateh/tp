@@ -14,11 +14,24 @@ public class LexerErrorTest {
 
         String expected = """
                 Error occurred during lexing.
+                Unterminated string: *this range*\
+                """;
+
+        assertEquals(expected, le.toString());
+    }
+
+    @Test
+    public void lexerError_getLogString_success() {
+        LexerError le = new LexerError(LexerErrorType.UNTERMINATED_STRING,
+                "test *this range*", "*this range*", new Location(5, 17));
+
+        String expected = """
+                Error occurred during lexing.
                 test *this range*
                      ^----------^
                 Unterminated string: *this range*\
                 """;
 
-        assertEquals(expected, le.toString());
+        assertEquals(expected, le.getLogString());
     }
 }

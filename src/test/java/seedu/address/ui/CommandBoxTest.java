@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.model.history.CommandHistory;
 
 
@@ -94,7 +94,8 @@ public class CommandBoxTest {
             }
 
             @Override
-            public void positionCaret(int pos) {}
+            public void positionCaret(int pos) {
+            }
 
             @Override
             public String getText() {
@@ -127,7 +128,8 @@ public class CommandBoxTest {
             private int lastCaret = -1;
 
             @Override
-            public void addTextChangeListener(Runnable listener) {}
+            public void addTextChangeListener(Runnable listener) {
+            }
 
             @Override
             public java.util.List<String> getStyleClass() {
@@ -275,7 +277,7 @@ public class CommandBoxTest {
     @Test
     public void handleCommandEntered_failure_addsErrorStyle() throws Exception {
         CommandBox.CommandExecutor executor = (String cmd) -> {
-            throw new ParseException("err");
+            throw new ValidationException("err");
         };
         CommandBox.HistorySupplier historySupplier = () -> new CommandHistory();
 
@@ -319,7 +321,7 @@ public class CommandBoxTest {
 
         // after failure, adapter style list should contain the error style
         boolean contains = adapter.getStyleClass().contains(CommandBox.ERROR_STYLE_CLASS);
-        assert(contains);
+        assert (contains);
     }
 
 }
