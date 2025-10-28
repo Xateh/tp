@@ -8,6 +8,7 @@ import java.util.Set;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Link;
+import seedu.address.model.person.Info;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -30,15 +31,17 @@ public class PersonBuilder {
     private Set<Tag> tags;
     private Map<String, String> customFields;
     private Set<Link> links;
+    private Info info;
 
     /**
-     * Creates a {@code PersonBuilder} with default empty fields. Tags, custom fields, and links
-     * are initialized to empty collections.
+     * Creates a {@code PersonBuilder} with default empty fields. Tags, custom fields and links are initialized to empty
+     * collections. Info is initialized with the empty string.
      */
     public PersonBuilder() {
         tags = new HashSet<>();
         customFields = new LinkedHashMap<>();
         links = new HashSet<>();
+        info = new Info("");
     }
 
     /**
@@ -54,6 +57,7 @@ public class PersonBuilder {
         tags = new HashSet<>(personToCopy.getTags());
         customFields = new LinkedHashMap<>(personToCopy.getCustomFields());
         links = new HashSet<>(personToCopy.getLinks());
+        info = personToCopy.getInfo();
     }
 
     /** Sets the {@code Name} of the {@code Person} we are building. */
@@ -108,6 +112,15 @@ public class PersonBuilder {
         return this;
     }
 
+     /** Sets the info {@code Info} of the {@code Person} we are building.
+     *
+     * @return This builder instance for fluent chaining.
+     */
+    public PersonBuilder withInfo(Info info) {
+        this.info = info;
+        return this;
+    }
+
     /**
      * Creates and returns the new {@link Person} object based on the fields set in this builder.
      *
@@ -121,6 +134,6 @@ public class PersonBuilder {
         }
 
         // Use the full constructor that includes customFields and links.
-        return new Person(name, phone, email, address, tags, customFields, links);
+        return new Person(name, phone, email, address, tags, customFields, links, info);
     }
 }

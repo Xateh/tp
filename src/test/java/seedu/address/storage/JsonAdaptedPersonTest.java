@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Info;
 import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
@@ -42,6 +43,7 @@ public class JsonAdaptedPersonTest {
             .map(JsonAdaptedTag::new)
             .collect(Collectors.toList());
     private static final List<JsonAdaptedLink> EMPTY_LINKS = Collections.emptyList();
+    private static final String VALID_INFO = BENSON.getInfo().toString();
 
     @Test
     public void toModelType_validPersonDetails_returnsPerson() throws Exception {
@@ -52,15 +54,15 @@ public class JsonAdaptedPersonTest {
     @Test
     public void toModelType_invalidName_throwsIllegalValueException() {
         JsonAdaptedPerson person =
-                new JsonAdaptedPerson(INVALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS);
+                new JsonAdaptedPerson(INVALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS, VALID_INFO);
         String expectedMessage = Name.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
 
     @Test
     public void toModelType_nullName_throwsIllegalValueException() {
-        JsonAdaptedPerson person =
-                new JsonAdaptedPerson(null, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS);
+        JsonAdaptedPerson person = new JsonAdaptedPerson(null, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                                                        VALID_TAGS, EMPTY_LINKS, VALID_INFO);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Name.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
@@ -68,7 +70,7 @@ public class JsonAdaptedPersonTest {
     @Test
     public void toModelType_invalidPhone_throwsIllegalValueException() {
         JsonAdaptedPerson person =
-                new JsonAdaptedPerson(VALID_NAME, INVALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS);
+                new JsonAdaptedPerson(VALID_NAME, INVALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS, VALID_INFO);
         String expectedMessage = Phone.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
@@ -76,7 +78,7 @@ public class JsonAdaptedPersonTest {
     @Test
     public void toModelType_nullPhone_throwsIllegalValueException() {
         JsonAdaptedPerson person =
-                new JsonAdaptedPerson(VALID_NAME, null, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS);
+                new JsonAdaptedPerson(VALID_NAME, null, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS, VALID_INFO);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Phone.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
@@ -84,7 +86,7 @@ public class JsonAdaptedPersonTest {
     @Test
     public void toModelType_invalidEmail_throwsIllegalValueException() {
         JsonAdaptedPerson person =
-                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, INVALID_EMAIL, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS);
+                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, INVALID_EMAIL, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS, VALID_INFO);
         String expectedMessage = Email.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
@@ -92,7 +94,7 @@ public class JsonAdaptedPersonTest {
     @Test
     public void toModelType_nullEmail_throwsIllegalValueException() {
         JsonAdaptedPerson person =
-                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, null, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS);
+                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, null, VALID_ADDRESS, VALID_TAGS, EMPTY_LINKS, VALID_INFO);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Email.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
@@ -100,7 +102,7 @@ public class JsonAdaptedPersonTest {
     @Test
     public void toModelType_invalidAddress_throwsIllegalValueException() {
         JsonAdaptedPerson person =
-                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, INVALID_ADDRESS, VALID_TAGS, EMPTY_LINKS);
+                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, INVALID_ADDRESS, VALID_TAGS, EMPTY_LINKS, VALID_INFO);
         String expectedMessage = Address.MESSAGE_CONSTRAINTS;
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
@@ -108,7 +110,7 @@ public class JsonAdaptedPersonTest {
     @Test
     public void toModelType_nullAddress_throwsIllegalValueException() {
         JsonAdaptedPerson person =
-                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, null, VALID_TAGS, EMPTY_LINKS);
+                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, null, VALID_TAGS, EMPTY_LINKS, VALID_INFO);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Address.class.getSimpleName());
         assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
     }
@@ -118,7 +120,7 @@ public class JsonAdaptedPersonTest {
         List<JsonAdaptedTag> invalidTags = new ArrayList<>(VALID_TAGS);
         invalidTags.add(new JsonAdaptedTag(INVALID_TAG));
         JsonAdaptedPerson person =
-                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, invalidTags, EMPTY_LINKS);
+                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, invalidTags, EMPTY_LINKS, VALID_INFO);
         assertThrows(IllegalValueException.class, person::toModelType);
     }
 
@@ -128,7 +130,7 @@ public class JsonAdaptedPersonTest {
         List<JsonAdaptedLink> links = List.of(new JsonAdaptedLink("lawyer", "Bernice Yu"));
 
         JsonAdaptedPerson person = new JsonAdaptedPerson(
-                VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, links);
+                VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, links, VALID_INFO);
 
         // Should build a Person successfully; links are not materialized here
         assertDoesNotThrow(person::toModelType);
@@ -142,7 +144,7 @@ public class JsonAdaptedPersonTest {
         List<JsonAdaptedLink> links = List.of(new JsonAdaptedLink("@@@", "Bernice Yu"));
 
         JsonAdaptedPerson person = new JsonAdaptedPerson(
-                VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, links);
+                VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS, links, VALID_INFO);
 
         // This layer should NOT throw; invalid name will be caught when Links are constructed/resolved
         assertDoesNotThrow(person::toModelType);
@@ -157,7 +159,8 @@ public class JsonAdaptedPersonTest {
                 new Address(address),
                 new HashSet<Tag>(),
                 new java.util.LinkedHashMap<>(),
-                new HashSet<Link>()
+                new HashSet<Link>(),
+                new Info("")
         );
     }
 
@@ -170,8 +173,7 @@ public class JsonAdaptedPersonTest {
         JsonAdaptedPerson japAlice = new JsonAdaptedPerson(
                 "Alice", "11111111", "alice@example.com", "1 Road",
                 VALID_TAGS,
-                List.of(new JsonAdaptedLink("lawyer", "Bob"))
-        );
+                List.of(new JsonAdaptedLink("lawyer", "Bob")), VALID_INFO);
 
         Map<String, Person> byName = new HashMap<>();
         byName.put("Alice", alice);
@@ -193,8 +195,7 @@ public class JsonAdaptedPersonTest {
         JsonAdaptedPerson japA = new JsonAdaptedPerson(
                 "A", "11111111", "a@x.com", "addr",
                 VALID_TAGS,
-                List.of(new JsonAdaptedLink("@@@", "B")) // invalid per Link regex
-        );
+                List.of(new JsonAdaptedLink("@@@", "B")), VALID_INFO); // invalid per Link regex;
 
         Map<String, Person> byName = Map.of("A", a, "B", b);
 
@@ -208,8 +209,7 @@ public class JsonAdaptedPersonTest {
         JsonAdaptedPerson japA = new JsonAdaptedPerson(
                 "A", "11111111", "a@x.com", "addr",
                 VALID_TAGS,
-                List.of(new JsonAdaptedLink("mentor", "Missing"))
-        );
+                List.of(new JsonAdaptedLink("mentor", "Missing")), VALID_INFO);
 
         Map<String, Person> byName = Map.of("A", a);
 
@@ -223,8 +223,7 @@ public class JsonAdaptedPersonTest {
         JsonAdaptedPerson japA = new JsonAdaptedPerson(
                 "A", "11111111", "a@x.com", "addr",
                 VALID_TAGS,
-                List.of(new JsonAdaptedLink("buddy", "A")) // self
-        );
+                List.of(new JsonAdaptedLink("buddy", "A")), VALID_INFO); // self
 
         Map<String, Person> byName = Map.of("A", a);
 
@@ -244,15 +243,13 @@ public class JsonAdaptedPersonTest {
         aliceLinks.add(ab);
         Person aliceWith = new Person(
                 alice.getName(), alice.getPhone(), alice.getEmail(), alice.getAddress(),
-                alice.getTags(), alice.getCustomFields(), aliceLinks
-        );
+                alice.getTags(), alice.getCustomFields(), aliceLinks, new Info(""));
 
         Set<Link> bobLinks = new HashSet<>();
         bobLinks.add(ab);
         Person bobWith = new Person(
                 bob.getName(), bob.getPhone(), bob.getEmail(), bob.getAddress(),
-                bob.getTags(), bob.getCustomFields(), bobLinks
-        );
+                bob.getTags(), bob.getCustomFields(), bobLinks, new Info(""));
 
         JsonAdaptedPerson japAlice = new JsonAdaptedPerson(aliceWith);
         JsonAdaptedPerson japBob = new JsonAdaptedPerson(bobWith);

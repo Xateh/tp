@@ -25,6 +25,7 @@ import seedu.address.model.Model;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Link;
+import seedu.address.model.person.Info;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -105,10 +106,8 @@ public class EditCommand extends Command {
         // no current support for editing customFields and links
         Map<String, String> customFields = personToEdit.getCustomFields();
         Set<Link> updatedLinks = personToEdit.getLinks();
-
-
-        return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedTags,
-                customFields, updatedLinks);
+        Info info = personToEdit.getInfo();
+        return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedTags, customFields, info);
     }
 
     @Override
