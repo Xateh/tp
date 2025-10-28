@@ -164,7 +164,7 @@ Format: `add <name> <phone> <address> <email> [/tag:<tag>]*`
 
 * `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com"`
 * `add "Betsy Crowe" "1234567" "Newgate Prison" "betsycrowe@example.com" /tag:friend /tag:criminal`
-* 
+
 **Warnings and Errors**
 
 * #r#Values for each field must conform to the listed restrictions above.##
