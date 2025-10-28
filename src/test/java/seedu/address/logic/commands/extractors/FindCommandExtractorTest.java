@@ -271,4 +271,162 @@ public class FindCommandExtractorTest {
 
         assertEquals(expected, actual);
     }
+    @Test
+    public void parse_quotedMultiWordToken_throws() throws LexerException, ParserException {
+        // A single token containing a space must be rejected
+        assertThrows(ValidationException.class, () ->
+                FindCommandExtractor.extract(BareCommand.parse("find \"alex yeoh\" /name")));
+    }
+
+    @Test
+    public void parse_emptyQuotedKeyword_throws() throws LexerException, ParserException {
+        // Empty keyword after trimming is invalid
+        assertThrows(ValidationException.class, () ->
+                FindCommandExtractor.extract(BareCommand.parse("find \"\" /name")));
+    }
+
+    @Test
+    public void parse_builtInFlags_caseSensitive()
+            throws LexerException, ParserException, ValidationException {
+        // Upper/mixed-case built-in flags are ignored, search all built in fields instead
+        FieldContainsKeywordsPredicate expectedPredicate =
+                new FieldContainsKeywordsPredicate(List.of("ALICE"));
+
+        FindCommand expected = new FindCommand(expectedPredicate);
+        FindCommand actual = FindCommandExtractor.extract(
+                BareCommand.parse("find ALICE /NAME /eMaIl"));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void parse_validArgs_duplicateFlagsIgnored()
+            throws LexerException, ParserException, ValidationException {
+        // Repeating the same flag shouldn't change semantics
+        FieldContainsKeywordsPredicate expectedPredicate =
+                new FieldContainsKeywordsPredicate(List.of("bob"),
+                        true, false, false, false, false, false, false, Set.of());
+
+        FindCommand expected = new FindCommand(expectedPredicate);
+        FindCommand actual = FindCommandExtractor.extract(
+                BareCommand.parse("find bob /name /name /NaMe"));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void parse_validArgs_allBuiltInsEnabled()
+            throws LexerException, ParserException, ValidationException {
+        // Turn on every built-in selector, without custom keys
+        FieldContainsKeywordsPredicate expectedPredicate =
+                new FieldContainsKeywordsPredicate(List.of("k"),
+                        true, true, true, true, true, true, true, Set.of());
+
+        FindCommand expected = new FindCommand(expectedPredicate);
+        FindCommand actual = FindCommandExtractor.extract(
+                BareCommand.parse("find k /name /phone /email /address /tag /from /to"));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void parse_mixedBuiltInsAndCustom_onlyCustomInSet()
+            throws LexerException, ParserException, ValidationException {
+        // Built-ins must not appear inside the custom key set
+        FieldContainsKeywordsPredicate expectedPredicate =
+                new FieldContainsKeywordsPredicate(List.of("john"),
+                        true, false, false, false, true, false, false,
+                        Set.of("department", "team"));
+
+        FindCommand expected = new FindCommand(expectedPredicate);
+        FindCommand actual = FindCommandExtractor.extract(
+                BareCommand.parse("find john /name /tag /department /team"));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void parse_repeatedCustomKeys_deduplicated()
+            throws LexerException, ParserException, ValidationException {
+        // The resulting Set should contain each custom key once
+        FieldContainsKeywordsPredicate expectedPredicate =
+                new FieldContainsKeywordsPredicate(List.of("asia"),
+                        false, false, false, false, false, false, false,
+                        Set.of("region"));
+
+        FindCommand expected = new FindCommand(expectedPredicate);
+        FindCommand actual = FindCommandExtractor.extract(
+                BareCommand.parse("find asia /region /Region /REGION"));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void parse_keywordsSplitAcrossTokens_areAccepted()
+            throws LexerException, ParserException, ValidationException {
+        // Multiple single-word tokens are fine (no quotes)
+        FieldContainsKeywordsPredicate expectedPredicate =
+                new FieldContainsKeywordsPredicate(List.of("best", "friend"));
+
+        FindCommand expected = new FindCommand(expectedPredicate);
+        FindCommand actual = FindCommandExtractor.extract(
+                BareCommand.parse("find best friend"));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void parse_leadingAndTrailingSpaces_valid()
+            throws LexerException, ParserException, ValidationException {
+        // Parser should yield trimmed tokens; extractor also trims defensively
+        FieldContainsKeywordsPredicate expectedPredicate =
+                new FieldContainsKeywordsPredicate(List.of("alice"),
+                        true, false, false, false, false, false, false, Set.of());
+
+        FindCommand expected = new FindCommand(expectedPredicate);
+        // Multiple spaces between tokens should not matter
+        FindCommand actual = FindCommandExtractor.extract(
+                BareCommand.parse("find     alice      /name"));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void parse_linksAndBuiltInsAndCustoms_combined()
+            throws LexerException, ParserException, ValidationException {
+        // Ensure simultaneous mix sets the right booleans and custom set
+        FieldContainsKeywordsPredicate expectedPredicate =
+                new FieldContainsKeywordsPredicate(List.of("partner"),
+                        true, false, true, false, false, true, true,
+                        Set.of("office", "department"));
+
+        FindCommand expected = new FindCommand(expectedPredicate);
+        FindCommand actual = FindCommandExtractor.extract(
+                BareCommand.parse("find partner /name /email /from /to /office /department"));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void parse_onlyCustoms_triggersSelectivePredicate()
+            throws LexerException, ParserException, ValidationException {
+        // No built-ins but at least one custom -> selective predicate (flags false, custom set non-empty)
+        FieldContainsKeywordsPredicate expectedPredicate =
+                new FieldContainsKeywordsPredicate(List.of("growth"),
+                        false, false, false, false, false, false, false, Set.of("strategy"));
+
+        FindCommand expected = new FindCommand(expectedPredicate);
+        FindCommand actual = FindCommandExtractor.extract(
+                BareCommand.parse("find growth /strategy"));
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void parse_onlyWhitespaceKeyword_throws()
+            throws LexerException, ParserException {
+        // If BareCommand preserves a whitespace-only token via quotes, extractor must reject it
+        assertThrows(ValidationException.class, () ->
+                FindCommandExtractor.extract(BareCommand.parse("find \"   \" /name")));
+    }
 }
