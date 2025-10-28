@@ -31,10 +31,26 @@ public final class FindCommandExtractor {
      * @throws ValidationException When the command parameters fail to validate.
      */
     public static FindCommand extract(BareCommand bareCommand) throws ValidationException {
-        // extract keywords from parameters
+        // extract keywords and validate at least one provided
         List<String> keywords = Validation.validateVariableParametersWithMinimumMultiplicity(
                         bareCommand, 0, 1, ParameterKind.NORMAL)
                 .stream().map(BareCommand.Parameter::getValue).toList();
+
+        assert !keywords.isEmpty();
+
+        for (String kw : keywords) {
+            String trimmed = (kw == null) ? "" : kw.trim();
+            if (trimmed.isEmpty()) {
+                throw new ValidationException("Please provide at least one non-empty keyword.");
+            }
+
+            // Disallow a single *multi-word* token for /name (e.g., "alex yeoh")
+            // Users should pass separate keywords instead: find Alex Yeoh /name
+            if (trimmed.contains(" ")) {
+                throw new ValidationException(
+                        "Word parameter should be a single word");
+            }
+        }
 
         // Determine which fields to search using options provided
         boolean optName = bareCommand.hasOption("name");
