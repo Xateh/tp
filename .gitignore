@@ -30,3 +30,6 @@ pixi*
 
 # VS Code Settings
 .vscode/
+
+# Binary files
+bin/
