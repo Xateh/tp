@@ -41,10 +41,11 @@ public final class TagCommandExtractor {
             List<Parameter> varParams = Validation.validateVariableParametersWithMinimumMultiplicity(
                     bareCommand, 1, 1, ParameterKind.ADDITIVE, ParameterKind.SUBTRACTIVE);
             for (Parameter param : varParams) {
+                Tag tag = Validation.validateTag(param.getValue());
                 if (param.isAdditive()) {
-                    addTags.add(new Tag(param.getValue()));
+                    addTags.add(tag);
                 } else if (param.isSubtractive()) {
-                    subTags.add(new Tag(param.getValue()));
+                    subTags.add(tag);
                 }
             }
         } catch (ValidationException e) {
