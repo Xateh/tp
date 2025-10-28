@@ -112,6 +112,11 @@ class MainAppLifecycleManagerTest {
         public void setGuiSettings(GuiSettings guiSettings) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public Model getModel() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Test
@@ -476,6 +481,11 @@ class MainAppLifecycleManagerTest {
 
         @Override
         public void setGuiSettings(GuiSettings guiSettings) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Model getModel() {
             throw new UnsupportedOperationException();
         }
     }

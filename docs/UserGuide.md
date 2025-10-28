@@ -207,7 +207,7 @@ Format(s):
 
 **Parameters**
 
-* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit 
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit
 
 **Options**
 
@@ -250,30 +250,21 @@ Examples:
 * `list` followed by `tag 1 -villain -enemy` will remove `villain` and `enemy` from the 1st person in the address book.
 * `list` followed by `tag 2 +friend -villain +cool -enemy` will add `friend` and `cool` to and remove `villain` and `enemy` from the 2nd person in the address book.
 
-### Adding information to a person: `infoedit`
+### Adding information to a person: `info`
 
 Edits information about a person given its index.
 
-Format: `infoedit INDEX`
+Format: `info <index>`
 
-* Displays an editable text box for the person at the given `INDEX` in the displayed list.
-* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
+* Displays an editable text box for the person at the given `<index>` in the displayed list.
 * If there is existing information attached to the person, it will be shown and editable in the text box.
 
-Examples:
-* `list` followed by `infoedit 2` will bring up an editable text box for the 2nd person in the address book.
+**Parameters**
 
-### Viewing information of a person: `infoview`
-
-View information about a person given its index.
-
-Format: `infoview INDEX`
-
-* Displays all the given information of the person at the `INDEX` specified.
-* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
 
 Examples:
-* `list` followed by `infoview 2` will display available information about the 2nd person in the address book.
+* `list` followed by `info 2` will bring up an editable text box for the 2nd person in the address book.
 
 ### Setting a custom field on a person : `field`
 
@@ -451,8 +442,7 @@ Action     | Format, Examples
 **Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag`
 **Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
 **Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
-**Edit Info** | `infoedit INDEX` <br> e.g., `infoedit 2`
-**View Info** | `infoview INDEX` <br> e.g., `infoview 2`
+**View/Edit Info** | `info <index>` <br> e.g., `info 2`
 **Field**  | `field INDEX /KEY:VALUE` <br> e.g., `field 2 /company:"BlackRock"`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **History** | `history`

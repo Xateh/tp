@@ -7,6 +7,7 @@ import java.util.Set;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Info;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -28,14 +29,16 @@ public class PersonBuilder {
     // Optional fields with defaults
     private Set<Tag> tags;
     private Map<String, String> customFields;
+    private Info info;
 
     /**
      * Creates a {@code PersonBuilder} with default empty fields. Tags and custom fields are initialized to empty
-     * collections.
+     * collections. Info is initialized with the empty string.
      */
     public PersonBuilder() {
         tags = new HashSet<>();
         customFields = new LinkedHashMap<>();
+        info = new Info("");
     }
 
     /**
@@ -50,6 +53,7 @@ public class PersonBuilder {
         // Create mutable copies of the collections
         tags = new HashSet<>(personToCopy.getTags());
         customFields = new LinkedHashMap<>(personToCopy.getCustomFields());
+        info = personToCopy.getInfo();
     }
 
     /**
@@ -116,6 +120,16 @@ public class PersonBuilder {
     }
 
     /**
+     * Sets the info {@code Info} of the {@code Person} we are building.
+     *
+     * @return This builder instance for fluent chaining.
+     */
+    public PersonBuilder withInfo(Info info) {
+        this.info = info;
+        return this;
+    }
+
+    /**
      * Creates and returns the new {@link Person} object based on the fields set in this builder.
      *
      * @return The constructed {@link Person}.
@@ -130,6 +144,6 @@ public class PersonBuilder {
         // The Person constructor handles the final null checks, but this
         // builder enforces the IllegalStateException requirement.
         // We use the full constructor to pass all fields.
-        return new Person(name, phone, email, address, tags, customFields);
+        return new Person(name, phone, email, address, tags, customFields, info);
     }
 }

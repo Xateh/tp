@@ -15,6 +15,7 @@ import seedu.address.logic.commands.extractors.FieldCommandExtractor;
 import seedu.address.logic.commands.extractors.FindCommandExtractor;
 import seedu.address.logic.commands.extractors.HelpCommandExtractor;
 import seedu.address.logic.commands.extractors.HistoryCommandExtractor;
+import seedu.address.logic.commands.extractors.InfoCommandExtractor;
 import seedu.address.logic.commands.extractors.ListCommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
 
@@ -31,6 +32,7 @@ public enum Bindings {
     FIND("find", FindCommandExtractor::extract),
     HELP("help", HelpCommandExtractor::extract),
     HISTORY("history", HistoryCommandExtractor::extract),
+    INFO("info", InfoCommandExtractor::extract),
     LIST("list", ListCommandExtractor::extract),
     TAG("tag", TagCommandExtractor::extract);
 

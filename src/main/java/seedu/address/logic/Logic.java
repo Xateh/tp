@@ -8,6 +8,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.exceptions.AssemblyException;
+import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.history.CommandHistory;
 import seedu.address.model.person.Person;
@@ -55,6 +56,11 @@ public interface Logic {
      * Set the user prefs' GUI settings.
      */
     void setGuiSettings(GuiSettings guiSettings);
+
+    /**
+     * Returns the model for direct command execution.
+     */
+    Model getModel();
 
     /**
      * Returns a snapshot of the current session data if the address book has changed since the last save.
