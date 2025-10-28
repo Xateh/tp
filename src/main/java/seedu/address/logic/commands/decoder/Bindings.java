@@ -5,27 +5,39 @@ import java.util.function.Predicate;
 
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.exceptions.ResolutionException;
+import seedu.address.logic.commands.extractors.AddCommandExtractor;
+import seedu.address.logic.commands.extractors.ClearCommandExtractor;
 import seedu.address.logic.commands.extractors.CommandExtractor;
 import seedu.address.logic.commands.extractors.DeleteCommandExtractor;
 import seedu.address.logic.commands.extractors.EditCommandExtractor;
+import seedu.address.logic.commands.extractors.ExitCommandExtractor;
 import seedu.address.logic.commands.extractors.FieldCommandExtractor;
 import seedu.address.logic.commands.extractors.FindCommandExtractor;
+import seedu.address.logic.commands.extractors.HelpCommandExtractor;
 import seedu.address.logic.commands.extractors.HistoryCommandExtractor;
+import seedu.address.logic.commands.extractors.InfoCommandExtractor;
+import seedu.address.logic.commands.extractors.ListCommandExtractor;
 import seedu.address.logic.commands.extractors.TagCommandExtractor;
 
 /**
  * Enumeration containing bindings for all imperatives and their respective command extractors.
  */
 public enum Bindings {
-    FIELD("field", FieldCommandExtractor::extract),
-    FIND("find", FindCommandExtractor::extract),
+    ADD("add", AddCommandExtractor::extract),
+    CLEAR("clear", ClearCommandExtractor::extract),
     DELETE("delete", DeleteCommandExtractor::extract),
     EDIT("edit", EditCommandExtractor::extract),
-    TAG("tag", TagCommandExtractor::extract),
-    HISTORY("history", HistoryCommandExtractor::extract);
+    EXIT("exit", ExitCommandExtractor::extract),
+    FIELD("field", FieldCommandExtractor::extract),
+    FIND("find", FindCommandExtractor::extract),
+    HELP("help", HelpCommandExtractor::extract),
+    HISTORY("history", HistoryCommandExtractor::extract),
+    INFO("info", InfoCommandExtractor::extract),
+    LIST("list", ListCommandExtractor::extract),
+    TAG("tag", TagCommandExtractor::extract);
 
-    private static final String MESSAGE_NO_MATCHING_BINDING = "Unable to find a valid matching command.";
-    private static final String MESSAGE_AMBIGUOUS_BINDING = "Resolved command is ambiguous.";
+    public static final String MESSAGE_NO_MATCHING_BINDING = "Unable to find a valid matching command.";
+    public static final String MESSAGE_AMBIGUOUS_BINDING = "Resolved command is ambiguous.";
 
     private final String imperative;
     private final CommandExtractor<?> extractor;

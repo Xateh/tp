@@ -58,9 +58,10 @@ public class CommandParser {
         try {
             root = parser.parseCommand();
         } catch (ProductionApplicationException e) {
-            ParserException parserException = new ParserException(e.getParserError());
+            ParserError parserError = e.getParserError();
+            ParserException parserException = new ParserException(parserError);
 
-            logger.severe(parserException.getMessage());
+            logger.severe(parserError.getLogString());
 
             throw parserException;
         }

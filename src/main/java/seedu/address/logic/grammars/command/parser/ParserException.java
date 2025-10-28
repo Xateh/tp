@@ -1,9 +1,11 @@
 package seedu.address.logic.grammars.command.parser;
 
+import seedu.address.logic.exceptions.AssemblyException;
+
 /**
  * Exception for parsing errors (failures to apply production rules).
  */
-public class ParserException extends Exception {
+public final class ParserException extends AssemblyException {
     private final ParserError parserError;
 
     ParserException(ParserError parserError) {
