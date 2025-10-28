@@ -85,4 +85,9 @@ public class EditCommandExtractorTest {
         assertEquals(expected,
                 EditCommandExtractor.extract(BareCommand.parse("edit 1 /tag:friend /tag:friend")));
     }
+
+    @Test
+    public void extract_noEditsMade_throwsException() {
+        assertThrows(ValidationException.class, () -> EditCommandExtractor.extract(BareCommand.parse("edit 1 /name")));
+    }
 }

@@ -12,6 +12,9 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BOB;
 
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.testutil.PersonBuilder;
@@ -93,12 +96,12 @@ public class PersonTest {
     @Test
     public void getLinks_modify_throwsUnsupportedOperationException() {
         Person a = new Person(new Name("A"), new Phone("11111111"), new Email("a@ex.com"),
-                new Address("addr"), new java.util.HashSet<>(),
-                new java.util.LinkedHashMap<>(), new java.util.HashSet<>());
+                new Address("addr"), new HashSet<>(),
+                new LinkedHashMap<>(), new HashSet<>(), new Info(""));
 
         Person b = new Person(new Name("B"), new Phone("22222222"), new Email("b@ex.com"),
-                new Address("addr"), new java.util.HashSet<>(),
-                new java.util.LinkedHashMap<>(), new java.util.HashSet<>());
+                new Address("addr"), new HashSet<>(),
+                new LinkedHashMap<>(), new HashSet<>(), new Info(""));
 
         Link ab = new Link(a, b, "lawyer");
 
@@ -106,7 +109,7 @@ public class PersonTest {
         java.util.HashSet<Link> links = new java.util.HashSet<>();
         links.add(ab);
         Person withLink = new Person(a.getName(), a.getPhone(), a.getEmail(), a.getAddress(),
-                a.getTags(), a.getCustomFields(), links);
+                a.getTags(), a.getCustomFields(), links, a.getInfo());
 
         assertThrows(UnsupportedOperationException.class, () -> withLink.getLinks().add(ab));
         assertThrows(UnsupportedOperationException.class, () -> withLink.getLinks().remove(ab));
@@ -117,21 +120,21 @@ public class PersonTest {
         // Base person (no links)
         Person a0 = new Person(new Name("A"), new Phone("11111111"), new Email("a@ex.com"),
                 new Address("addr"), new java.util.HashSet<>(),
-                new java.util.LinkedHashMap<>(), new java.util.HashSet<>());
+                new LinkedHashMap<>(), new HashSet<>(), new Info(""));
 
         // Clone of A by value (still no links)
         Person a1 = new Person(a0.getName(), a0.getPhone(), a0.getEmail(), a0.getAddress(),
-                a0.getTags(), a0.getCustomFields(), new java.util.HashSet<>());
+                a0.getTags(), a0.getCustomFields(), new HashSet<>(), new Info(""));
 
         // A with one link
         Person b = new Person(new Name("B"), new Phone("22222222"), new Email("b@ex.com"),
-                new Address("addr"), new java.util.HashSet<>(),
-                new java.util.LinkedHashMap<>(), new java.util.HashSet<>());
+                new Address("addr"), new HashSet<>(),
+                new LinkedHashMap<>(), new HashSet<>(), new Info(""));
         Link ab = new Link(a0, b, "lawyer");
         java.util.HashSet<Link> links = new java.util.HashSet<>();
         links.add(ab);
         Person aWithLink = new Person(a0.getName(), a0.getPhone(), a0.getEmail(), a0.getAddress(),
-                a0.getTags(), a0.getCustomFields(), links);
+                a0.getTags(), a0.getCustomFields(), links, new Info(""));
 
         assertTrue(a0.equals(a1)); // identical except links
         assertFalse(a0.equals(aWithLink)); // links differ
@@ -141,7 +144,8 @@ public class PersonTest {
     @Test
     public void toStringMethod() {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
-                + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", tags=" + ALICE.getTags() + "}";
+                + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", tags=" + ALICE.getTags()
+                + ", info=}";
         assertEquals(expected, ALICE.toString());
     }
 }

@@ -89,7 +89,7 @@ class JsonSerializableAddressBook {
                 newLinksForBase.addAll(resolvedLinks);
                 Person withLinks = new Person(
                         base.getName(), base.getPhone(), base.getEmail(), base.getAddress(),
-                        base.getTags(), base.getCustomFields(), newLinksForBase
+                        base.getTags(), base.getCustomFields(), newLinksForBase, base.getInfo()
                 );
                 addressBook.setPerson(base, withLinks);
                 builtPersons.set(i, withLinks);
@@ -116,7 +116,7 @@ class JsonSerializableAddressBook {
                         Person updatedLinkee = new Person(
                                 currentLinkee.getName(), currentLinkee.getPhone(), currentLinkee.getEmail(),
                                 currentLinkee.getAddress(), currentLinkee.getTags(), currentLinkee.getCustomFields(),
-                                linkeeLinks
+                                linkeeLinks, currentLinkee.getInfo()
                         );
                         addressBook.setPerson(currentLinkee, updatedLinkee);
                         byName.put(updatedLinkee.getName().fullName, updatedLinkee);

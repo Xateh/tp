@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Info;
 import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
@@ -35,14 +36,16 @@ class JsonAdaptedPerson {
     private final String address;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
     private final Map<String, String> customFields = new LinkedHashMap<>();
+    private final String info;
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
      */
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
-            @JsonProperty("email") String email, @JsonProperty("address") String address,
-            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("links") List<JsonAdaptedLink> links) {
+                             @JsonProperty("email") String email, @JsonProperty("address") String address,
+                             @JsonProperty("tags") List<JsonAdaptedTag> tags,
+                             @JsonProperty("links") List<JsonAdaptedLink> links, @JsonProperty("info") String info) {
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -53,6 +56,7 @@ class JsonAdaptedPerson {
         if (links != null) {
             this.links.addAll(links);
         }
+        this.info = info;
     }
 
     /**
@@ -72,6 +76,7 @@ class JsonAdaptedPerson {
                 .filter(l -> l.getLinker().getName().equals(source.getName()))
                 .map(JsonAdaptedLink::new)
                 .collect(Collectors.toList()));
+        info = source.getInfo().value;
     }
 
     /**
@@ -118,9 +123,9 @@ class JsonAdaptedPerson {
         final Address modelAddress = new Address(address);
 
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        //empty links
+        final Info modelInfo = new Info(info == null ? "" : info);
         Person base = new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags,
-                customFields, new HashSet<>());
+                customFields, new HashSet<>(), modelInfo);
         return base;
     }
 
@@ -151,3 +156,4 @@ class JsonAdaptedPerson {
         return out;
     }
 }
+

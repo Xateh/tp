@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Info;
 import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
@@ -28,6 +29,7 @@ public class PersonBuilderTest {
     private static final Address DEFAULT_ADDRESS = new Address("123, Jurong West Ave 6, #08-111");
     private static final Set<Tag> DEFAULT_TAGS = Set.of(new Tag("friend"));
     private static final Map<String, String> DEFAULT_CUSTOM_FIELDS = Map.of("Nickname", "Ali");
+    private static final Info DEFAULT_INFO = new Info("Some information");
 
     // Links: shared empty set for expectations
     private static final Set<Link> EMPTY_LINKS = new HashSet<>();
@@ -42,7 +44,8 @@ public class PersonBuilderTest {
                 DEFAULT_ADDRESS,
                 new HashSet<>(),
                 new LinkedHashMap<>(),
-                new HashSet<>()
+                new HashSet<>(),
+                new Info("")
         );
     }
 
@@ -57,12 +60,12 @@ public class PersonBuilderTest {
                 .withAddress(DEFAULT_ADDRESS)
                 .withTags(DEFAULT_TAGS)
                 .withCustomFields(DEFAULT_CUSTOM_FIELDS)
+                .withInfo(DEFAULT_INFO)
                 .build();
 
         Person expectedPerson = new Person(
                 DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL, DEFAULT_ADDRESS,
-                DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS
-        );
+                DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
 
         assertEquals(expectedPerson, person);
     }
@@ -78,7 +81,7 @@ public class PersonBuilderTest {
 
         Person expectedPerson = new Person(
                 DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL, DEFAULT_ADDRESS,
-                new HashSet<>(), new LinkedHashMap<>(), EMPTY_LINKS
+                new HashSet<>(), new LinkedHashMap<>(), EMPTY_LINKS, new Info("")
         );
 
         assertEquals(expectedPerson, person);
@@ -90,7 +93,7 @@ public class PersonBuilderTest {
     public void constructor_copyPerson_buildSuccess() {
         Person originalPerson = new Person(
                 DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL, DEFAULT_ADDRESS,
-                DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS
+                DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO
         );
 
         Person copiedPerson = new PersonBuilder(originalPerson).build();
@@ -101,72 +104,84 @@ public class PersonBuilderTest {
     @Test
     public void build_modifyName_success() {
         Person originalPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
-                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         Name newName = new Name("Bob Builder");
         Person modifiedPerson = new PersonBuilder(originalPerson).withName(newName).build();
 
         Person expectedPerson = new Person(newName, DEFAULT_PHONE, DEFAULT_EMAIL,
-                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         assertEquals(expectedPerson, modifiedPerson);
     }
 
     @Test
     public void build_modifyPhone_success() {
         Person originalPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
-                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         Phone newPhone = new Phone("98765432");
         Person modifiedPerson = new PersonBuilder(originalPerson).withPhone(newPhone).build();
 
         Person expectedPerson = new Person(DEFAULT_NAME, newPhone, DEFAULT_EMAIL,
-                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         assertEquals(expectedPerson, modifiedPerson);
     }
 
     @Test
     public void build_modifyEmail_success() {
         Person originalPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
-                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         Email newEmail = new Email("bob@builder.com");
         Person modifiedPerson = new PersonBuilder(originalPerson).withEmail(newEmail).build();
 
         Person expectedPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, newEmail,
-                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         assertEquals(expectedPerson, modifiedPerson);
     }
 
     @Test
     public void build_modifyAddress_success() {
         Person originalPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
-                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         Address newAddress = new Address("456, Clementi Ave 2, #02-02");
         Person modifiedPerson = new PersonBuilder(originalPerson).withAddress(newAddress).build();
 
         Person expectedPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
-                newAddress, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                newAddress, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         assertEquals(expectedPerson, modifiedPerson);
     }
 
     @Test
     public void build_modifyTags_success() {
         Person originalPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
-                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         Set<Tag> newTags = Set.of(new Tag("colleague"), new Tag("urgent"));
         Person modifiedPerson = new PersonBuilder(originalPerson).withTags(newTags).build();
 
         Person expectedPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
-                DEFAULT_ADDRESS, newTags, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                DEFAULT_ADDRESS, newTags, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         assertEquals(expectedPerson, modifiedPerson);
     }
 
     @Test
     public void build_modifyCustomFields_success() {
         Person originalPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
-                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS);
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
         Map<String, String> newCustomFields = Map.of("LinkedIn", "bob-builder", "Nickname", "B");
         Person modifiedPerson = new PersonBuilder(originalPerson).withCustomFields(newCustomFields).build();
 
         Person expectedPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
-                DEFAULT_ADDRESS, DEFAULT_TAGS, newCustomFields, EMPTY_LINKS);
+                DEFAULT_ADDRESS, DEFAULT_TAGS, newCustomFields, EMPTY_LINKS, DEFAULT_INFO);
+        assertEquals(expectedPerson, modifiedPerson);
+    }
+
+    @Test
+    public void build_modifyInfo_success() {
+        Person originalPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, DEFAULT_INFO);
+        Info newInfo = new Info("new and updated information");
+        Person modifiedPerson = new PersonBuilder(originalPerson).withInfo(newInfo).build();
+
+        Person expectedPerson = new Person(DEFAULT_NAME, DEFAULT_PHONE, DEFAULT_EMAIL,
+                DEFAULT_ADDRESS, DEFAULT_TAGS, DEFAULT_CUSTOM_FIELDS, EMPTY_LINKS, newInfo);
         assertEquals(expectedPerson, modifiedPerson);
     }
 

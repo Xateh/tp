@@ -25,7 +25,8 @@ public class LinkTest {
                 new Address(address),
                 new HashSet<Tag>(),
                 new LinkedHashMap<String, String>(),
-                new HashSet<Link>()
+                new HashSet<Link>(),
+                new Info("")
         );
     }
 
