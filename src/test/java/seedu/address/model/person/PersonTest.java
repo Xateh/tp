@@ -113,6 +113,7 @@ public class PersonTest {
         String expected = Person.class.getCanonicalName() + "{name=" + withCustomFields.getName()
                 + ", phone=" + withCustomFields.getPhone() + ", email=" + withCustomFields.getEmail()
                 + ", address=" + withCustomFields.getAddress() + ", tags=" + withCustomFields.getTags()
+                + ", info=" + withCustomFields.getInfo()
                 + ", customFields= {Company=Acme, Twitter=@alice}}";
         assertEquals(expected, withCustomFields.toString());
     }

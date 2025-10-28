@@ -121,10 +121,6 @@ public class PersonBuilder {
      * @return a new {@code Person} instance reflecting the state captured in this builder
      */
     public Person build() {
-        Person person = new Person(name, phone, email, address, tags, info);
-        if (customFields.isEmpty()) {
-            return person;
-        }
-        return person.withCustomFields(customFields);
+        return new Person(name, phone, email, address, tags, customFields, info);
     }
 }
