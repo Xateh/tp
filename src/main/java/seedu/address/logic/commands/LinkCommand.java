@@ -73,9 +73,12 @@ public class LinkCommand extends Command {
         Person linker = lastShownList.get(linkerIndex.getZeroBased());
         Person linkee = lastShownList.get(linkeeIndex.getZeroBased());
 
+        assert linker != null;
+        assert linkee != null;
+
         Link newLink = new Link(linker, linkee, linkName);
 
-        // Get links of linker and linkee
+        // Get current links of linker and linkee
         Set<Link> linkerLinks = new HashSet<>(linker.getLinks());
         Set<Link> linkeeLinks = new HashSet<>(linkee.getLinks());
 

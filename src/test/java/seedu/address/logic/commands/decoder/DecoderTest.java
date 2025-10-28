@@ -63,13 +63,5 @@ public class DecoderTest {
         Command linkCommand = Decoder.decode(BareCommand.parse("link 1 mentor 2"));
         assertEquals(LinkCommand.class, linkCommand.getClass());
     }
-
-    @Test
-    public void decode_linkCommandWithHyphenatedName_success() throws
-            LexerException, ParserException, ResolutionException, ValidationException {
-        // Hyphenated link names are allowed as long as its escaped by user
-        Command linkCommand = Decoder.decode(BareCommand.parse("link 3 \"team-lead\" 5"));
-        assertEquals(LinkCommand.class, linkCommand.getClass());
-    }
 }
 

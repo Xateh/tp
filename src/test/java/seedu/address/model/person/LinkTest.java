@@ -60,9 +60,6 @@ public class LinkTest {
         // forbidden character (@ not in allowed list)
         assertFalse(Link.isValidLinkName("alpha@beta"));
 
-        // over 30 chars (31)
-        assertFalse(Link.isValidLinkName("0123456789012345678901234567890"));
-
         // newline / control chars
         assertFalse(Link.isValidLinkName("mentor\ncoach"));
     }

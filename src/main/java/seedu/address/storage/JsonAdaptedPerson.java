@@ -124,7 +124,7 @@ class JsonAdaptedPerson {
         return base;
     }
 
-    Set<Link> resolveLinks(Person self, Function<String, Person> resolveByName) throws IllegalValueException {
+    Set<Link> resolveLinks(Person self, Function<String, Person> resolveByName) {
         Set<Link> out = new HashSet<>();
         if (links == null || links.isEmpty()) {
             return out;
