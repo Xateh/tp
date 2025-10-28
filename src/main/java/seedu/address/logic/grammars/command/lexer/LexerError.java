@@ -36,6 +36,16 @@ class LexerError {
 
         lines.add("Error occurred during lexing.");
 
+        lines.add(String.format("%s: %s", this.lexerErrorType.getGenericDescription(), this.offendingLiteral));
+
+        return String.join("\n", lines);
+    }
+
+    public String getLogString() {
+        ArrayList<String> lines = new ArrayList<>();
+
+        lines.add("Error occurred during lexing.");
+
         lines.add(this.ingest);
 
         lines.add(makeVisualDelimiter(this.location.start(), this.location.end()));
