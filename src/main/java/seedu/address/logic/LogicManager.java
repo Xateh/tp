@@ -10,9 +10,10 @@ import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.decoder.Decoder;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.AddressBookParser;
-import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.logic.exceptions.AssemblyException;
+import seedu.address.logic.grammars.command.BareCommand;
 import seedu.address.logic.session.SessionRecorder;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
@@ -31,7 +32,6 @@ public class LogicManager implements Logic {
     private final Logger logger = LogsCenter.getLogger(LogicManager.class);
 
     private final Model model;
-    private final AddressBookParser addressBookParser;
     private final SessionRecorder sessionRecorder;
     private final Storage storage;
 
@@ -45,8 +45,8 @@ public class LogicManager implements Logic {
     /**
      * Constructs a {@code LogicManager} that optionally restores state from a previous session snapshot.
      *
-     * @param model backing model instance
-     * @param storage storage layer used for persistence
+     * @param model          backing model instance
+     * @param storage        storage layer used for persistence
      * @param initialSession previously saved session data to restore, if any
      */
     public LogicManager(Model model, Storage storage, Optional<SessionData> initialSession) {
@@ -54,17 +54,16 @@ public class LogicManager implements Logic {
         this.storage = storage;
 
         CommandHistory initialHistory = loadCommandHistory(storage);
-        this.addressBookParser = new AddressBookParser();
         this.model.setCommandHistory(initialHistory);
         sessionRecorder = new SessionRecorder(model.getAddressBook(), model.getGuiSettings(), initialSession);
         initialSession.ifPresent(this::restoreSessionState);
     }
 
     @Override
-    public CommandResult execute(String commandText) throws CommandException, ParseException {
+    public CommandResult execute(String commandText) throws CommandException, AssemblyException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
-        Command command = addressBookParser.parseCommand(commandText);
+        Command command = Decoder.decode(BareCommand.parse(commandText));
         AddressBook beforeState = new AddressBook(model.getAddressBook());
         CommandResult commandResult = command.execute(model);
         AddressBook afterState = new AddressBook(model.getAddressBook());
