@@ -32,6 +32,23 @@ class ParserError {
 
         lines.add("Error occurred during parsing.");
 
+        String productionRuleStack = String.join(" > ", reverseArrayList(this.productionNonterminalStack));
+        lines.add(String.format("Error occurred while applying production rules: %s", productionRuleStack));
+
+        lines.add(String.format("Expected token types: one of {%s}",
+                String.join(",", Arrays.stream(this.expectedTokenTypes)
+                        .map(Enum::toString).toArray(String[]::new))));
+
+        lines.add(String.format("Found: %s", offendingToken.getType().getDescription()));
+
+        return String.join("\n", lines);
+    }
+
+    public String getLogString() {
+        ArrayList<String> lines = new ArrayList<>();
+
+        lines.add("Error occurred during parsing.");
+
         lines.add(this.ingest);
 
         Location location = this.offendingToken.getLocation();

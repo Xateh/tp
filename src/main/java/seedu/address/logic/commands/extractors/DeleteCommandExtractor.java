@@ -8,11 +8,7 @@ import seedu.address.logic.grammars.command.BareCommand;
 /**
  * Extractor that builds {@code DeleteCommand}s.
  */
-public class DeleteCommandExtractor {
-    // Messages for extraction
-    public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
-    public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
-
+public final class DeleteCommandExtractor {
     private DeleteCommandExtractor() {
     }
 
