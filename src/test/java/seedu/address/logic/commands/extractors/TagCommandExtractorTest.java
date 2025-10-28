@@ -70,6 +70,15 @@ public class TagCommandExtractorTest {
         // no tags supplied
         assertThrows(ValidationException.class, () -> TagCommandExtractor.extract(
                 BareCommand.parse("tag 1")));
+        // normal parameter
+        assertThrows(ValidationException.class, () -> TagCommandExtractor.extract(
+                BareCommand.parse("tag 1 \"spaced tags\"")));
+        // additive spaced tag
+        assertThrows(ValidationException.class, () -> TagCommandExtractor.extract(
+                BareCommand.parse("tag 1 +\"spaced tags\"")));
+        // subtractive spaced tag
+        assertThrows(ValidationException.class, () -> TagCommandExtractor.extract(
+                BareCommand.parse("tag 1 -\"spaced tags\"")));
     }
 
     @Test

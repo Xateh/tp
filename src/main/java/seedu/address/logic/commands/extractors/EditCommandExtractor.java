@@ -7,15 +7,13 @@ import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.commands.exceptions.ValidationException;
 import seedu.address.logic.grammars.command.BareCommand;
-import seedu.address.logic.parser.ParserUtil;
-import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
  * Extractor that builds {@code EditCommand}s.
  */
-public class EditCommandExtractor {
-    // Messages for extraction
-    public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
+public final class EditCommandExtractor {
+    // Messages
+    public static final String MESSAGE_NO_EDITS_MADE = "Must specify at least one edit to be made.";
 
     // Options
     public static final String OPTION_KEY_NAME = "name";
@@ -40,29 +38,29 @@ public class EditCommandExtractor {
 
         // extract edit details
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
-        try {
-            Optional<String> name = bareCommand.getOptionValue(OPTION_KEY_NAME);
-            if (name.isPresent()) {
-                editPersonDescriptor.setName(ParserUtil.parseName(name.get()));
-            }
-            Optional<String> phone = bareCommand.getOptionValue(OPTION_KEY_PHONE);
-            if (phone.isPresent()) {
-                editPersonDescriptor.setPhone(ParserUtil.parsePhone(phone.get()));
-            }
-            Optional<String> email = bareCommand.getOptionValue(OPTION_KEY_EMAIL);
-            if (email.isPresent()) {
-                editPersonDescriptor.setEmail(ParserUtil.parseEmail(email.get()));
-            }
-            Optional<String> address = bareCommand.getOptionValue(OPTION_KEY_ADDRESS);
-            if (address.isPresent()) {
-                editPersonDescriptor.setAddress(ParserUtil.parseAddress(address.get()));
-            }
-            if (bareCommand.hasOption(OPTION_KEY_TAG)) {
-                editPersonDescriptor.setTags(
-                        ParserUtil.parseTags(bareCommand.getOptionAllValues(OPTION_KEY_TAG).get()));
-            }
-        } catch (ParseException e) {
-            throw new ValidationException(e.getMessage());
+        Optional<String> name = bareCommand.getOptionValue(OPTION_KEY_NAME);
+        if (name.isPresent()) {
+            editPersonDescriptor.setName(Validation.validateName(name.get()));
+        }
+        Optional<String> phone = bareCommand.getOptionValue(OPTION_KEY_PHONE);
+        if (phone.isPresent()) {
+            editPersonDescriptor.setPhone(Validation.validatePhone(phone.get()));
+        }
+        Optional<String> email = bareCommand.getOptionValue(OPTION_KEY_EMAIL);
+        if (email.isPresent()) {
+            editPersonDescriptor.setEmail(Validation.validateEmail(email.get()));
+        }
+        Optional<String> address = bareCommand.getOptionValue(OPTION_KEY_ADDRESS);
+        if (address.isPresent()) {
+            editPersonDescriptor.setAddress(Validation.validateAddress(address.get()));
+        }
+        if (bareCommand.hasOption(OPTION_KEY_TAG)) {
+            editPersonDescriptor.setTags(
+                    Validation.validateTags(bareCommand.getOptionAllValues(OPTION_KEY_TAG).get()));
+        }
+
+        if (!editPersonDescriptor.isAnyFieldEdited()) {
+            throw new ValidationException(MESSAGE_NO_EDITS_MADE);
         }
 
         return new EditCommand(index, editPersonDescriptor);

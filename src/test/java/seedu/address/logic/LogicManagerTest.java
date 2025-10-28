@@ -3,15 +3,20 @@ package seedu.address.logic;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
-import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_BOB;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_EMAIL_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_EMAIL_BOB;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_BOB;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
+import static seedu.address.logic.commands.CommandTestUtil.escapeWithQuotes;
+import static seedu.address.logic.commands.decoder.Bindings.MESSAGE_NO_MATCHING_BINDING;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.AMY;
 
@@ -32,7 +37,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.HistoryCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.logic.exceptions.AssemblyException;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -47,6 +52,19 @@ import seedu.address.storage.StorageManager;
 import seedu.address.testutil.PersonBuilder;
 
 public class LogicManagerTest {
+    private static final String SAMPLE_ADD_COMMAND_INPUT_AMY = String.format("%s %s %s %s %s",
+            AddCommand.COMMAND_WORD,
+            escapeWithQuotes(VALID_NAME_AMY),
+            escapeWithQuotes(VALID_PHONE_AMY),
+            escapeWithQuotes(VALID_ADDRESS_AMY),
+            escapeWithQuotes(VALID_EMAIL_AMY));
+    private static final String SAMPLE_ADD_COMMAND_INPUT_BOB = String.format("%s %s %s %s %s",
+            AddCommand.COMMAND_WORD,
+            escapeWithQuotes(VALID_NAME_BOB),
+            escapeWithQuotes(VALID_PHONE_BOB),
+            escapeWithQuotes(VALID_ADDRESS_BOB),
+            escapeWithQuotes(VALID_EMAIL_BOB));
+
     @TempDir
     public Path temporaryFolder;
 
@@ -70,7 +88,7 @@ public class LogicManagerTest {
     @Test
     public void execute_invalidCommandFormat_throwsParseException() {
         String invalidCommand = "uicfhmowqewca";
-        assertParseException(invalidCommand, MESSAGE_UNKNOWN_COMMAND);
+        assertAssemblyException(invalidCommand, MESSAGE_NO_MATCHING_BINDING);
     }
 
     @Test
@@ -99,14 +117,11 @@ public class LogicManagerTest {
 
     @Test
     public void execute_successCommand_recordsHistoryEntry() throws Exception {
-        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
-
-        logic.execute(addCommand);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
 
         CommandHistory historySnapshot = logic.getCommandHistorySnapshot();
         assertEquals(1, historySnapshot.size());
-        assertEquals(addCommand.trim(), historySnapshot.getEntries().get(0));
+        assertEquals(SAMPLE_ADD_COMMAND_INPUT_AMY.trim(), historySnapshot.getEntries().get(0));
     }
 
     @Test
@@ -114,7 +129,7 @@ public class LogicManagerTest {
         CommandHistory before = logic.getCommandHistorySnapshot();
         String invalidCommand = "uicfhmowqewca";
 
-        assertThrows(ParseException.class, () -> logic.execute(invalidCommand));
+        assertThrows(AssemblyException.class, () -> logic.execute(invalidCommand));
 
         CommandHistory after = logic.getCommandHistorySnapshot();
         assertEquals(before, after);
@@ -139,7 +154,7 @@ public class LogicManagerTest {
     @Test
     public void getCommandHistorySnapshot_unmodifiableList() {
         assertThrows(UnsupportedOperationException.class, () ->
-            logic.getCommandHistorySnapshot().getEntries().add("new command")
+                logic.getCommandHistorySnapshot().getEntries().add("new command")
         );
     }
 
@@ -214,7 +229,7 @@ public class LogicManagerTest {
                 + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
         Person expectedPerson = new PersonBuilder(AMY).withTags().build();
 
-        logic.execute(addCommand);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
 
         Optional<SessionData> snapshot = logic.getSessionSnapshotIfDirty();
         assertTrue(snapshot.isPresent());
@@ -223,9 +238,7 @@ public class LogicManagerTest {
 
     @Test
     public void getSessionSnapshotIfDirty_markPersistedClearsDirtyFlag() throws Exception {
-        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
-        logic.execute(addCommand);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
 
         assertTrue(logic.getSessionSnapshotIfDirty().isPresent());
         logic.markSessionSnapshotPersisted();
@@ -234,15 +247,13 @@ public class LogicManagerTest {
 
     @Test
     public void getCommandHistorySnapshot_returnsDefensiveCopy() throws Exception {
-        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
-        logic.execute(addCommand);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
 
         CommandHistory snapshot = logic.getCommandHistorySnapshot();
         snapshot.reset(List.of("modified"));
 
         CommandHistory latestSnapshot = logic.getCommandHistorySnapshot();
-        assertEquals(List.of(addCommand.trim()), latestSnapshot.getEntries());
+        assertEquals(List.of(SAMPLE_ADD_COMMAND_INPUT_AMY.trim()), latestSnapshot.getEntries());
     }
 
     @Test
@@ -252,9 +263,7 @@ public class LogicManagerTest {
         logic.execute("find Alice");
         assertTrue(logic.getSessionSnapshotIfDirty().isEmpty());
 
-        String addBobCommand = AddCommand.COMMAND_WORD + NAME_DESC_BOB + PHONE_DESC_BOB
-                + EMAIL_DESC_BOB + ADDRESS_DESC_BOB;
-        logic.execute(addBobCommand);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_BOB);
 
         SessionData snapshot = logic.getSessionSnapshotIfDirty().orElseThrow();
         assertEquals(List.of("Alice"), snapshot.getSearchKeywords());
@@ -263,9 +272,7 @@ public class LogicManagerTest {
         logic.execute(ListCommand.COMMAND_WORD);
         assertTrue(logic.getSessionSnapshotIfDirty().isEmpty());
 
-        String addAmyCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
-        logic.execute(addAmyCommand);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
 
         snapshot = logic.getSessionSnapshotIfDirty().orElseThrow();
         assertEquals(List.of(), snapshot.getSearchKeywords());
@@ -318,14 +325,14 @@ public class LogicManagerTest {
     }
 
     /**
-     * Executes the command and confirms that
-     * - no exceptions are thrown <br>
-     * - the feedback message is equal to {@code expectedMessage} <br>
-     * - the internal model manager state is the same as that in {@code expectedModel} <br>
+     * Executes the command and confirms that - no exceptions are thrown <br> - the feedback message is equal to
+     * {@code expectedMessage} <br> - the internal model manager state is the same as that in {@code expectedModel}
+     * <br>
+     *
      * @see #assertCommandFailure(String, Class, String, Model)
      */
     private void assertCommandSuccess(String inputCommand, String expectedMessage,
-            Model expectedModel) throws CommandException, ParseException {
+                                      Model expectedModel) throws CommandException, AssemblyException {
         CommandResult result = logic.execute(inputCommand);
         assertEquals(expectedMessage, result.getFeedbackToUser());
         syncCommandHistory(expectedModel, model);
@@ -333,15 +340,17 @@ public class LogicManagerTest {
     }
 
     /**
-     * Executes the command, confirms that a ParseException is thrown and that the result message is correct.
+     * Executes the command, confirms that an AssemblyException is thrown and that the result message is correct.
+     *
      * @see #assertCommandFailure(String, Class, String, Model)
      */
-    private void assertParseException(String inputCommand, String expectedMessage) {
-        assertCommandFailure(inputCommand, ParseException.class, expectedMessage);
+    private void assertAssemblyException(String inputCommand, String expectedMessage) {
+        assertCommandFailure(inputCommand, AssemblyException.class, expectedMessage);
     }
 
     /**
      * Executes the command, confirms that a CommandException is thrown and that the result message is correct.
+     *
      * @see #assertCommandFailure(String, Class, String, Model)
      */
     private void assertCommandException(String inputCommand, String expectedMessage) {
@@ -350,23 +359,24 @@ public class LogicManagerTest {
 
     /**
      * Executes the command, confirms that the exception is thrown and that the result message is correct.
+     *
      * @see #assertCommandFailure(String, Class, String, Model)
      */
     private void assertCommandFailure(String inputCommand, Class<? extends Throwable> expectedException,
-            String expectedMessage) {
+                                      String expectedMessage) {
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         assertCommandFailure(inputCommand, expectedException, expectedMessage, expectedModel);
     }
 
     /**
-     * Executes the command and confirms that
-     * - the {@code expectedException} is thrown <br>
-     * - the resulting error message is equal to {@code expectedMessage} <br>
-     * - the internal model manager state is the same as that in {@code expectedModel} <br>
+     * Executes the command and confirms that - the {@code expectedException} is thrown <br> - the resulting error
+     * message is equal to {@code expectedMessage} <br> - the internal model manager state is the same as that in
+     * {@code expectedModel} <br>
+     *
      * @see #assertCommandSuccess(String, String, Model)
      */
     private void assertCommandFailure(String inputCommand, Class<? extends Throwable> expectedException,
-            String expectedMessage, Model expectedModel) {
+                                      String expectedMessage, Model expectedModel) {
         assertThrows(expectedException, expectedMessage, () -> logic.execute(inputCommand));
         syncCommandHistory(expectedModel, model);
         assertEquals(expectedModel, model);
@@ -375,7 +385,7 @@ public class LogicManagerTest {
     /**
      * Tests the Logic component's handling of an {@code IOException} thrown by the Storage component.
      *
-     * @param e the exception to be thrown by the Storage component
+     * @param e               the exception to be thrown by the Storage component
      * @param expectedMessage the message expected inside exception thrown by the Logic component
      */
     private void syncCommandHistory(Model expectedModel, Model actualModel) {
@@ -399,10 +409,10 @@ public class LogicManagerTest {
                 commandHistoryStorage, sessionStorage);
 
         SessionData previousSession = new SessionData(
-            Instant.parse("2025-10-14T00:00:00Z"),
-            model.getAddressBook(),
-            List.of("Alice"),
-            new GuiSettings());
+                Instant.parse("2025-10-14T00:00:00Z"),
+                model.getAddressBook(),
+                List.of("Alice"),
+                new GuiSettings());
 
         logic = new LogicManager(model, storage, Optional.of(previousSession));
 
@@ -423,10 +433,10 @@ public class LogicManagerTest {
                 commandHistoryStorage, sessionStorage);
 
         SessionData previousSession = new SessionData(
-            Instant.parse("2025-10-14T00:00:00Z"),
-            model.getAddressBook(),
-            List.of(),
-            new GuiSettings());
+                Instant.parse("2025-10-14T00:00:00Z"),
+                model.getAddressBook(),
+                List.of(),
+                new GuiSettings());
 
         logic = new LogicManager(model, storage, Optional.of(previousSession));
 
@@ -457,9 +467,7 @@ public class LogicManagerTest {
     @Test
     public void getModel_afterExecutingCommand_modelStateConsistent() throws Exception {
         // Execute a command that modifies the model
-        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
-        logic.execute(addCommand);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
 
         // Verify getModel() returns the updated model state
         Model retrievedModel = logic.getModel();
