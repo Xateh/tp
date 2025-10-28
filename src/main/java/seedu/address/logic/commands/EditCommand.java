@@ -24,6 +24,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Info;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -101,13 +102,11 @@ public class EditCommand extends Command {
         Email updatedEmail = editPersonDescriptor.getEmail().orElse(personToEdit.getEmail());
         Address updatedAddress = editPersonDescriptor.getAddress().orElse(personToEdit.getAddress());
         Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
+        // No current support for editing customFields and Info
+        Map<String, String> customFields = personToEdit.getCustomFields();
+        Info info = personToEdit.getInfo();
 
-        Person updatedPerson = new Person(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedTags);
-        Map<String, String> existingCustomFields = personToEdit.getCustomFields();
-        if (existingCustomFields.isEmpty()) {
-            return updatedPerson;
-        }
-        return updatedPerson.withCustomFields(existingCustomFields);
+        return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedTags, customFields, info);
     }
 
     @Override

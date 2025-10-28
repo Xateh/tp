@@ -112,6 +112,11 @@ class MainAppLifecycleManagerTest {
         public void setGuiSettings(GuiSettings guiSettings) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public Model getModel() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Test
@@ -478,6 +483,11 @@ class MainAppLifecycleManagerTest {
         public void setGuiSettings(GuiSettings guiSettings) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public Model getModel() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Test
@@ -504,10 +514,11 @@ class MainAppLifecycleManagerTest {
     void initModel_nullArgs_throwsNpe() {
         // null storage
         assertThrows(NullPointerException.class, ()
-            -> lifecycleManager.initModel(null, new UserPrefs(), Optional.empty()));
+                -> lifecycleManager.initModel(null, new UserPrefs(), Optional.empty()));
 
         // create a minimal Storage stub
-        Storage stub = new BaseStorageStub() { };
+        Storage stub = new BaseStorageStub() {
+        };
 
         assertThrows(NullPointerException.class, () -> lifecycleManager.initModel(stub, null, Optional.empty()));
         // null restoredSession

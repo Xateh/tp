@@ -7,6 +7,7 @@ import java.util.Set;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Info;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -22,6 +23,7 @@ public class PersonBuilder {
     public static final String DEFAULT_PHONE = "85355255";
     public static final String DEFAULT_EMAIL = "amy@gmail.com";
     public static final String DEFAULT_ADDRESS = "123, Jurong West Ave 6, #08-111";
+    public static final String DEFAULT_INFO = "";
 
     private Name name;
     private Phone phone;
@@ -29,6 +31,7 @@ public class PersonBuilder {
     private Address address;
     private Set<Tag> tags;
     private Map<String, String> customFields;
+    private Info info;
 
     /**
      * Creates a {@code PersonBuilder} with the default details.
@@ -40,6 +43,7 @@ public class PersonBuilder {
         address = new Address(DEFAULT_ADDRESS);
         tags = new HashSet<>();
         customFields = new LinkedHashMap<>();
+        info = new Info(DEFAULT_INFO);
     }
 
     /**
@@ -52,6 +56,7 @@ public class PersonBuilder {
         address = personToCopy.getAddress();
         tags = new HashSet<>(personToCopy.getTags());
         customFields = new LinkedHashMap<>(personToCopy.getCustomFields());
+        info = personToCopy.getInfo();
     }
 
     /**
@@ -59,6 +64,14 @@ public class PersonBuilder {
      */
     public PersonBuilder withName(String name) {
         this.name = new Name(name);
+        return this;
+    }
+
+    /**
+     * Sets the {@code Info} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withInfo(String info) {
+        this.info = new Info(info);
         return this;
     }
 
@@ -108,7 +121,7 @@ public class PersonBuilder {
      * @return a new {@code Person} instance reflecting the state captured in this builder
      */
     public Person build() {
-        Person person = new Person(name, phone, email, address, tags);
+        Person person = new Person(name, phone, email, address, tags, info);
         if (customFields.isEmpty()) {
             return person;
         }
