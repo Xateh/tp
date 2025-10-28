@@ -11,6 +11,7 @@ import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.person.FieldContainsKeywordsPredicate;
 import seedu.address.session.SessionData;
 
 /**
@@ -102,7 +103,7 @@ public class SessionRecorder {
             FindCommand findCommand = (FindCommand) command;
             searchKeywords = List.copyOf(findCommand.getPredicate().getKeywords());
             // capture flags and custom keys from predicate
-            var predicate = findCommand.getPredicate();
+            FieldContainsKeywordsPredicate predicate = findCommand.getPredicate();
             searchName = predicate.isSearchName();
             searchPhone = predicate.isSearchPhone();
             searchEmail = predicate.isSearchEmail();
