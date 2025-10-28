@@ -18,11 +18,24 @@ public class StatusBarFooter extends UiPart<Region> {
     private Label saveLocationStatus;
 
     /**
-     * Creates a {@code StatusBarFooter} with the given {@code Path}.
+     * Creates a {@code StatusBarFooter} showing the directory where session snapshots are stored.
+     *
+     * <p>The {@code addressBookFilePath} parameter is used to derive the session directory in the
+     * same way as {@link seedu.address.MainAppLifecycleManager#deriveSessionDirectory(Path)}:
+     * if the address book file has a parent directory, the session directory is
+     * parent.resolve("sessions"); otherwise it falls back to a top-level "sessions" directory.
      */
     public StatusBarFooter(Path saveLocation) {
         super(FXML);
-        saveLocationStatus.setText(Paths.get(".").resolve(saveLocation).toString());
+        // Derive the sessions directory from the provided address book file path.
+        Path sessionDir;
+        Path parent = saveLocation == null ? null : saveLocation.getParent();
+        if (parent == null) {
+            sessionDir = Path.of("sessions");
+        } else {
+            sessionDir = parent.resolve("sessions");
+        }
+        saveLocationStatus.setText(Paths.get(".").resolve(sessionDir).toString());
     }
 
 }
