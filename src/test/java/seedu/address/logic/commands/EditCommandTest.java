@@ -15,6 +15,8 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
@@ -97,6 +99,32 @@ public class EditCommandTest {
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
 
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_preservesExistingCustomFields_success() {
+        Model modelWithCustomFields = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+        Person personToEdit = modelWithCustomFields.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Map<String, String> existingCustomFields = Map.of("company", "Tiktok");
+        Person personWithCustomFields = new PersonBuilder(personToEdit)
+                .withCustomFields(existingCustomFields)
+                .build();
+        modelWithCustomFields.setPerson(personToEdit, personWithCustomFields);
+
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withPhone(VALID_PHONE_BOB).build();
+        EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
+
+        Person expectedEditedPerson = new PersonBuilder(personWithCustomFields)
+                .withPhone(VALID_PHONE_BOB)
+                .build();
+        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS,
+                Messages.format(expectedEditedPerson));
+
+        Model expectedModel = new ModelManager(new AddressBook(modelWithCustomFields.getAddressBook()),
+                new UserPrefs());
+        expectedModel.setPerson(personWithCustomFields, expectedEditedPerson);
+
+        assertCommandSuccess(editCommand, modelWithCustomFields, expectedMessage, expectedModel);
     }
 
     @Test

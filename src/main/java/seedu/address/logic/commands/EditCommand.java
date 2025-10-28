@@ -11,6 +11,7 @@ import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -101,7 +102,12 @@ public class EditCommand extends Command {
         Address updatedAddress = editPersonDescriptor.getAddress().orElse(personToEdit.getAddress());
         Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
 
-        return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedTags);
+        Person updatedPerson = new Person(updatedName, updatedPhone, updatedEmail, updatedAddress, updatedTags);
+        Map<String, String> existingCustomFields = personToEdit.getCustomFields();
+        if (existingCustomFields.isEmpty()) {
+            return updatedPerson;
+        }
+        return updatedPerson.withCustomFields(existingCustomFields);
     }
 
     @Override

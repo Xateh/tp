@@ -1,6 +1,8 @@
 package seedu.address.testutil;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import seedu.address.model.person.Address;
@@ -26,6 +28,7 @@ public class PersonBuilder {
     private Email email;
     private Address address;
     private Set<Tag> tags;
+    private Map<String, String> customFields;
 
     /**
      * Creates a {@code PersonBuilder} with the default details.
@@ -36,6 +39,7 @@ public class PersonBuilder {
         email = new Email(DEFAULT_EMAIL);
         address = new Address(DEFAULT_ADDRESS);
         tags = new HashSet<>();
+        customFields = new LinkedHashMap<>();
     }
 
     /**
@@ -47,6 +51,7 @@ public class PersonBuilder {
         email = personToCopy.getEmail();
         address = personToCopy.getAddress();
         tags = new HashSet<>(personToCopy.getTags());
+        customFields = new LinkedHashMap<>(personToCopy.getCustomFields());
     }
 
     /**
@@ -62,6 +67,14 @@ public class PersonBuilder {
      */
     public PersonBuilder withTags(String ... tags) {
         this.tags = SampleDataUtil.getTagSet(tags);
+        return this;
+    }
+
+    /**
+     * Sets the custom fields of the {@code Person} that we are building.
+     */
+    public PersonBuilder withCustomFields(Map<String, String> customFields) {
+        this.customFields = new LinkedHashMap<>(customFields);
         return this;
     }
 
@@ -89,8 +102,16 @@ public class PersonBuilder {
         return this;
     }
 
+    /**
+     * Builds a {@code Person} populated with the configured core details and custom fields.
+     *
+     * @return a new {@code Person} instance reflecting the state captured in this builder
+     */
     public Person build() {
-        return new Person(name, phone, email, address, tags);
+        Person person = new Person(name, phone, email, address, tags);
+        if (customFields.isEmpty()) {
+            return person;
+        }
+        return person.withCustomFields(customFields);
     }
-
 }
