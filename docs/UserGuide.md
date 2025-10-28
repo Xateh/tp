@@ -227,18 +227,25 @@ Examples:
 
 Sets, updates or removes one or more **custom field values** for the specified person in the address book.
 
-Format: `field INDEX /KEY[:VALUE] [/KEY[:VALUE]]…`
+Format: `field <index> /<key[:value]>+`
 
-* Updates the person at the specified `INDEX`. The index refers to the number shown in the current list. The index **must be a positive integer** 1, 2, 3, …​
-* Each `/KEY[:VALUE]` pair trims surrounding whitespace from both `KEY` and `VALUE` before applying the change.
-* Providing a `VALUE` **adds or updates** the custom field identified by `KEY`. New keys are created automatically; existing keys are overwritten.
-* Omitting `VALUE` (e.g. `/nickname`) **removes** the custom field identified by `KEY` if it exists.
-* Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
-* You may provide **one or multiple** `/KEY[:VALUE]` pairs in a single command.
-* You may do addition/updating and deletion (of existing fields) in a single command.
-* If a `VALUE` contains spaces, wrap it in double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
+**Parameters**
 
-**Examples:**
+* `<index>` `(index)` – Selects the person to update. This refers to the number shown in the current list and **must be a positive integer** 1, 2, 3, …​
+
+**Options**
+
+* `/<key[:value]>` `(string)` `+` – At least one custom field option must be supplied.
+  * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
+  * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
+  * Omitting `value` (e.g. `/nickname`) **removes** the custom field identified by `key` if it exists.
+  * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
+  * `key` cannot contain spaces, even if wrapped in straight double quotes; A `key` like `"Asset Class"` will be rejected, whereas an alternative like `AssetClass` will be accepted.
+  * If a `value` contains spaces, wrap it in straight double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
+
+You may mix additions/updates and removals in a single command by providing multiple `/key[:value]` options.
+
+Examples:
 * `field 5 /linkedInUsername:alextan /rate:120` — Sets two fields on the 5th person in one command.
 * `field 3 /notes:"Met at FinTech conf 2025"` — Adds a note with spaces to the 3rd person.
 * `field 4 /nickname` — Removes the `nickname` custom field from the 4th person.
@@ -404,7 +411,7 @@ Action     | Format, Examples
 **Remove Tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
 **Edit Info** | `infoedit INDEX` <br> e.g., `infoedit 2`
 **View Info** | `infoview INDEX` <br> e.g., `infoview 2`
-**Field**  | `field INDEX /KEY[:VALUE]` <br> e.g., `field 2 /company:"BlackRock"`
+**Field**  | `field <index> /<key[:value]>+` <br> e.g., `field 2 /company:BlackRock`
 **Remove Field**  | `field INDEX /KEY` <br> e.g., `field 2 /company`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **History** | `history`
