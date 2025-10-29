@@ -128,6 +128,7 @@ public class InfoCommandTest {
                 personToEdit.getAddress(),
                 personToEdit.getTags(),
                 personToEdit.getCustomFields(),
+                personToEdit.getLinks(),
                 newInfo);
         expectedModel.setPerson(personToEdit, editedPerson);
 
@@ -164,6 +165,7 @@ public class InfoCommandTest {
                 personToEdit.getAddress(),
                 personToEdit.getTags(),
                 personToEdit.getCustomFields(),
+                personToEdit.getLinks(),
                 emptyInfo);
 
         String expectedMessage = String.format(InfoCommand.MESSAGE_SUCCESS, Messages.format(editedPerson));
@@ -187,6 +189,7 @@ public class InfoCommandTest {
                 personToEdit.getAddress(),
                 personToEdit.getTags(),
                 personToEdit.getCustomFields(),
+                personToEdit.getLinks(),
                 multilineInfo);
 
         String expectedMessage = String.format(InfoCommand.MESSAGE_SUCCESS, Messages.format(editedPerson));
@@ -208,6 +211,7 @@ public class InfoCommandTest {
                         personToEdit.getAddress(),
                         personToEdit.getTags(),
                         personToEdit.getCustomFields(),
+                        personToEdit.getLinks(),
                         specialInfo)));
         assertEquals(expectedMessage, result.getFeedbackToUser());
     }
@@ -369,6 +373,7 @@ public class InfoCommandTest {
                 personToEdit.getAddress(),
                 personToEdit.getTags(),
                 personToEdit.getCustomFields(),
+                personToEdit.getLinks(),
                 veryLongInfo);
 
         String expectedMessage = String.format(InfoCommand.MESSAGE_SUCCESS, Messages.format(editedPerson));

@@ -164,7 +164,7 @@ Format: `add <name> <phone> <address> <email> [/tag:<tag>]*`
 
 * `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com"`
 * `add "Betsy Crowe" "1234567" "Newgate Prison" "betsycrowe@example.com" /tag:friend /tag:criminal`
-* 
+
 **Warnings and Errors**
 
 * #r#Values for each field must conform to the listed restrictions above.##
@@ -298,6 +298,16 @@ Format: `find <keyword>+ [/<field>]*`
 * Persons matching at least one keyword on any one field will be returned (i.e. `OR` search).
   e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
 
+**Parameters**
+
+* `<keyword>` (string): keyword to search on. Only fields containing the full word (case insensitive) will be matched.
+
+**Options**
+
+* `/<field>` (string): specified field to search on (both built in and custom added).
+* `/from` (string): search all links where the person is the linker.
+* `/to` (string): search all links where the person is the linkee (one being linked to).
+
 Examples:
 * `find John` returns `john` and `John Doe`.
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
@@ -306,7 +316,7 @@ Examples:
 * `find test.dummy@gmail.com` returns all persons whose email is `test.dummy@gmail.com`.
 * `find friend` returns all persons tagged with `"friend"`.
 
-* You can limit the search to specific fields by adding options after your keywords.
+You can limit the search to specific fields by adding options after your keywords (see above under **Options**).
 * Each field option starts with / followed by the field name.
 * The same rules for searching applies as per the case of searching all built in fields. (see above)
 * Now, only those persons matching at least one keyword on any one specified field will be returned.
@@ -316,6 +326,31 @@ Examples:
 * `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
 * `find 99999999 /phone` returns all persons whose phone number is `99999999`.
 * `find test /name /email` returns all persons whose name or email contains the word `test`.
+* `find lawyer /from` returns all persons who are the linkers to other persons with linkname "lawyer".
+* `find lawyer /to` returns all persons who are the linkees to other persons with linkname "lawyer".
+
+### Creating links between persons: `link`
+
+Creates a relationship link between two persons in the address book.
+
+Format: `link <index1> <linkName> <index2>`
+
+* Establishes a directed relationship where the person at <index1> is the <linkName> of the person at <index2>.
+* Both persons will display the link in their contact cards.
+* Self-links (e.g. linking a person to themselves) are not allowed.
+* If the same link already exists, the command will have no effect.
+
+**Parameters**
+
+* `<index1>` (index): index of the linker (the person initiating the link)
+* `<linkName>` (string): name of the relationship (eg., lawyer, client)
+* `<index2>` (index): index of the linkee (the person being linked to)
+
+Examples:
+
+* list followed by link 1 lawyer 2 — person 1 becomes the lawyer of person 2.
+* list followed by link 2 "best-friend" 3 — person 2 becomes the best-friend of person 3 (note that quotes allow link names with special characters).
+* list followed by link 2 client 1 — person 2 becomes the client of person 1.
 
 ### Deleting a person : `delete`
 

@@ -1,73 +1,25 @@
 @startuml
+skinparam style strictuml
+skinparam classAttributeIconSize 0
+hide empty members
 !define ABSTRACT_CLASS abstract class
 !define INTERFACE interface
 !define ABSTRACT_METHOD {abstract}
 
 package "Lexer" {
     class CommandLexer {
-        - ingest: String
-        - tokens: ArrayList<Token>
-        - start: int
-        - current: int
         __
         + {static} lexCommand(String): TokenisedCommand
-        - lex(): void
-        - scanToken(): void
-        - peek(): char
-        - advance(): char
-        - munchWord(): void
-        - munchText(): void
-        - addToken(TokenType): void
-        - error(LexerErrorType): void
     }
 
     class TokenisedCommand {
-        - ingest: String
-        - tokens: List<Token>
-        __
-        + getIngest(): String
-        + getAtIndex(int): Token
-    }
-
-    class Token {
-        - type: TokenType
-        - literal: String
-        - location: Location
-        __
-        + getType(): TokenType
-        + getLiteral(): String
-        + getLocation(): Location
-    }
-
-    enum TokenType {
-        WORD
-        TEXT
-        SLASH
-        COLON
-        TERMINAL
     }
 }
 
 package "Parser" {
     class CommandParser {
-        - tokenisedCommand: TokenisedCommand
-        - currentTokenIndex: int
         __
         + {static} parseCommand(TokenisedCommand): AstNode.Command
-        - parseCommand(): AstNode.Command
-        - parseImperative(): AstNode.Imperative
-        - parseParameterList(): AstNode.ParameterList
-        - parseParameter(): AstNode.Parameter
-        - parseOptionList(): AstNode.OptionList
-        - parseOption(): AstNode.Option
-        - parseOptionName(): AstNode.OptionName
-        - parseOptionValue(): AstNode.OptionValue
-        - parseWord(): AstNode.Word
-        - parseText(): AstNode.Text
-        - eat(TokenType...): Token
-        - advance(): Token
-        - peek(): Token
-        - check(TokenType...): boolean
     }
 
     package "AST" {
@@ -79,81 +31,41 @@ package "Parser" {
 
         package "Visitor" {
             INTERFACE "AstVisitor<R>" as AstVisitor {
-                + visitCommand(Command): R
-                + visitImperative(Imperative): R
-                + visitParameterList(ParameterList): R
-                + visitParameter(Parameter): R
-                + visitOptionList(OptionList): R
-                + visitOption(Option): R
-                + visitOptionName(OptionName): R
-                + visitOptionValue(OptionValue): R
-                + visitText(Text): R
-                + visitWord(Word): R
             }
 
             class CommandExtractor {
                 + extract(Command): Command
-                + visitCommand(Command): Command
-                + visitImperative(Imperative): String
-                + visitParameterList(ParameterList): List<String>
-                + visitParameter(Parameter): String
-                + visitOptionList(OptionList): Map<String,String>
-                + visitOption(Option): void
-                + visitOptionName(OptionName): String
-                + visitOptionValue(OptionValue): String
-                + visitText(Text): String
-                + visitWord(Word): String
             }
         }
     }
 }
 
-class Command {
-    - imperative: String
-    - parameters: String[]
-    - options: HashMap<String,String>
+class BareCommand {
     __
-    + {static} parse(String): Command
-    + getImperative(): String
-    + getParameter(int): String
-    + getAllParameters(): String[]
-    + getOptionValue(String): String
-    + hasOption(String): boolean
+    + {static} parse(String): BareCommand
 }
 
-class CommandBuilder {
-    - imperative: String
-    - parameters: ArrayList<String>
-    - options: HashMap<String,String>
+class BareCommandBuilder {
     __
-    + setImperative(String): void
-    + addParameter(String): void
-    + setOption(String): void
-    + setOption(String, String): void
-    + build(): Command
+    + build(): BareCommand
 }
 
 ' Relationships - Lexer
 CommandLexer ..> TokenisedCommand : creates
-TokenisedCommand *-- Token
-Token --> TokenType
 
 ' Relationships - Parser
 CommandParser --> TokenisedCommand : uses
 
-CommandParser ..> Command : creates
-
 ' Relationships - Visitor
 CommandExtractor ..|> AstVisitor
 AstNode ..> AstVisitor : accepts
-CommandExtractor ..> CommandBuilder : uses
+CommandExtractor ..> BareCommandBuilder : uses
 
 ' Relationships - Interface
-Command +-- CommandBuilder
-Command ..> CommandLexer : uses
-Command ..> CommandParser : uses
-Command ..> CommandExtractor : uses
-CommandBuilder ..> Command : builds
+BareCommand ..> CommandLexer : uses
+BareCommand ..> CommandParser : uses
+BareCommand ..> CommandExtractor : uses
+BareCommandBuilder ..> BareCommand : builds
 
 hide empty members
 
