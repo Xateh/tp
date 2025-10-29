@@ -20,7 +20,7 @@ public final class FieldCommandExtractor {
     public static final String MESSAGE_INDEX_UNSPECIFIED = "Index not specified.";
     public static final String MESSAGE_WRONG_IMPERATIVE = "Wrong imperative for FieldCommand";
     private static final List<String> DISALLOWED_CUSTOM_FIELD_NAMES = List.of("name", "email", "phone",
-                                    "address", "tag", "field", "link", "find");
+                                    "address", "tag", "field");
 
     private FieldCommandExtractor() {}
 

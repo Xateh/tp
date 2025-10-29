@@ -154,6 +154,7 @@ public class Person {
                 .add("email", email)
                 .add("address", address)
                 .add("tags", tags)
+                .add("links", links)
                 .add("info", info);
 
         Map<String, String> customFields = getCustomFields();

@@ -146,7 +146,7 @@ public class PersonTest {
     public void toStringMethod() {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
                 + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", tags=" + ALICE.getTags()
-                + ", info=}";
+                + ", links=" + ALICE.getLinks() + ", info=}";
         assertEquals(expected, ALICE.toString());
     }
 
@@ -162,7 +162,7 @@ public class PersonTest {
         String expected = Person.class.getCanonicalName() + "{name=" + withCustomFields.getName()
                 + ", phone=" + withCustomFields.getPhone() + ", email=" + withCustomFields.getEmail()
                 + ", address=" + withCustomFields.getAddress() + ", tags=" + withCustomFields.getTags()
-                + ", info=" + withCustomFields.getInfo()
+                + ", links=" + withCustomFields.getLinks() + ", info=" + withCustomFields.getInfo()
                 + ", customFields= {Company=Acme, Twitter=@alice}}";
         assertEquals(expected, withCustomFields.toString());
     }
