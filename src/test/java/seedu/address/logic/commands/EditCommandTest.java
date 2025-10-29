@@ -15,7 +15,9 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +28,10 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.person.FieldContainsKeywordsPredicate;
+import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
+import seedu.address.model.tag.Tag;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
 
@@ -97,8 +102,83 @@ public class EditCommandTest {
 
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
+        // reapply the same filter as was applied to the original model
+        final String[] splitName = personInFilteredList.getName().fullName.split("\\s+");
+        expectedModel.updateFilteredPersonList(new FieldContainsKeywordsPredicate(Arrays.asList(splitName[0])));
 
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_filteredList_editPersonNoLongerShown() {
+        // prepare model with a filter that shows only the first person
+        showPersonAtIndex(model, INDEX_FIRST_PERSON);
+
+        Person personInFilteredList = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person editedPerson = new PersonBuilder(personInFilteredList).withName(VALID_NAME_BOB).build();
+
+        // edit so that the person's name no longer matches the active filter predicate
+        EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).build());
+
+        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
+
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        // apply the edit to the expected model
+        expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
+        // reapply the same filter: the edited person should no longer be visible
+        final String[] splitName = personInFilteredList.getName().fullName.split("\\s+");
+        expectedModel.updateFilteredPersonList(new FieldContainsKeywordsPredicate(Arrays.asList(splitName[0])));
+
+        assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+        // confirm that the filtered list in the actual model is now empty (edited person filtered out)
+        assertTrue(model.getFilteredPersonList().isEmpty());
+    }
+
+    @Test
+    public void execute_removeAllTags_success() {
+        // remove all tags from the first person
+        Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person editedPerson = new PersonBuilder(personToEdit).withTags().build();
+
+        EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withTags().build());
+
+        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
+
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
+
+        assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void editPersonDescriptor_getTags_unmodifiable() {
+        EditCommand.EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withTags("friend").build();
+        // getTags returns unmodifiable set when present
+        assertTrue(descriptor.getTags().isPresent());
+        Set<Tag> tags = descriptor.getTags().get();
+        try {
+            tags.add(new Tag("newtag"));
+        } catch (UnsupportedOperationException e) {
+            // expected
+            return;
+        }
+        // If no exception thrown, fail the test
+        throw new AssertionError("Expected UnsupportedOperationException when modifying tags set");
+    }
+
+    @Test
+    public void editPersonDescriptorCopyConstructorAndIsAnyFieldEdited() {
+        // descriptor with no fields
+        EditCommand.EditPersonDescriptor emptyDesc = new EditCommand.EditPersonDescriptor();
+        assertFalse(emptyDesc.isAnyFieldEdited());
+
+        // set a field and test copy constructor and isAnyFieldEdited
+        emptyDesc.setName(new Name(VALID_NAME_BOB));
+        assertTrue(emptyDesc.isAnyFieldEdited());
+        EditCommand.EditPersonDescriptor copy = new EditCommand.EditPersonDescriptor(emptyDesc);
+        assertEquals(emptyDesc.getName(), copy.getName());
     }
 
     @Test
@@ -197,6 +277,47 @@ public class EditCommandTest {
 
         // different descriptor -> returns false
         assertFalse(standardCommand.equals(new EditCommand(INDEX_FIRST_PERSON, DESC_BOB)));
+    }
+
+    @Test
+    public void editPersonDescriptor_equals_variousCases() {
+        EditCommand.EditPersonDescriptor descriptor = new EditCommand.EditPersonDescriptor();
+        descriptor.setName(new Name(VALID_NAME_BOB));
+        descriptor.setPhone(new seedu.address.model.person.Phone(VALID_PHONE_BOB));
+        descriptor.setTags(new java.util.HashSet<>());
+
+        // same object -> true
+        assertTrue(descriptor.equals(descriptor));
+
+        // different type -> false
+        assertFalse(descriptor.equals("not a descriptor"));
+
+        // different name -> false
+        EditCommand.EditPersonDescriptor other = new EditCommand.EditPersonDescriptor(descriptor);
+        other.setName(new Name("Different Name"));
+        assertFalse(descriptor.equals(other));
+
+        // different phone -> false
+        other = new EditCommand.EditPersonDescriptor(descriptor);
+        other.setPhone(new seedu.address.model.person.Phone("99999999"));
+        assertFalse(descriptor.equals(other));
+
+        // different email -> false
+        other = new EditCommand.EditPersonDescriptor(descriptor);
+        other.setEmail(new seedu.address.model.person.Email("diff@example.com"));
+        assertFalse(descriptor.equals(other));
+
+        // different address -> false
+        other = new EditCommand.EditPersonDescriptor(descriptor);
+        other.setAddress(new seedu.address.model.person.Address("Different Address"));
+        assertFalse(descriptor.equals(other));
+
+        // different tags -> false
+        other = new EditCommand.EditPersonDescriptor(descriptor);
+        java.util.Set<Tag> tagSet = new java.util.HashSet<>();
+        tagSet.add(new Tag("newtag"));
+        other.setTags(tagSet);
+        assertFalse(descriptor.equals(other));
     }
 
     @Test
