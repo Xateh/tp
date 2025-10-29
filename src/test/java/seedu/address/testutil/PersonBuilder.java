@@ -8,6 +8,7 @@ import java.util.Set;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Info;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -31,6 +32,7 @@ public class PersonBuilder {
     private Address address;
     private Set<Tag> tags;
     private Map<String, String> customFields;
+    private Set<Link> links;
     private Info info;
 
     /**
@@ -43,6 +45,7 @@ public class PersonBuilder {
         address = new Address(DEFAULT_ADDRESS);
         tags = new HashSet<>();
         customFields = new LinkedHashMap<>();
+        links = new HashSet<>();
         info = new Info(DEFAULT_INFO);
     }
 
@@ -56,6 +59,7 @@ public class PersonBuilder {
         address = personToCopy.getAddress();
         tags = new HashSet<>(personToCopy.getTags());
         customFields = new LinkedHashMap<>(personToCopy.getCustomFields());
+        links = new HashSet<>(personToCopy.getLinks());
         info = personToCopy.getInfo();
     }
 
@@ -121,6 +125,6 @@ public class PersonBuilder {
      * @return a new {@code Person} instance reflecting the state captured in this builder
      */
     public Person build() {
-        return new Person(name, phone, email, address, tags, customFields, info);
+        return new Person(name, phone, email, address, tags, customFields, links, info);
     }
 }
