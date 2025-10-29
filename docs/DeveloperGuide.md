@@ -13,7 +13,8 @@
 
 ## **Acknowledgements**
 
-_{ list here sources of all reused/adapted ideas, code, documentation, and third-party libraries -- include links to the original source as well }_
+AssetSphere builds upon the AddressBook-Level3 project maintained by the CS2103T teaching team and community contributors.
+We also acknowledge the JavaFX and PlantUML projects for providing the UI framework and diagram tooling used throughout this guide.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -67,7 +68,7 @@ The sections below give more details of each component.
 
 ### UI component
 
-The **API** of this component is specified in [`Ui.java`](https://https://github.com/AY2526S1-CS2103T-T13-2/tp/tree/master/src/main/java/seedu/address/ui/Ui.java)
+The **API** of this component is specified in [`Ui.java`](https://github.com/AY2526S1-CS2103T-T13-2/tp/tree/master/src/main/java/seedu/address/ui/Ui.java)
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
