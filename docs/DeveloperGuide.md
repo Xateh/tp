@@ -726,8 +726,8 @@ added.
 
 **Performance**:
 - The system should respond within **1 second** for each command.
-- App cold start to first command within **2 second**.
-- App shutdown should not take more than **1 second**.
+- App cold start to first command within **3 second**.
+- App shutdown should not take more than **5 second**.
 
 **Portability**:
 - The product should work on all machines (**Windows, Linux, Mac**).
