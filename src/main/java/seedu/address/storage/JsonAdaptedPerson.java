@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -14,6 +15,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Info;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -26,20 +29,23 @@ class JsonAdaptedPerson {
 
     public static final String MISSING_FIELD_MESSAGE_FORMAT = "Person's %s field is missing!";
 
+    final List<JsonAdaptedLink> links = new ArrayList<>(); //package private to use in test
     private final String name;
     private final String phone;
     private final String email;
     private final String address;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
     private final Map<String, String> customFields = new LinkedHashMap<>();
+    private final String info;
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
      */
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
-            @JsonProperty("email") String email, @JsonProperty("address") String address,
-            @JsonProperty("tags") List<JsonAdaptedTag> tags) {
+                             @JsonProperty("email") String email, @JsonProperty("address") String address,
+                             @JsonProperty("tags") List<JsonAdaptedTag> tags,
+                             @JsonProperty("links") List<JsonAdaptedLink> links, @JsonProperty("info") String info) {
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -47,6 +53,10 @@ class JsonAdaptedPerson {
         if (tags != null) {
             this.tags.addAll(tags);
         }
+        if (links != null) {
+            this.links.addAll(links);
+        }
+        this.info = info;
     }
 
     /**
@@ -61,6 +71,12 @@ class JsonAdaptedPerson {
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
         customFields.putAll(source.getCustomFields()); // preserve order
+        // only serialize outgoing links
+        links.addAll(source.getLinks().stream()
+                .filter(l -> l.getLinker().getName().equals(source.getName()))
+                .map(JsonAdaptedLink::new)
+                .collect(Collectors.toList()));
+        info = source.getInfo().value;
     }
 
     /**
@@ -107,8 +123,37 @@ class JsonAdaptedPerson {
         final Address modelAddress = new Address(address);
 
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        // Backward compatible: if customFields missing, LinkedHashMap stays empty.
-        Person base = new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags);
-        return base.withCustomFields(customFields);
+        final Info modelInfo = new Info(info == null ? "" : info);
+        Person base = new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags,
+                customFields, new HashSet<>(), modelInfo);
+        return base;
+    }
+
+    Set<Link> resolveLinks(Person self, Function<String, Person> resolveByName) {
+        Set<Link> out = new HashSet<>();
+        if (links == null || links.isEmpty()) {
+            return out;
+        }
+        for (JsonAdaptedLink jl : links) {
+            String linkName = jl.getLinkName();
+            String linkeeName = jl.getLinkeeName();
+
+            if (linkName == null || !Link.isValidLinkName(linkName)) {
+                continue;
+            }
+
+            Person linkee = resolveByName.apply(linkeeName);
+            if (linkee == null) {
+                continue;
+            }
+
+            if (self.isSamePerson(linkee)) {
+                continue;
+            }
+
+            out.add(new Link(self, linkee, jl.getLinkName()));
+        }
+        return out;
     }
 }
+

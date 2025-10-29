@@ -45,15 +45,13 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
 ## Features
 
-<box type="info" seamless>
-
-#### Basic Command Structure
+<box type="info" seamless header="Basic Command Structure">
 
 **NOTE TO REVIEWERS**: This part of the UG contains the updated command syntax that the app will eventually use. However, not all of the rest of the UG has been updated to be aligned with this new syntax. This **will be fixed** in a later version.
 
 All commands follow the same simple format:
 
-`command <parameters…> <options…>`
+`command <parameters...> <options...>`
 
 1. **Command:** The action you want to perform (e.g., `add`, `list`, `delete`).
 2. **Parameters:** Inputs the command _needs_ to work. These are usually **required**, and their **order matters**.
@@ -80,6 +78,8 @@ Options are optional settings to customise your command. They always come _after
     - **Example:** `add "Finish report" /priority:high`
     - If the value has spaces, wrap the value in quotes: `add "New event" /due:"tomorrow at 5"`
 
+#g#To avoid cluttering the syntax for each command, options may be specified in a particular order in the formats given below for better readability. But, it is always fine to specify the options in **any order**.##
+
 When you look at the help for a command, you'll see this notation:
 
 - **Parameter Variants:**
@@ -96,14 +96,42 @@ When you look at the help for a command, you'll see this notation:
     - `<item>?`: Zero or one (it's optional).
     - `<item>+`: One or more are required.
     - `<item>*`: Zero or more (it's optional and you can provide many).
+    - Multiple items may be grouped with square brackets `[]` and assigned a multiplicity. In such a case, the entire group may be repeated as many times as specified.
 
-**Example:** `tag <index>+ <tag>+` means you must provide at least one index, followed by at least one tag.
+_Example:_ `tag <index>+ [/tag:<tag>]+` means you must provide at least one index, followed by at least one tag with option key `tag`. These are all acceptable inputs:
+    - `tag 1 /tag:friend`
+    - `tag 1 /tag:enemy`
+    - `tag 1 /tag:`
+    - `tag 1 /tag:friend`
+    - `tag 1 /tag:friend`
+
+**Whitespace and Special Characters**
+
+- #m#Whitespace is ignored unless it is wrapped in quotes (`""`).##
+- #m#If you wish to pass special characters (non-alphanumeric: anything that is not a letter or number) to a field, you must wrap it in quotes (`""`).##
 
 **Extraneous Parameters and Options**
 
 By default:
-- the number of parameters are fixed for commands and should be strictly adhered to. Using an number of parameters that does not conform to the requirements of the command format is **undefined behaviour**. Some commands may gracefully handle extraneous parameters if it is sensible to do so, but this behaviour _should not be relied on_.
-- extraneous options are *always* ignored.
+- #r#The number of parameters are fixed for commands and should be strictly adhered to. Using a number of parameters that does not conform to the requirements of the command format is **undefined behaviour** (we leave it to individual commands to decide what to do). In most cases, this is an error.##
+- #m#Some commands may gracefully handle extraneous parameters if it is sensible to do so, but this behaviour _should not be relied on_.##
+- #m#Extraneous options are *always* ignored, unless the command allows variable option keys (it cannot tell what the difference is between a legitimate option key and one that is extraneous.##
+- #m#If an option name is specified multiple times when the command expects it to be specified only once, it will accept the first value specified.##
+
+</box>
+
+<box type="important" seamless header="Built-in and Custom Fields">
+
+There are additional restrictions on built-in fields:
+- `name`s must only contain letters, numbers, or spaces, and it should not be blank
+- `phone`s must only contain numbers, and it should be at least 3 digits long
+- `address`s must not be blank
+- `email`s must be of a valid email address form
+- `tag`s must only contain letters and numbers
+
+Furthermore:
+- Custom field names must only contain letters and numbers
+- Custom field values must not be blank
 
 </box>
 
@@ -115,21 +143,31 @@ Shows a message explaining how to access the help page.
 
 Format: `help`
 
-
 ### Adding a person: `add`
 
 Adds a person to the address book.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
+Format: `add <name> <phone> <address> <email> [/tag:<tag>]*`
 
-<box type="tip" seamless>
+**Parameters**
 
-**Tip:** A person can have any number of tags (including 0)
-</box>
+* `<name>` (string): a valid name
+* `<phone>` (string): a valid phone number
+* `<address>` (string): a valid address
+* `<email>` (string): a valid email address
 
-Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+**Options**
+
+* `<tag>` (string): a valid tag name
+
+**Examples**
+
+* `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com"`
+* `add "Betsy Crowe" "1234567" "Newgate Prison" "betsycrowe@example.com" /tag:friend /tag:criminal`
+
+**Warnings and Errors**
+
+* #r#Values for each field must conform to the listed restrictions above.##
 
 ### Listing all persons : `list`
 
@@ -138,6 +176,7 @@ Shows a list of all persons in the address book.
 Format: `list`
 
 ### Viewing command history : `history`
+
 Displays the list of commands previously entered.
 
 Format: `history`
@@ -157,26 +196,39 @@ Examples:
 
 Edits an existing person in the address book.
 
-Format: `edit <index> [/<field>:<new-value>]+`
+Format(s):
+- `edit <index> [/<field>:<new-value>]+`
+- `edit <index> [/<field>:<new-value>]+ [/tag]`
 
-* At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
 * When editing tags, the existing tags of the person will be removed i.e adding of tags is not cumulative.
 * You can remove all the person’s tags by typing `/tag` without specifying any tags after it.
+* Edit cannot be used to modify fields or links.
 
 **Parameters**
 
-* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit 
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to edit
 
 **Options**
 
-* `<field>` (word): one of any of the available fields on a person (one of `name`, `phone`, `address`, `email`)
+* #r#At least one optional field must be provided.##
+* `<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
 * `<new-value>` (string): any valid field entry (dependent on the modified field)
+  * For options other than `tag`, a value **must** be specified.
+  * If `tag` is specified without any value, all tags on the person are removed.
+  * The `tag` can be specified repeatedly with multiple distinct values.
 
-Examples:
+**Examples**
 
-*  `edit 1 /phone:91234567 /email:"johndoe@example.com"` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
-*  `edit 2 /name:"Betsy Crower" /tag` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+* `edit 1 /phone:91234567 /email:"johndoe@example.com"` edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
+* `edit 2 /name:"Betsy Crower" /tag` edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+* `edit 3 /tag:friend /tag:colleague` edits the tags of the 3rd person to be `friend` and `colleague` only, clearing all previous tags.
+* `edit 3 /tag /tag:friend /tag:colleague` edits the tags of the 3rd person to be `friend` and `colleague` only, clearing all previous tags; this is functionally identical to the previous example.
+
+**Warnings and Errors**
+
+* #m#If the `tag` field is specified with values, any boolean options specified for `tag` are ignored (see above examples).##
+* #r#Values for each field must conform to the listed restrictions above.##
 
 ### Modifying tags : `tag`
 
@@ -198,30 +250,21 @@ Examples:
 * `list` followed by `tag 1 -villain -enemy` will remove `villain` and `enemy` from the 1st person in the address book.
 * `list` followed by `tag 2 +friend -villain +cool -enemy` will add `friend` and `cool` to and remove `villain` and `enemy` from the 2nd person in the address book.
 
-### Adding information to a person: `infoedit`
+### Adding information to a person: `info`
 
 Edits information about a person given its index.
 
-Format: `infoedit INDEX`
+Format: `info <index>`
 
-* Displays an editable text box for the person at the given `INDEX` in the displayed list.
-* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
+* Displays an editable text box for the person at the given `<index>` in the displayed list.
 * If there is existing information attached to the person, it will be shown and editable in the text box.
 
-Examples:
-* `list` followed by `infoedit 2` will bring up an editable text box for the 2nd person in the address book.
+**Parameters**
 
-### Viewing information of a person: `infoview`
-
-View information about a person given its index.
-
-Format: `infoview INDEX`
-
-* Displays all the given information of the person at the `INDEX` specified.
-* The index refers to the index number shown in the displayed person list and **must be a positive integer** 1, 2, 3, ...
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
 
 Examples:
-* `list` followed by `infoview 2` will display available information about the 2nd person in the address book.
+* `list` followed by `info 2` will bring up an editable text box for the 2nd person in the address book.
 
 ### Setting a custom field on a person : `field`
 
@@ -273,6 +316,29 @@ Examples:
 * `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
 * `find 99999999 /phone` returns all persons whose phone number is `99999999`.
 * `find test /name /email` returns all persons whose name or email contains the word `test`.
+
+### Creating links between persons: `link`
+
+Creates a relationship link between two persons in the address book.
+
+Format: `link <index1> <linkName> <index2>`
+
+* Establishes a directed relationship where the person at <index1> is the <linkName> of the person at <index2>.
+* Both persons will display the link in their contact cards.
+* Self-links (e.g. linking a person to themselves) are not allowed.
+* If the same link already exists, the command will have no effect.
+
+**Parameters**
+
+* `<index1>` (index): index of the linker (the person initiating the link)
+* `<linkName>` (string): name of the relationship (eg., lawyer, client)
+* `<index2>` (index): index of the linkee (the person being linked to)
+
+Examples:
+
+* list followed by link 1 lawyer 2 — person 1 becomes the lawyer of person 2.
+* list followed by link 2 "best-friend" 3 — person 2 becomes the best-friend of person 3 (note that quotes allow link names with special characters).
+* list followed by link 2 client 1 — person 2 becomes the client of person 1.
 
 ### Deleting a person : `delete`
 
@@ -394,13 +460,12 @@ _Details coming soon ..._
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add**    | `add <name> <phone> <address> <email> [/tag:<tag>]*` <br> e.g., `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com" /tag:friend`
 **List**   | `list`
-**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag`
 **Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
 **Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
-**Edit Info** | `infoedit INDEX` <br> e.g., `infoedit 2`
-**View Info** | `infoview INDEX` <br> e.g., `infoview 2`
+**View/Edit Info** | `info <index>` <br> e.g., `info 2`
 **Field**  | `field INDEX /KEY:VALUE` <br> e.g., `field 2 /company:"BlackRock"`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **History** | `history`
