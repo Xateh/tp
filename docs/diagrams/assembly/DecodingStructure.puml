@@ -1,4 +1,7 @@
 @startuml
+skinparam style strictuml
+skinparam classAttributeIconSize 0
+hide empty members
 !define INTERFACE interface
 
 class Decoder {
@@ -10,26 +13,10 @@ abstract class Command {
 }
 
 class BareCommand {
-    - imperative: String
-    - parameters: String[]
-    - options: HashMap<String,String>
-    __
-    + getImperative(): String
-    + getParameter(int): String
-    + getAllParameters(): String[]
-    + getOptionValue(String): String
-    + hasOption(String): boolean
 }
 
 package "Resolution" {
     enum Bindings {
-        TAG("tag", TagCommandExtractor::extract)
-        __
-        - imperative: String
-        - extractor: CommandExtractor<?>
-        __
-        + {static} resolveBindings(Predicate<String>): CommandExtractor<?>[]
-        + {static} resolveExactBinding(Predicate<String>): CommandExtractor<?>
     }
 }
 

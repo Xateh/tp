@@ -15,6 +15,7 @@ import seedu.address.logic.commands.FieldCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.HistoryCommand;
+import seedu.address.logic.commands.LinkCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.TagCommand;
 import seedu.address.logic.commands.exceptions.ResolutionException;
@@ -121,4 +122,12 @@ public class DecoderTest {
     public void decode_uniquePrefixAmbiguousMatch_throwsException() {
         assertThrows(ResolutionException.class, () -> Decoder.decode(BareCommand.parse("e")));
     }
+
+    @Test
+    public void decode_linkCommandExactMatch_success() throws
+            AssemblyException {
+        Command linkCommand = Decoder.decode(BareCommand.parse("link 1 mentor 2"));
+        assertEquals(LinkCommand.class, linkCommand.getClass());
+    }
 }
+

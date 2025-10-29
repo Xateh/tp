@@ -25,11 +25,10 @@ Decoder -> Bindings: resolveExactBinding(predicate)
 activate Bindings
 
 note right of Bindings
-  Filter bindings using predicate:
-  imperative.equals("tag")
+  Filter bindings using supplied predicate
 end note
 
-Bindings --> Decoder: return CommandExtractor
+Bindings --> Decoder: return commandExtractor
 deactivate Bindings
 
 note right of Decoder
@@ -42,27 +41,25 @@ Decoder -> Extractor: extract(bareCommand)
 activate Extractor
 
 note right of Extractor
-  Construction Phase:
-  Build typed command
+  Construct typed command
   with validated parameters
 end note
 
 create Cmd
 Extractor -> Cmd
 activate Cmd
-Cmd --> Extractor: return Command
+Cmd --> Extractor: return command
 deactivate Cmd
 
-Extractor --> Decoder: return Command
+Extractor --> Decoder: return command
 deactivate Extractor
 
-Decoder --> System: return Command
+Decoder --> System: return command
 deactivate Decoder
 
 note right of System
   Command is now ready
-  for execution with validated
-  index and tag set
+  for execution
 end note
 
 @enduml
