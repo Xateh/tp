@@ -31,7 +31,7 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
    * `list` : Lists all contacts.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
+   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the address book.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
@@ -99,11 +99,10 @@ When you look at the help for a command, you'll see this notation:
     - Multiple items may be grouped with square brackets `[]` and assigned a multiplicity. In such a case, the entire group may be repeated as many times as specified.
 
 _Example:_ `tag <index>+ [/tag:<tag>]+` means you must provide at least one index, followed by at least one tag with option key `tag`. These are all acceptable inputs:
-    - `tag 1 /tag:friend`
-    - `tag 1 /tag:enemy`
-    - `tag 1 /tag:`
-    - `tag 1 /tag:friend`
-    - `tag 1 /tag:friend`
+- `tag 1 /tag:friend`
+- `tag 1 /tag:enemy`
+- `tag 1 /tag`
+- `tag 1 /tag:enemy /tag:colleague`
 
 **Whitespace and Special Characters**
 
@@ -122,14 +121,14 @@ By default:
 
 <box type="important" seamless header="Built-in and Custom Fields">
 
-There are additional restrictions on built-in fields:
+The following are **built-in fields**. There are additional restrictions on each of them:
 - `name`s must only contain letters, numbers, or spaces, and it should not be blank
 - `phone`s must only contain numbers, and it should be at least 3 digits long
 - `address`s must not be blank
 - `email`s must be of a valid email address form
 - `tag`s must only contain letters and numbers
 
-Furthermore:
+For **custom fields** (those added with the `field` command):
 - Custom field names must only contain letters and numbers
 - Custom field values must not be blank
 
@@ -266,23 +265,37 @@ Format: `info <index>`
 Examples:
 * `list` followed by `info 2` will bring up an editable text box for the 2nd person in the address book.
 
-### Setting a custom field on a person : `field`
+### Setting and removing a custom field on a person : `field`
 
-Sets or updates one or more **custom field values** for the specified person in the address book.
+Sets, updates or removes one or more **custom field values** for the specified person in the address book.
 
-Format: `field INDEX /KEY:VALUE [/KEY:VALUE]…`
+Format: `field <index> [/<key>[:<value>]*]+`
 
-* Updates the person at the specified `INDEX`. The index refers to the number shown in the current list. The index **must be a positive integer** 1, 2, 3, …​
-* Each `/KEY:VALUE` pair targets a previously defined custom field (`KEY`).
-* You may provide **one or multiple** `/KEY:VALUE` pairs in a single command.
-* If a `VALUE` contains spaces, wrap it in double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
-* If a `KEY` is unknown (not defined), the command fails with an error.
+**Parameters**
 
-**Examples:**
-* `field 5 /linkedInUsername:alextan /rate:120` — Sets two fields on the 5th person in one command.
-* `field 3 /notes:"Met at FinTech conf 2025"` — Adds a note with spaces to the 3rd person.
-* `field 7 /birthday:"1999-02-01"` — Sets a field on the 7th person in one command.
-* `field 7 /birthday:"1999-02-10"` — Updates the field with `KEY` `birthday` on the 7th person.
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): Index of person to add fields to
+
+**Options**
+
+* #r#At least one optional field must be provided.##
+* `<key>` (word): name of custom field
+* `<value>` (string): value of custom field
+  * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
+  * Custom field `key` is **case-sensitive**; `key` is not equivalent to `Key`.
+  * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
+  * Omitting `value` (e.g. `/nickname`) **removes** the custom field identified by `key` if it exists.
+  * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
+  * `key` cannot contain spaces, even if wrapped in straight double quotes; A `key` like `"Asset Class"` will be rejected, whereas an alternative like `AssetClass` will be accepted.
+  * If a `value` contains spaces, wrap it in straight double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
+
+You may mix additions/updates and removals in a single command by providing multiple key-value options.
+
+Examples:
+* `field 5 /linkedInUsername:alextan /rate:120`: Sets two fields on the 5th person in one command.
+* `field 3 /notes:"Met at FinTech conf 2025"`: Adds a note with spaces to the 3rd person.
+* `field 4 /nickname`: Removes the `nickname` custom field from the 4th person.
+* `field 7 /birthday:"1999-02-10"`: Creates or updates the `birthday` custom field on the 7th person.
+* `field 2 /assetClass: Gold /socialMedia`: Sets the field `assetClass`, and removes the field `socialMedia` on the 2nd person in one command.
 
 ### Locating persons by name: `find`
 
@@ -290,23 +303,30 @@ Finds persons whose fields contain any of the given keywords.
 
 Format: `find <keyword>+ [/<field>]*`
 
-* If no specific field is provided, all built-in fields will be searched.
+* If no specific field is provided, all built-in fields (not including custom fields and links) will be searched.
 * The search is case-insensitive. e.g `hans` will match `Hans`.
 * The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`.
-* All the fields are searched.
+* All the built-in fields are searched.
 * Only full words will be matched e.g. `Han` will not match `Hans`.
 * Persons matching at least one keyword on any one field will be returned (i.e. `OR` search).
   e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
 
-Examples:
-* `find John` returns `john` and `John Doe`.
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
-* `find 99999999` returns all persons whose phone number is `99999999`.
-* `find test.dummy@gmail.com` returns all persons whose email is `test.dummy@gmail.com`.
-* `find friend` returns all persons tagged with `"friend"`.
+**Parameters**
 
-* You can limit the search to specific fields by adding options after your keywords.
+* `<keyword>` (string): keyword to search on. Only fields containing the full word (case insensitive) will be matched.
+
+**Options**
+
+* `/<field>` (string): specified field to search on (both built in and custom added).
+* `/from` (string): search all links where the person is the linker.
+* `/to` (string): search all links where the person is the linkee (one being linked to).
+
+Examples:
+* `find 99999999` returns all persons whose built-in fields contain `99999999`.
+* `find test.dummy@gmail.com` returns all persons whose built-in fields contain `test.dummy@gmail.com`.
+* `find friend` returns all persons whose built-in fields contain `"friend"`.
+
+You can limit the search to specific fields by adding options after your keywords (see above under **Options**).
 * Each field option starts with / followed by the field name.
 * The same rules for searching applies as per the case of searching all built in fields. (see above)
 * Now, only those persons matching at least one keyword on any one specified field will be returned.
@@ -316,6 +336,8 @@ Examples:
 * `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
 * `find 99999999 /phone` returns all persons whose phone number is `99999999`.
 * `find test /name /email` returns all persons whose name or email contains the word `test`.
+* `find lawyer /from` returns all persons who are the linkers to other persons with linkname "lawyer".
+* `find lawyer /to` returns all persons who are the linkees to other persons with linkname "lawyer".
 
 ### Creating links between persons: `link`
 
@@ -392,7 +414,7 @@ Note about when a snapshot is created:
 
 Behavior for end users remains unchanged by the recent internal refactor. The app still:
 * Restores the most recent valid session snapshot at startup (filters, window layout, and address book snapshot).
-* Persists a session JSON file on normal exit under the `sessions/` subdirectory next to your main data file.
+* Persists a session JSON file on normal exit under the `data/sessions/` subdirectory next to your main data file.
 * Persists the command history to `data/commandhistory.json` on exit.
 
 If you observe unexpected behaviour around session restoration or command history persistence after updating to this version, please:
@@ -402,7 +424,7 @@ If you observe unexpected behaviour around session restoration or command histor
 
 ### Editing the data file
 
-AssetSphere data are saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+AssetSphere data are saved automatically as a JSON file under the `data/sessions/`. Advanced users are welcome to update data directly by editing that data file.
 
 Caution:
 
@@ -458,18 +480,17 @@ _Details coming soon ..._
 
 ## Command summary
 
-Action     | Format, Examples
------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add <name> <phone> <address> <email> [/tag:<tag>]*` <br> e.g., `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com" /tag:friend`
-**List**   | `list`
-**Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag`
-**Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
-**Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
-**View/Edit Info** | `info <index>` <br> e.g., `info 2`
-**Field**  | `field INDEX /KEY:VALUE` <br> e.g., `field 2 /company:"BlackRock"`
-**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
-**History** | `history`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Clear**  | `clear`
-**Exit**  | `exit`
+Action     | Format, Examples                                                                                                                                                                                       
+-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+**Add**    | `add <name> <phone> <address> <email> [/tag:<tag>]*` <br> e.g., `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com" /tag:friend`                                             
+**List**   | `list`                                                                                                                                                                                                 
+**Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag` 
+**Modify Tag**    | `tag <index> [(+\|-)<tag>]+` <br> e.g., `tag 2 +friend -villain +cool -enemy`                                                                                                                          
+**View/Edit Info** | `info <index>` <br> e.g., `info 2`                                                                                                                                                                     
+**Field**  | `field <index> [/<key>[:<value>]*]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
+**Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`                                                                                                                                             
+**History** | `history`                                                                                                                                                                                              
+**Delete** | `delete <index>`<br> e.g., `delete 3`                                                                                                                                                                  
+**Clear**  | `clear`                                                                                                                                                                                                
+**Exit**  | `exit`                                                                                                                                                                                                 
 **Help**   | `help`
