@@ -145,9 +145,9 @@ This diagram shows a truncated architecture (with auxiliary classes hidden) orga
 
 This sequence diagram traces the high-level flow of execution (omitting exceptions and various internal implementation details) starting from `BareCommand.parse(String)`:
 
-1. **Lexing Phase**: Shows how the lexer processes the string character-by-character using peek/advance/munch operations, creating tokens
-2. **Parsing Phase**: Demonstrates recursive descent parsing with the parser calling various parse methods that mirror the grammar structure
-3. **Extraction Phase** (not an actual distinguished phase): Illustrates the Visitor pattern in action, with the CommandExtractor traversing the AST and populating a CommandBuilder
+1. **Lexing Phase**: Shows how the lexer processes the string character-by-character using peek/advance/munch operations, creating tokens.
+2. **Parsing Phase**: Demonstrates recursive descent parsing with the parser calling various parse methods that mirror the grammar structure.
+3. **Extraction Phase** (not an actual distinguished phase): Illustrates the Visitor pattern in action, with the CommandExtractor traversing the AST and populating a BareCommandBuilder. Note that this is an extractor from the AST, and is distinct from extractors from BareCommand (which are discussed later).
 
 The diagram includes notes explaining key concepts at each phase and shows both the normal flow and error handling paths. It clearly shows the three-stage transformation: String → Tokens → AST → BareCommand.
 
