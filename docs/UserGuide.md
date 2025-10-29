@@ -302,10 +302,10 @@ Finds persons whose fields contain any of the given keywords.
 
 Format: `find <keyword>+ [/<field>]*`
 
-* If no specific field is provided, all built-in fields will be searched.
+* If no specific field is provided, all built-in fields (not including custom fields and links) will be searched.
 * The search is case-insensitive. e.g `hans` will match `Hans`.
 * The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`.
-* All the fields are searched.
+* All the built-in fields are searched.
 * Only full words will be matched e.g. `Han` will not match `Hans`.
 * Persons matching at least one keyword on any one field will be returned (i.e. `OR` search).
   e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
@@ -321,12 +321,9 @@ Format: `find <keyword>+ [/<field>]*`
 * `/to` (string): search all links where the person is the linkee (one being linked to).
 
 Examples:
-* `find John` returns `john` and `John Doe`.
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
-* `find 99999999` returns all persons whose phone number is `99999999`.
-* `find test.dummy@gmail.com` returns all persons whose email is `test.dummy@gmail.com`.
-* `find friend` returns all persons tagged with `"friend"`.
+* `find 99999999` returns all persons whose built-in fields contain `99999999`.
+* `find test.dummy@gmail.com` returns all persons whose built-in fields contain `test.dummy@gmail.com`.
+* `find friend` returns all persons whose built-in fields contain `"friend"`.
 
 You can limit the search to specific fields by adding options after your keywords (see above under **Options**).
 * Each field option starts with / followed by the field name.
@@ -492,7 +489,7 @@ Action     | Format, Examples
 **View/Edit Info** | `info <index>` <br> e.g., `info 2`
 **Field**  | `field <index> /<key[:value]>+` <br> e.g., `field 2 /company:BlackRock`
 **Remove Field**  | `field INDEX /KEY` <br> e.g., `field 2 /company`
-**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`
 **History** | `history`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Clear**  | `clear`
