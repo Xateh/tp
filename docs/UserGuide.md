@@ -99,11 +99,10 @@ When you look at the help for a command, you'll see this notation:
     - Multiple items may be grouped with square brackets `[]` and assigned a multiplicity. In such a case, the entire group may be repeated as many times as specified.
 
 _Example:_ `tag <index>+ [/tag:<tag>]+` means you must provide at least one index, followed by at least one tag with option key `tag`. These are all acceptable inputs:
-    - `tag 1 /tag:friend`
-    - `tag 1 /tag:enemy`
-    - `tag 1 /tag:`
-    - `tag 1 /tag:friend`
-    - `tag 1 /tag:friend`
+- `tag 1 /tag:friend`
+- `tag 1 /tag:enemy`
+- `tag 1 /tag`
+- `tag 1 /tag:enemy /tag:colleague`
 
 **Whitespace and Special Characters**
 
@@ -122,14 +121,14 @@ By default:
 
 <box type="important" seamless header="Built-in and Custom Fields">
 
-There are additional restrictions on built-in fields:
+The following are **built-in fields**. There are additional restrictions on each of them:
 - `name`s must only contain letters, numbers, or spaces, and it should not be blank
 - `phone`s must only contain numbers, and it should be at least 3 digits long
 - `address`s must not be blank
 - `email`s must be of a valid email address form
 - `tag`s must only contain letters and numbers
 
-Furthermore:
+For **custom fields** (those added with the `field` command):
 - Custom field names must only contain letters and numbers
 - Custom field values must not be blank
 
@@ -270,31 +269,33 @@ Examples:
 
 Sets, updates or removes one or more **custom field values** for the specified person in the address book.
 
-Format: `field <index> /<key[:value]>+`
+Format: `field <index> [/<key>[:<value>]*]+`
 
 **Parameters**
 
-* `<index>` `(index)` – Selects the person to update. This refers to the number shown in the current list and **must be a positive integer** 1, 2, 3, …​
+* `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): Index of person to add fields to
 
 **Options**
 
-* `/<key[:value]>` `(string)` `+` – At least one custom field option must be supplied.
+* #r#At least one optional field must be provided.##
+* `<key>` (word): name of custom field
+* `<value>` (string): value of custom field
   * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
-  * Custom field `key` is **case sensitive**; `key` is not equivalent to `Key`.
+  * Custom field `key` is **case-sensitive**; `key` is not equivalent to `Key`.
   * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
   * Omitting `value` (e.g. `/nickname`) **removes** the custom field identified by `key` if it exists.
   * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
   * `key` cannot contain spaces, even if wrapped in straight double quotes; A `key` like `"Asset Class"` will be rejected, whereas an alternative like `AssetClass` will be accepted.
   * If a `value` contains spaces, wrap it in straight double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
 
-You may mix additions/updates and removals in a single command by providing multiple `/key[:value]` options.
+You may mix additions/updates and removals in a single command by providing multiple key-value options.
 
 Examples:
-* `field 5 /linkedInUsername:alextan /rate:120` — Sets two fields on the 5th person in one command.
-* `field 3 /notes:"Met at FinTech conf 2025"` — Adds a note with spaces to the 3rd person.
-* `field 4 /nickname` — Removes the `nickname` custom field from the 4th person.
-* `field 7 /birthday:"1999-02-10"` — Creates or updates the `birthday` custom field on the 7th person.
-* `field 2 /assetClass: Gold /socialMedia` - Sets the field `assetClass`, and removes the field `socialMedia` on the 2nd person in one command.
+* `field 5 /linkedInUsername:alextan /rate:120`: Sets two fields on the 5th person in one command.
+* `field 3 /notes:"Met at FinTech conf 2025"`: Adds a note with spaces to the 3rd person.
+* `field 4 /nickname`: Removes the `nickname` custom field from the 4th person.
+* `field 7 /birthday:"1999-02-10"`: Creates or updates the `birthday` custom field on the 7th person.
+* `field 2 /assetClass: Gold /socialMedia`: Sets the field `assetClass`, and removes the field `socialMedia` on the 2nd person in one command.
 
 ### Locating persons by name: `find`
 
@@ -479,19 +480,17 @@ _Details coming soon ..._
 
 ## Command summary
 
-Action     | Format, Examples
------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add <name> <phone> <address> <email> [/tag:<tag>]*` <br> e.g., `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com" /tag:friend`
-**List**   | `list`
-**Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag`
-**Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
-**Remove Tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
-**View/Edit Info** | `info <index>` <br> e.g., `info 2`
-**Field**  | `field <index> /<key[:value]>+` <br> e.g., `field 2 /company:BlackRock`
-**Remove Field**  | `field INDEX /KEY` <br> e.g., `field 2 /company`
-**Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`
-**History** | `history`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Clear**  | `clear`
-**Exit**  | `exit`
+Action     | Format, Examples                                                                                                                                                                                       
+-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+**Add**    | `add <name> <phone> <address> <email> [/tag:<tag>]*` <br> e.g., `add "John Doe" 98765432 "John street, block 123, #01-01" "johnd@example.com" /tag:friend`                                             
+**List**   | `list`                                                                                                                                                                                                 
+**Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag` 
+**Modify Tag**    | `tag <index> [(+\|-)<tag>]+` <br> e.g., `tag 2 +friend -villain +cool -enemy`                                                                                                                          
+**View/Edit Info** | `info <index>` <br> e.g., `info 2`                                                                                                                                                                     
+**Field**  | `field <index> [/<key>[:<value>]*]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
+**Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`                                                                                                                                             
+**History** | `history`                                                                                                                                                                                              
+**Delete** | `delete <index>`<br> e.g., `delete 3`                                                                                                                                                                  
+**Clear**  | `clear`                                                                                                                                                                                                
+**Exit**  | `exit`                                                                                                                                                                                                 
 **Help**   | `help`
