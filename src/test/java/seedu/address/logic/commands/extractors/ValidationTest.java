@@ -399,6 +399,20 @@ public class ValidationTest {
             assertEquals(expected, index);
         }
 
+        @Test
+        public void validateIndex_atypicalPosition_success() {
+            BareCommand cmd = new BareCommandBuilder()
+                    .setImperative("command")
+                    .addParameter("pad")
+                    .addParameter("pad")
+                    .addParameter("pad")
+                    .addParameter("2")
+                    .build();
+            Index expected = Index.fromOneBased(2);
+
+            Index index = assertDoesNotThrow(() -> Validation.validateIndex(cmd, 3));
+            assertEquals(expected, index);
+        }
 
         @Test
         public void validateIndex_invalidIndexOutOfRange_throwsException() {
