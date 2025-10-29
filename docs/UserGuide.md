@@ -294,6 +294,7 @@ Examples:
 * `field 3 /notes:"Met at FinTech conf 2025"` — Adds a note with spaces to the 3rd person.
 * `field 4 /nickname` — Removes the `nickname` custom field from the 4th person.
 * `field 7 /birthday:"1999-02-10"` — Creates or updates the `birthday` custom field on the 7th person.
+* `field 2 /assetClass: Gold /socialMedia` - Sets the field `assetClass`, and removes the field `socialMedia` on the 2nd person in one command.
 
 ### Locating persons by name: `find`
 
