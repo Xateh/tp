@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.tag.Tag;
@@ -147,14 +148,23 @@ public class Person {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
+        ToStringBuilder builder = new ToStringBuilder(this)
                 .add("name", name)
                 .add("phone", phone)
                 .add("email", email)
                 .add("address", address)
                 .add("tags", tags)
-                .add("info", info)
-                .toString();
+                .add("links", links)
+                .add("info", info);
+
+        Map<String, String> customFields = getCustomFields();
+        if (!customFields.isEmpty()) {
+            StringJoiner joiner = new StringJoiner(", ");
+            customFields.forEach((key, value) -> joiner.add(key + "=" + value));
+            builder.add("customFields", " {" + joiner + "}");
+        }
+
+        return builder.toString();
     }
 
 }

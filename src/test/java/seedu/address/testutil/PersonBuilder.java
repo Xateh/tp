@@ -88,6 +88,14 @@ public class PersonBuilder {
     }
 
     /**
+     * Sets the custom fields of the {@code Person} that we are building.
+     */
+    public PersonBuilder withCustomFields(Map<String, String> customFields) {
+        this.customFields = new LinkedHashMap<>(customFields);
+        return this;
+    }
+
+    /**
      * Sets the {@code Address} of the {@code Person} that we are building.
      */
     public PersonBuilder withAddress(String address) {
@@ -111,14 +119,12 @@ public class PersonBuilder {
         return this;
     }
 
-    public Person build() {
-        return new Person(name, phone, email, address, tags, new LinkedHashMap<>(), links, info);
-    }
     /**
-     * Sets the {@code customField} of the {@code Person} that we are building.
+     * Builds a {@code Person} populated with the configured core details and custom fields.
+     *
+     * @return a new {@code Person} instance reflecting the state captured in this builder
      */
-    public PersonBuilder withCustomFields(Map<String, String> customFields) {
-        this.customFields = new LinkedHashMap<>(customFields);
-        return this;
+    public Person build() {
+        return new Person(name, phone, email, address, tags, customFields, links, info);
     }
 }

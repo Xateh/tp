@@ -47,9 +47,6 @@ public class Validation {
     public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
 
-    public static final List<String> DISALLOWED_CUSTOM_FIELD_NAMES =
-            List.of("name", "email", "phone", "address", "tag", "field");
-
     private Validation() {
     }
 

@@ -266,23 +266,35 @@ Format: `info <index>`
 Examples:
 * `list` followed by `info 2` will bring up an editable text box for the 2nd person in the address book.
 
-### Setting a custom field on a person : `field`
+### Setting and removing a custom field on a person : `field`
 
-Sets or updates one or more **custom field values** for the specified person in the address book.
+Sets, updates or removes one or more **custom field values** for the specified person in the address book.
 
-Format: `field INDEX /KEY:VALUE [/KEY:VALUE]…`
+Format: `field <index> /<key[:value]>+`
 
-* Updates the person at the specified `INDEX`. The index refers to the number shown in the current list. The index **must be a positive integer** 1, 2, 3, …​
-* Each `/KEY:VALUE` pair targets a previously defined custom field (`KEY`).
-* You may provide **one or multiple** `/KEY:VALUE` pairs in a single command.
-* If a `VALUE` contains spaces, wrap it in double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
-* If a `KEY` is unknown (not defined), the command fails with an error.
+**Parameters**
 
-**Examples:**
+* `<index>` `(index)` – Selects the person to update. This refers to the number shown in the current list and **must be a positive integer** 1, 2, 3, …​
+
+**Options**
+
+* `/<key[:value]>` `(string)` `+` – At least one custom field option must be supplied.
+  * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
+  * Custom field `key` is **case sensitive**; `key` is not equivalent to `Key`.
+  * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
+  * Omitting `value` (e.g. `/nickname`) **removes** the custom field identified by `key` if it exists.
+  * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
+  * `key` cannot contain spaces, even if wrapped in straight double quotes; A `key` like `"Asset Class"` will be rejected, whereas an alternative like `AssetClass` will be accepted.
+  * If a `value` contains spaces, wrap it in straight double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
+
+You may mix additions/updates and removals in a single command by providing multiple `/key[:value]` options.
+
+Examples:
 * `field 5 /linkedInUsername:alextan /rate:120` — Sets two fields on the 5th person in one command.
 * `field 3 /notes:"Met at FinTech conf 2025"` — Adds a note with spaces to the 3rd person.
-* `field 7 /birthday:"1999-02-01"` — Sets a field on the 7th person in one command.
-* `field 7 /birthday:"1999-02-10"` — Updates the field with `KEY` `birthday` on the 7th person.
+* `field 4 /nickname` — Removes the `nickname` custom field from the 4th person.
+* `field 7 /birthday:"1999-02-10"` — Creates or updates the `birthday` custom field on the 7th person.
+* `field 2 /assetClass: Gold /socialMedia` - Sets the field `assetClass`, and removes the field `socialMedia` on the 2nd person in one command.
 
 ### Locating persons by name: `find`
 
@@ -476,9 +488,10 @@ Action     | Format, Examples
 **List**   | `list`
 **Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag`
 **Tag**    | `tag INDEX TAG+` <br> e.g., `tag 2 friend cool`
-**Remove tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
+**Remove Tag** | `untag INDEX t/TAG` <br> e.g., `untag 2 t/friends`
 **View/Edit Info** | `info <index>` <br> e.g., `info 2`
-**Field**  | `field INDEX /KEY:VALUE` <br> e.g., `field 2 /company:"BlackRock"`
+**Field**  | `field <index> /<key[:value]>+` <br> e.g., `field 2 /company:BlackRock`
+**Remove Field**  | `field INDEX /KEY` <br> e.g., `field 2 /company`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **History** | `history`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
