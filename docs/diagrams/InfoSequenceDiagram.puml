@@ -1,0 +1,40 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+actor User
+participant ":UI" as UI UI_COLOR
+participant ":Logic" as Logic LOGIC_COLOR
+participant "info:InfoCommand" as InfoCommand LOGIC_COLOR
+participant "uiManager:UiManager" as UiManager UI_COLOR
+participant "dialog:Dialog" as Dialog UI_COLOR
+
+User -> UI : info 1
+activate UI
+UI -> Logic : execute("info 1")
+activate Logic
+Logic -> InfoCommand : extract("info 1")
+activate InfoCommand
+InfoCommand --> Logic : info
+deactivate InfoCommand
+Logic -> InfoCommand : execute(model)
+activate InfoCommand
+InfoCommand -> UiManager : showInfoEditor(person, index)
+activate UiManager
+UiManager -> Dialog : create
+activate Dialog
+Dialog --> UiManager
+deactivate Dialog
+UiManager -> Dialog : showAndWait()
+activate Dialog
+Dialog --> User : shows editor
+deactivate Dialog
+UiManager --> InfoCommand
+deactivate UiManager
+InfoCommand --> Logic : result
+deactivate InfoCommand
+Logic --> UI : result
+deactivate Logic
+UI --> User : "Opened info editor..."
+deactivate UI
+@enduml
