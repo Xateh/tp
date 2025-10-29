@@ -27,14 +27,15 @@ public class Person {
     private final Address address;
     private final Set<Tag> tags = new HashSet<>();
     private final Map<String, String> customFields;
+    private final Set<Link> links = new HashSet<>();
     private final Info info;
 
     /**
      * Full constructor including custom fields.
      */
     public Person(Name name, Phone phone, Email email, Address address,
-                  Set<Tag> tags, Map<String, String> customFields, Info info) {
-        requireAllNonNull(name, phone, email, address, tags, customFields, info);
+                  Set<Tag> tags, Map<String, String> customFields, Set<Link> links, Info info) {
+        requireAllNonNull(name, phone, email, address, tags, customFields, links, info);
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -42,6 +43,7 @@ public class Person {
         this.tags.addAll(tags);
         // Preserve order and make defensive copy
         this.customFields = new LinkedHashMap<>(customFields);
+        this.links.addAll(links);
         this.info = info;
     }
 
@@ -84,11 +86,18 @@ public class Person {
     }
 
     /**
+     * Returns all links associated to the person;
+     */
+    public Set<Link> getLinks() {
+        return Collections.unmodifiableSet(links);
+    }
+
+    /**
      * Returns a new {@code Person} identical to this, but with the provided custom fields.
      * The provided map is copied defensively and iteration order is preserved.
      */
     public Person withCustomFields(Map<String, String> fields) {
-        return new Person(name, phone, email, address, tags, new LinkedHashMap<>(fields), info);
+        return new Person(name, phone, email, address, tags, new LinkedHashMap<>(fields), links, info);
     }
 
     /**
@@ -126,13 +135,14 @@ public class Person {
                 && address.equals(otherPerson.address)
                 && tags.equals(otherPerson.tags)
                 && customFields.equals(otherPerson.customFields)
+                && links.equals(otherPerson.links)
                 && info.equals(otherPerson.info);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags, customFields, info);
+        return Objects.hash(name, phone, email, address, tags, customFields, links, info);
     }
 
     @Override

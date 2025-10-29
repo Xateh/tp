@@ -80,7 +80,6 @@ public class EditCommand extends Command {
      */
     private static Person createEditedPerson(Person personToEdit, EditPersonDescriptor editPersonDescriptor) {
         assert personToEdit != null;
-
         PersonBuilder personBuilder = new PersonBuilder(personToEdit);
 
         editPersonDescriptor.getName().ifPresent(personBuilder::withName);

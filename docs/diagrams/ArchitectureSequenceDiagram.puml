@@ -36,12 +36,12 @@ deactivate storage
 storage --[STORAGE_COLOR]> logic
 deactivate storage
 
-note over logic,storage: At shutdown, Logic requests a session snapshot only if the
-note over logic,storage: session attributes to be persisted (address book, search
-note over logic,storage: keywords, GUI settings) differ from the last persisted
-note over logic,storage: snapshot. The timestamp (`savedAt`) is ignored for this
-note over logic,storage: comparison; command-result-only changes do not make the
-note over logic,storage: session dirty.
+note over logic,storage
+At shutdown, Logic requests a session snapshot only if the session attributes to be
+persisted (address book, search keywords, GUI settings) differ from the last
+persisted snapshot. The timestamp (`savedAt`) is ignored for this comparison;
+command-result-only changes do not make the session dirty.
+end note
 logic -[LOGIC_COLOR]> storage : saveSession(sessionData)
 activate storage STORAGE_COLOR
 storage -[STORAGE_COLOR]> storage : Save session file

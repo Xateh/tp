@@ -31,10 +31,26 @@ public final class FindCommandExtractor {
      * @throws ValidationException When the command parameters fail to validate.
      */
     public static FindCommand extract(BareCommand bareCommand) throws ValidationException {
-        // extract keywords from parameters
+        // extract keywords and validate at least one provided
         List<String> keywords = Validation.validateVariableParametersWithMinimumMultiplicity(
                         bareCommand, 0, 1, ParameterKind.NORMAL)
                 .stream().map(BareCommand.Parameter::getValue).toList();
+
+        assert !keywords.isEmpty();
+
+        for (String kw : keywords) {
+            String trimmed = (kw == null) ? "" : kw.trim();
+            if (trimmed.isEmpty()) {
+                throw new ValidationException("Please provide at least one non-empty keyword.");
+            }
+
+            // Disallow a single *multi-word* token for /name (e.g., "alex yeoh")
+            // Users should pass separate keywords instead: find Alex Yeoh /name
+            if (trimmed.contains(" ")) {
+                throw new ValidationException(
+                        "Word parameter should be a single word");
+            }
+        }
 
         // Determine which fields to search using options provided
         boolean optName = bareCommand.hasOption("name");
@@ -42,7 +58,9 @@ public final class FindCommandExtractor {
         boolean optEmail = bareCommand.hasOption("email");
         boolean optAddress = bareCommand.hasOption("address");
         boolean optTag = bareCommand.hasOption("tag");
-        List<String> keysToRemove = List.of("name", "phone", "email", "address", "tags", "tag");
+        boolean optLinker = bareCommand.hasOption("from"); // from specifies finding all linkers
+        boolean optLinkee = bareCommand.hasOption("to"); // to specifies finding all linkees
+        List<String> keysToRemove = List.of("name", "phone", "email", "address", "tag", "from", "to");
         Map<String, List<String>> map = bareCommand.getAllOptions();
         Set<String> customKeys = map.keySet().stream()
                 .map(k -> k != null ? k.trim().toLowerCase() : "")
@@ -50,7 +68,7 @@ public final class FindCommandExtractor {
                 .collect(Collectors.toSet());
 
         // check if user specified any options
-        boolean anyFlag = optName || optPhone || optEmail || optAddress || optTag;
+        boolean anyFlag = optName || optPhone || optEmail || optAddress || optTag || optLinker || optLinkee;
 
         FieldContainsKeywordsPredicate predicate;
         if (anyFlag || !customKeys.isEmpty()) {
@@ -62,10 +80,12 @@ public final class FindCommandExtractor {
                     optEmail,
                     optAddress,
                     optTag,
+                    optLinker,
+                    optLinkee,
                     customKeys
             );
         } else {
-            // No options provided, default to search all non custom fields
+            // No options provided, default to search all non-custom fields
             predicate = new FieldContainsKeywordsPredicate(keywords);
         }
 

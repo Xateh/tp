@@ -351,6 +351,30 @@
     -fx-font-size: 11px;
 }
 
+#links {
+    -fx-hgap: 7;
+    -fx-vgap: 3;
+}
+
+#links .label {
+    -fx-text-fill: white;
+    -fx-background-color: #5a9e6e; /* pick a distinct but cohesive color */
+    -fx-padding: 1 3 1 3;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+    -fx-font-size: 11px;
+}
+
+/* If you prefer a class instead of id-based styling, keep this too: */
+.link-label {
+    -fx-text-fill: white;
+    -fx-background-color: #5a9e6e;
+    -fx-padding: 1 3 1 3;
+    -fx-border-radius: 2;
+    -fx-background-radius: 2;
+    -fx-font-size: 11px;
+}
+
 /* Chip style for custom-field values (same as #tags .label) */
 .custom-field-pill {
     -fx-text-fill: white;
