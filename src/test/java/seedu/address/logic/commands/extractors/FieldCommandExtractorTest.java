@@ -40,6 +40,22 @@ class FieldCommandExtractorTest {
     }
 
     @Test
+    void extract_trimsKeysAndValues_success() throws Exception {
+        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
+        builder.setImperative("field");
+        builder.addParameter("1");
+        builder.setOption(" company ", " Goldman Sachs ");
+        BareCommand bare = builder.build();
+
+        FieldCommand command = FieldCommandExtractor.extract(bare);
+
+        String feedback = command.execute(model).getFeedbackToUser();
+        assertTrue(feedback.contains("company:Goldman Sachs"));
+        Person edited = model.getFilteredPersonList().get(0);
+        assertEquals("Goldman Sachs", edited.getCustomFields().get("company"));
+    }
+
+    @Test
     void extract_invalidIndex_throwsValidationException() throws Exception {
         BareCommand bare = BareCommand.parse("field x /k:v");
         ValidationException ex = assertThrows(ValidationException.class, () ->
@@ -56,20 +72,37 @@ class FieldCommandExtractorTest {
     }
 
     @Test
-    void extract_blankKey_throwsValidationException() {
-        BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
-        builder.setImperative("field");
-        builder.addParameter("1");
-        builder.setOption("   ", "value");
-        BareCommand bare = builder.build();
+    void extract_disallowedLowercaseKey_throwsValidationException() throws Exception {
+        BareCommand bare = BareCommand.parse("field 1 /name:value");
 
         ValidationException ex = assertThrows(ValidationException.class, () ->
                 FieldCommandExtractor.extract(bare));
-        assertEquals(FieldCommand.MESSAGE_NAME_CANNOT_BE_BLANK, ex.getMessage());
+        assertEquals(String.format(FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME, "name"), ex.getMessage());
     }
 
     @Test
-    void extract_blankValue_throwsValidationException() {
+    void extract_disallowedMixedCaseKey_throwsValidationException() throws Exception {
+        BareCommand bare = BareCommand.parse("field 1 /Email:value");
+
+        ValidationException ex = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(bare));
+        assertEquals(String.format(FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME, "Email"), ex.getMessage());
+    }
+
+    @Test
+    void extract_findKey_success() throws Exception {
+        BareCommand bare = BareCommand.parse("field 1 /Find:value");
+
+        FieldCommand command = FieldCommandExtractor.extract(bare);
+
+        String feedback = command.execute(model).getFeedbackToUser();
+        assertTrue(feedback.contains("Find:value"));
+        Person edited = model.getFilteredPersonList().get(0);
+        assertEquals("value", edited.getCustomFields().get("Find"));
+    }
+
+    @Test
+    void extract_blankValue_throwsValidationException() throws Exception {
         BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
         builder.setImperative("field");
         builder.addParameter("1");
@@ -82,20 +115,27 @@ class FieldCommandExtractorTest {
     }
 
     @Test
-    void extract_missingOptionValue_throwsValidationException() {
+    void extract_missingOptionValue_removesField() throws Exception {
+        Person withField = model.getFilteredPersonList().get(0)
+                .withCustomFields(java.util.Map.of("company", "Existing"));
+        model.setPerson(model.getFilteredPersonList().get(0), withField);
+
         BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
         builder.setImperative("field");
         builder.addParameter("1");
         builder.setOption("company");
         BareCommand bare = builder.build();
 
-        ValidationException ex = assertThrows(ValidationException.class, () ->
-                FieldCommandExtractor.extract(bare));
-        assertEquals(FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK, ex.getMessage());
+        FieldCommand command = FieldCommandExtractor.extract(bare);
+
+        String feedback = command.execute(model).getFeedbackToUser();
+        assertTrue(feedback.contains("Removed field(s): company"));
+        Person edited = model.getFilteredPersonList().get(0);
+        assertTrue(edited.getCustomFields().isEmpty());
     }
 
     @Test
-    void extract_nullOptionValue_throwsValidationException() {
+    void extract_nullOptionValue_throwsValidationException() throws Exception {
         BareCommand.BareCommandBuilder builder = new BareCommand.BareCommandBuilder();
         builder.setImperative("field");
         builder.addParameter("1");

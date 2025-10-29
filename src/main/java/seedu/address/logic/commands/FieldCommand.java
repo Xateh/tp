@@ -2,15 +2,19 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import seedu.address.commons.core.index.Index;
+import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.builder.PersonBuilder;
 
 /**
  * Adds or updates custom key→value fields on a person.
@@ -20,39 +24,30 @@ public class FieldCommand extends Command {
 
     public static final String COMMAND_WORD = "field";
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Adds or updates custom fields for the person identified by the index number.\n"
-            + "Parameters: INDEX (must be a positive integer) /KEY:VALUE...\n"
-            + "Example: " + COMMAND_WORD + " 1 /company:\"Goldman Sachs\"";
-    public static final String MESSAGE_VALUE_CANNOT_BE_BLANK = "Field value cannot be blank.";
+            + ": Adds, updates, or removes custom fields for the person identified by the index number.\n"
+            + "Parameters: INDEX (must be a positive integer) /KEY[:VALUE]...\n"
+            + "Example: " + COMMAND_WORD + " 1 /company:\"Goldman Sachs\" /nickname";
     public static final String MESSAGE_NAME_CANNOT_BE_BLANK = "Field name cannot be blank.";
+    public static final String MESSAGE_DISALLOWED_FIELD_NAME =
+            "Field name '%s' is reserved and cannot be used.";
     public static final String MESSAGE_AT_LEAST_ONE_PAIR =
-            "Provide at least one /key:value pair. Usage: field <index> /key:value ...";
+            "Provide at least one /key or /key:value option. Usage: field <index> /key[:value] ...";
+    public static final String MESSAGE_VALUE_CANNOT_BE_BLANK = "Field value cannot be blank.";
     private final Index index;
-    private final Map<String, String> pairs;
+    private final Map<String, String> updates;
+    private final List<String> removals;
 
     /**
      * Creates a FieldCommand.
      */
-    public FieldCommand(Index index, Map<String, String> pairs) {
+    public FieldCommand(Index index, Map<String, String> updates, List<String> removals) {
         requireNonNull(index);
-        requireNonNull(pairs);
-        if (pairs.isEmpty()) {
-            throw new IllegalArgumentException(MESSAGE_AT_LEAST_ONE_PAIR);
-        }
-        Map<String, String> sanitized = new LinkedHashMap<>();
-        for (Map.Entry<String, String> entry : pairs.entrySet()) {
-            String key = normalize(entry.getKey());
-            String value = normalize(entry.getValue());
-            if (key.isEmpty()) {
-                throw new IllegalArgumentException(MESSAGE_NAME_CANNOT_BE_BLANK);
-            }
-            if (value.isEmpty()) {
-                throw new IllegalArgumentException(MESSAGE_VALUE_CANNOT_BE_BLANK);
-            }
-            sanitized.put(key, value);
-        }
+        requireNonNull(updates);
+        requireNonNull(removals);
+
         this.index = index;
-        this.pairs = sanitized;
+        this.updates = new LinkedHashMap<>(updates);
+        this.removals = List.copyOf(removals);
     }
 
     /**
@@ -68,32 +63,65 @@ public class FieldCommand extends Command {
         }
         Person target = list.get(zero);
 
-        // Merge strategy: overwrite existing keys with new values, keep others.
-        Map<String, String> merged = new LinkedHashMap<>(target.getCustomFields());
-        for (Map.Entry<String, String> e : pairs.entrySet()) {
-            merged.put(e.getKey(), e.getValue());
-        }
+        Map<String, String> mergedFields = new LinkedHashMap<>(target.getCustomFields());
+        List<String> successfulRemovals = applyRemovals(mergedFields);
+        applyChanges(mergedFields);
 
-        Person edited = target.withCustomFields(merged);
+        Person edited = new PersonBuilder(target)
+                .withCustomFields(mergedFields)
+                .build();
         model.setPerson(target, edited);
-        // persistence handled by LogicManager or caller
 
-        // Build feedback message
-        StringBuilder sb = new StringBuilder("Added/updated field(s): ");
-        boolean first = true;
-        for (Map.Entry<String, String> e : pairs.entrySet()) {
-            if (!first) {
-                sb.append(", ");
-            }
-            first = false;
-            sb.append(e.getKey()).append(":").append(e.getValue());
-        }
-        sb.append(" for ").append(edited.getName().fullName);
-        return new CommandResult(sb.toString());
+        String feedback = buildFeedbackMessage(edited, successfulRemovals);
+        return new CommandResult(feedback);
     }
 
-    private static String normalize(String input) {
-        return input == null ? "" : input.trim();
+    private List<String> applyRemovals(Map<String, String> fields) {
+        List<String> successfulRemovals = new ArrayList<>();
+        for (String removal : removals) {
+            if (fields.remove(removal) != null) {
+                successfulRemovals.add(removal);
+            }
+        }
+        return successfulRemovals;
+    }
+
+    private void applyChanges(Map<String, String> fields) {
+        fields.putAll(updates);
+    }
+
+    private String buildFeedbackMessage(Person edited, List<String> successfulRemovals) {
+        StringBuilder sb = new StringBuilder();
+
+        if (!updates.isEmpty()) {
+            String joinedUpdates = updates.entrySet().stream()
+                    .map(e -> e.getKey() + ":" + e.getValue())
+                    .collect(Collectors.joining(", "));
+            sb.append("Added/updated field(s): ").append(joinedUpdates);
+        }
+
+        if (!successfulRemovals.isEmpty()) {
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            String joinedRemovals = String.join(", ", successfulRemovals);
+            sb.append("Removed field(s): ").append(joinedRemovals);
+        }
+
+        if (sb.length() == 0) {
+            sb.append("No field changes applied");
+        }
+
+        sb.append(" for ").append(edited.getName().fullName);
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("index", index)
+                .add("updates", updates)
+                .add("removals", removals)
+                .toString();
     }
 }
-
