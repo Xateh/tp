@@ -57,6 +57,7 @@ public class PersonCard extends UiPart<Region> {
     private Label email;
     @FXML
     private FlowPane tags;
+    @FXML private FlowPane links;
 
     /**
      * Creates a {@code PersonCode} with the given {@code Person} and index to display.
@@ -72,6 +73,32 @@ public class PersonCard extends UiPart<Region> {
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
                 .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
+
+        links.getChildren().clear();
+        person.getLinks().stream()
+                .sorted((a, b) -> {
+                    int byName = a.getLinkName().compareToIgnoreCase(b.getLinkName());
+                    if (byName != 0) {
+                        return byName;
+                    }
+                    return a.getLinkee().getName().fullName
+                            .compareToIgnoreCase(b.getLinkee().getName().fullName);
+                })
+                .forEach(link -> {
+                    boolean isLinker = link.getLinker().isSamePerson(person);
+                    String otherName = isLinker
+                            ? link.getLinkee().getName().fullName
+                            : link.getLinker().getName().fullName;
+                    String arrow = isLinker ? "→" : "←";
+                    Label pill = new Label(link.getLinkName() + " " + arrow + " " + otherName);
+                    pill.getStyleClass().add("link-label");
+                    links.getChildren().add(pill);
+                });
+
+
+        if (links.getChildren().isEmpty()) {
+            hide(links);
+        }
 
         // ----- Custom fields (schema-less key:value) -----
         // We render arbitrary user-defined attributes as "key : value" rows.
