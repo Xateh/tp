@@ -727,6 +727,8 @@ added.
 
 **Performance**:
 - The system should respond within **1 second** for each command.
+- App cold start to first command within **3 second**.
+- App shutdown should not take more than **5 second**.
 
 **Portability**:
 - The product should work on all machines (**Windows, Linux, Mac**).
@@ -739,7 +741,7 @@ added.
 - The system should remain usable with up to **1000 contacts**, with command execution time not exceeding **3 seconds**.
 
 **Usability**:
-- Error messages must pinpoint exact error and suggest fixes
+- Error messages must pinpoint exact error and suggest fixes.
 
 **Speed**:
 - A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
