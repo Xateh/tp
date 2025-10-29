@@ -1,12 +1,10 @@
 @startuml
 actor System
-participant "Command" as Cmd
+participant "BareCommand" as Cmd <<class>>
 participant "CommandLexer" as Lexer
-participant "TokenisedCommand" as TokCmd
 participant "CommandParser" as Parser
-participant "AstNode.Command" as AST
 participant "CommandExtractor" as Extractor
-participant "CommandBuilder" as Builder
+participant "BareCommandBuilder" as Builder
 
 System -> Cmd: parse(commandString)
 activate Cmd
@@ -26,20 +24,7 @@ end note
 Lexer -> Lexer: lex()
 activate Lexer
 
-loop while not at end
-    Lexer -> Lexer: scanToken()
-
-    activate Lexer
-
-    deactivate Lexer
-end
-
-Lexer -> Lexer: addToken(TERMINAL)
-deactivate Lexer
-
-create TokCmd
-Lexer -> TokCmd: new TokenisedCommand(tokens)
-Lexer --> Cmd: return TokenisedCommand
+Lexer -> Lexer: return tokenisedCommand
 deactivate Lexer
 
 ' Parsing Phase
@@ -55,13 +40,10 @@ end note
 Parser -> Parser: parseCommand()
 activate Parser
 
-create AST
-Parser -> AST: new Command(imperative, params, options)
-
-Parser --> Parser: return AstNode.Command
+Parser --> Parser: return astNodeCommand
 deactivate Parser
 
-Parser --> Cmd: return AstNode.Command
+Parser --> Cmd: return astNodeCommand
 deactivate Parser
 
 ' Extraction Phase
@@ -75,28 +57,26 @@ note right of Extractor
 end note
 
 create Builder
-Extractor -> Builder: new CommandBuilder()
+Extractor -> Builder: new BareCommandBuilder()
 
 note right of Extractor
     multiple calls to
-    CommandBuilder are made
+    BareCommandBuilder are made
     to set values while traversing
     the AST
 end note
 
-deactivate AST
-
 Extractor -> Builder: build()
 activate Builder
-create "Command (result)" as Result
-Builder -> Result: new Command(imperative, params, options)
-Builder --> Extractor: return Command
+create "BareCommand" as Result
+Builder -> Result: new BareCommand(...)
+Builder --> Extractor: return bareCommand
 deactivate Builder
 
-Extractor --> Cmd: return Command
+Extractor --> Cmd: return bareCommand
 deactivate Extractor
 
-Cmd --> System: return Command
+Cmd --> System: return bareCommand
 deactivate Cmd
 
 @enduml
