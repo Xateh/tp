@@ -444,6 +444,34 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_validLinkCommand_success() throws Exception {
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_BOB);
+        // Execute a valid link
+        CommandResult result = logic.execute("link 1 mentor 2");
+        String feedback = result.getFeedbackToUser();
+        assertTrue(feedback.contains("mentor"));
+        assertTrue(feedback.contains("is now"));
+        assertTrue(feedback.contains("Amy"));
+        assertTrue(feedback.contains("Bob"));
+    }
+
+    @Test
+    public void execute_invalidLinkIndexes_throwsCommandException() {
+        // No persons added yet
+        assertThrows(CommandException.class, () -> logic.execute("link 1 friend 2"));
+    }
+
+    @Test
+    public void execute_selfLink_throwsValidationException() {
+        // Add one person
+        assertThrows(Exception.class, () -> {
+            logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
+            logic.execute("link 1 buddy 1");
+        });
+    }
+
+    @Test
     public void getModel_validLogicManager_returnsSameModel() {
         // Test the new getModel() method
         Model retrievedModel = logic.getModel();
@@ -578,4 +606,221 @@ public class LogicManagerTest {
         Model retrievedModel = logic.getModel();
         assertEquals(model, retrievedModel);
     }
+
+    // ===================== Test doubles & extra coverage tests =====================
+
+    /**
+     * Recording storage to verify whether saveAddressBook() is invoked.
+     */
+    private static class RecordingStorageManager extends StorageManager {
+        private boolean saveCalled = false;
+
+        RecordingStorageManager(JsonAddressBookStorage ab,
+                                JsonUserPrefsStorage prefs,
+                                JsonCommandHistoryStorage hist,
+                                JsonSessionStorage sess) {
+            super(ab, prefs, hist, sess);
+        }
+
+        @Override
+        public void saveAddressBook(seedu.address.model.ReadOnlyAddressBook addressBook) throws IOException {
+            saveCalled = true; // record call
+            super.saveAddressBook(addressBook);
+        }
+
+        public boolean getSaveCalled() {
+            return saveCalled;
+        }
+    }
+
+    /**
+     * Storage that always throws on saveAddressBook() to exercise LogicManager's try/catch path.
+     */
+    private static class FailingStorageManager extends StorageManager {
+        private final IOException toThrow;
+
+        FailingStorageManager(JsonAddressBookStorage ab,
+                              JsonUserPrefsStorage prefs,
+                              JsonCommandHistoryStorage hist,
+                              JsonSessionStorage sess,
+                              IOException toThrow) {
+            super(ab, prefs, hist, sess);
+            this.toThrow = toThrow;
+        }
+
+        @Override
+        public void saveAddressBook(seedu.address.model.ReadOnlyAddressBook addressBook) throws IOException {
+            throw toThrow;
+        }
+    }
+
+    // ---------------------- Save NOT called on non-mutating command ----------------------
+
+    @Test
+    public void execute_nonMutatingCommand_doesNotSaveAddressBook() throws Exception {
+        Path abPath = temporaryFolder.resolve("noSave_ab.json");
+        Path prefsPath = temporaryFolder.resolve("noSave_prefs.json");
+        Path histPath = temporaryFolder.resolve("noSave_hist.json");
+        Path sessDir = temporaryFolder.resolve("noSave_sess");
+
+        RecordingStorageManager storage = new RecordingStorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(histPath),
+                new JsonSessionStorage(sessDir)
+        );
+
+        logic = new LogicManager(model, storage);
+
+        // List does not mutate model -> saveAddressBook must not be called
+        logic.execute(ListCommand.COMMAND_WORD);
+        assertTrue(!storage.saveCalled, "saveAddressBook() should NOT be called for non-mutating commands");
+    }
+
+    // ---------------------- Save IS called on mutating ADD command ----------------------
+
+    @Test
+    public void execute_mutatingAddCommand_savesAddressBook() throws Exception {
+        Path abPath = temporaryFolder.resolve("saveAdd_ab.json");
+        Path prefsPath = temporaryFolder.resolve("saveAdd_prefs.json");
+        Path histPath = temporaryFolder.resolve("saveAdd_hist.json");
+        Path sessDir = temporaryFolder.resolve("saveAdd_sess");
+
+        RecordingStorageManager storage = new RecordingStorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(histPath),
+                new JsonSessionStorage(sessDir)
+        );
+
+        logic = new LogicManager(model, storage);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
+
+        assertTrue(storage.saveCalled, "saveAddressBook() should be called for mutating commands");
+    }
+
+    // ---------------------- Save IS called on mutating LINK command ----------------------
+
+    @Test
+    public void execute_mutatingLinkCommand_savesAddressBook() throws Exception {
+        Path abPath = temporaryFolder.resolve("saveLink_ab.json");
+        Path prefsPath = temporaryFolder.resolve("saveLink_prefs.json");
+        Path histPath = temporaryFolder.resolve("saveLink_hist.json");
+        Path sessDir = temporaryFolder.resolve("saveLink_sess");
+
+        RecordingStorageManager storage = new RecordingStorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(histPath),
+                new JsonSessionStorage(sessDir)
+        );
+
+        logic = new LogicManager(model, storage);
+
+        // Add two persons then link
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_BOB);
+        storage.saveCalled = false; // reset flag before the link
+        logic.execute("link 1 mentor 2");
+
+        assertTrue(storage.saveCalled, "saveAddressBook() should be called after a successful link command");
+    }
+
+    // ---------------------- Persistence round-trip after LINK ----------------------
+
+    @Test
+    public void execute_linkCommand_matchesModelAfterReload() throws Exception {
+        Path abPath = temporaryFolder.resolve("persistLink_ab.json");
+        Path prefsPath = temporaryFolder.resolve("persistLink_prefs.json");
+        Path histPath = temporaryFolder.resolve("persistLink_hist.json");
+        Path sessDir = temporaryFolder.resolve("persistLink_sess");
+
+        JsonAddressBookStorage ab = new JsonAddressBookStorage(abPath);
+        StorageManager storage = new StorageManager(
+                ab,
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(histPath),
+                new JsonSessionStorage(sessDir)
+        );
+
+        logic = new LogicManager(model, storage);
+
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
+        logic.execute(SAMPLE_ADD_COMMAND_INPUT_BOB);
+        logic.execute("link 1 mentor 2");
+
+        // Reload from disk and compare
+        seedu.address.model.ReadOnlyAddressBook reloaded = ab.readAddressBook().orElseThrow();
+        assertEquals(new seedu.address.model.AddressBook(reloaded), model.getAddressBook(),
+                "AddressBook on disk should equal in-memory state after link");
+    }
+
+    // ---------------------- Save failure is wrapped into CommandException ----------------------
+
+    @Test
+    public void execute_whenSaveFails_throwsCommandExceptionWithPrefix() throws Exception {
+        Path abPath = temporaryFolder.resolve("failSave_ab.json");
+        Path prefsPath = temporaryFolder.resolve("failSave_prefs.json");
+        Path histPath = temporaryFolder.resolve("failSave_hist.json");
+        Path sessDir = temporaryFolder.resolve("failSave_sess");
+
+        IOException boom = new IOException("simulated IO crash");
+        FailingStorageManager storage = new FailingStorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(histPath),
+                new JsonSessionStorage(sessDir),
+                boom
+        );
+
+        logic = new LogicManager(model, storage);
+
+        assertThrows(CommandException.class, () -> logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY));
+    }
+
+
+    // ---------------------- No-save on parse error ----------------------
+
+    @Test
+    public void execute_parseError_doesNotSaveAddressBook() {
+        Path abPath = temporaryFolder.resolve("parseNoSave_ab.json");
+        Path prefsPath = temporaryFolder.resolve("parseNoSave_prefs.json");
+        Path histPath = temporaryFolder.resolve("parseNoSave_hist.json");
+        Path sessDir = temporaryFolder.resolve("parseNoSave_sess");
+
+        RecordingStorageManager storage = new RecordingStorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(histPath),
+                new JsonSessionStorage(sessDir)
+        );
+
+        logic = new LogicManager(model, storage);
+
+        assertThrows(AssemblyException.class, () -> logic.execute("uicfhmowqewca"));
+        assertTrue(!storage.saveCalled, "saveAddressBook() should NOT be called when parsing fails");
+    }
+
+    // ---------------------- No-save on command error ----------------------
+
+    @Test
+    public void execute_commandError_doesNotSaveAddressBook() {
+        Path abPath = temporaryFolder.resolve("cmdNoSave_ab.json");
+        Path prefsPath = temporaryFolder.resolve("cmdNoSave_prefs.json");
+        Path histPath = temporaryFolder.resolve("cmdNoSave_hist.json");
+        Path sessDir = temporaryFolder.resolve("cmdNoSave_sess");
+
+        RecordingStorageManager storage = new RecordingStorageManager(
+                new JsonAddressBookStorage(abPath),
+                new JsonUserPrefsStorage(prefsPath),
+                new JsonCommandHistoryStorage(histPath),
+                new JsonSessionStorage(sessDir)
+        );
+
+        logic = new LogicManager(model, storage);
+
+        assertThrows(CommandException.class, () -> logic.execute("delete 9999"));
+        assertTrue(!storage.saveCalled, "saveAddressBook() should NOT be called when command execution fails");
+    }
 }
+

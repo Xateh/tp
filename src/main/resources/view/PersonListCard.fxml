@@ -28,6 +28,7 @@
         <Label fx:id="name" text="\$first" styleClass="cell_big_label" />
       </HBox>
       <FlowPane fx:id="tags" />
+      <FlowPane fx:id="links" />
       <!-- Custom fields (generic key:value rows) -->
       <VBox fx:id="customFieldsBox" spacing="3">
         <VBox.margin>
