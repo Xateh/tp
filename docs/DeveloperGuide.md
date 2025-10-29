@@ -727,6 +727,7 @@ added.
 **Performance**:
 - The system should respond within **1 second** for each command.
 - App cold start to first command within **2 second**.
+- App shutdown should not take more than **1 second**.
 
 **Portability**:
 - The product should work on all machines (**Windows, Linux, Mac**).
@@ -737,7 +738,6 @@ added.
 
 **Scalability**:
 - The system should remain usable with up to **1000 contacts**, with command execution time not exceeding **3 seconds**.
-- The system should be able to find up to **20 keywords**, with command execution time not exceeding **3 seconds**.
 
 **Usability**:
 - Error messages must pinpoint exact error and suggest fixes.
