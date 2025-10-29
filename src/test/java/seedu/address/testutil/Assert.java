@@ -14,9 +14,12 @@ public class Assert {
      * with our custom {@link #assertThrows(Class, String, Executable)} method.
      * To standardize API calls in this project, users should use this method instead of
      * {@link Assertions#assertThrows(Class, Executable)}.
+     *
+     * @return
      */
-    public static void assertThrows(Class<? extends Throwable> expectedType, Executable executable) {
-        Assertions.assertThrows(expectedType, executable);
+    public static IllegalArgumentException assertThrows(Class<? extends Throwable> expectedType, Executable exec) {
+        Assertions.assertThrows(expectedType, exec);
+        return null;
     }
 
     /**
