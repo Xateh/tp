@@ -280,6 +280,7 @@ Format: `field <index> /<key[:value]>+`
 
 * `/<key[:value]>` `(string)` `+` – At least one custom field option must be supplied.
   * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
+  * Custom field `key` is **case sensitive**; `key` is not equivalent to `Key`.
   * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
   * Omitting `value` (e.g. `/nickname`) **removes** the custom field identified by `key` if it exists.
   * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
