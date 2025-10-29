@@ -19,6 +19,7 @@ Class Email
 Class Name
 Class Phone
 Class Tag
+Class Info
 
 Class I #FFFFFF
 }
@@ -45,6 +46,7 @@ Person *--> Phone
 Person *--> Email
 Person *--> Address
 Person *--> "*" Tag
+Person *--> Info
 
 Person -[hidden]up--> I
 UniquePersonList -[hidden]right-> I
@@ -52,6 +54,7 @@ UniquePersonList -[hidden]right-> I
 Name -[hidden]right-> Phone
 Phone -[hidden]right-> Address
 Address -[hidden]right-> Email
+Email -[hidden]right-> Info
 
 ModelManager --> "~* filtered" Person
 @enduml
