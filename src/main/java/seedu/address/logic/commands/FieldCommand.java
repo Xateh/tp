@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import seedu.address.commons.core.index.Index;
+import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -31,6 +32,7 @@ public class FieldCommand extends Command {
             "Field name '%s' is reserved and cannot be used.";
     public static final String MESSAGE_AT_LEAST_ONE_PAIR =
             "Provide at least one /key or /key:value option. Usage: field <index> /key[:value] ...";
+    public static final String MESSAGE_VALUE_CANNOT_BE_BLANK = "Field value cannot be blank.";
     private final Index index;
     private final Map<String, String> updates;
     private final List<String> removals;
@@ -63,7 +65,7 @@ public class FieldCommand extends Command {
 
         Map<String, String> mergedFields = new LinkedHashMap<>(target.getCustomFields());
         List<String> successfulRemovals = applyRemovals(mergedFields);
-        applyUpdates(mergedFields);
+        applyChanges(mergedFields);
 
         Person edited = new PersonBuilder(target)
                 .withCustomFields(mergedFields)
@@ -84,7 +86,7 @@ public class FieldCommand extends Command {
         return successfulRemovals;
     }
 
-    private void applyUpdates(Map<String, String> fields) {
+    private void applyChanges(Map<String, String> fields) {
         fields.putAll(updates);
     }
 
@@ -112,5 +114,14 @@ public class FieldCommand extends Command {
 
         sb.append(" for ").append(edited.getName().fullName);
         return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .add("index", index)
+                .add("updates", updates)
+                .add("removals", removals)
+                .toString();
     }
 }

@@ -47,20 +47,22 @@ public final class FieldCommandExtractor {
                     FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME);
 
             Optional<List<String>> allValues = bareCommand.getOptionAllValues(rawKey);
-            Optional<String> optionValue = Optional.empty();
             if (allValues.isPresent()) {
                 List<String> values = allValues.get();
-                if (!values.isEmpty() && values.get(0) != null) {
-                    optionValue = bareCommand.getOptionValue(rawKey);
+                if (!values.isEmpty() && values.get(0) == null) {
+                    throw new ValidationException(FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK);
                 }
             }
 
+            Optional<String> optionValue = bareCommand.getOptionValue(rawKey);
+
             if (optionValue.isPresent()) {
                 String value = normalize(optionValue.get());
-                if (!value.isEmpty()) {
-                    updates.put(key, value);
-                    continue;
+                if (value.isEmpty()) {
+                    throw new ValidationException(FieldCommand.MESSAGE_VALUE_CANNOT_BE_BLANK);
                 }
+                updates.put(key, value);
+                continue;
             }
 
             removals.add(key);
