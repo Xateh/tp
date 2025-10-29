@@ -31,7 +31,7 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
    * `list` : Lists all contacts.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
+   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the address book.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
@@ -404,7 +404,7 @@ Note about when a snapshot is created:
 
 Behavior for end users remains unchanged by the recent internal refactor. The app still:
 * Restores the most recent valid session snapshot at startup (filters, window layout, and address book snapshot).
-* Persists a session JSON file on normal exit under the `sessions/` subdirectory next to your main data file.
+* Persists a session JSON file on normal exit under the `data/sessions/` subdirectory next to your main data file.
 * Persists the command history to `data/commandhistory.json` on exit.
 
 If you observe unexpected behaviour around session restoration or command history persistence after updating to this version, please:
@@ -414,7 +414,7 @@ If you observe unexpected behaviour around session restoration or command histor
 
 ### Editing the data file
 
-AssetSphere data are saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+AssetSphere data are saved automatically as a JSON file under the `data/sessions/`. Advanced users are welcome to update data directly by editing that data file.
 
 Caution:
 
