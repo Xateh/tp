@@ -170,7 +170,6 @@ This sequence diagram traces the high-level flow of execution (omitting exceptio
 
 <puml src="diagrams/ModelClassDiagram.puml" width="450" />
 
-
 The `Model` component,
 
 * stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
@@ -293,7 +292,24 @@ To add a new command to the system,
 
 The system automatically handles routing and dispatch.
 
-Your extractor should accept a `BareCommand`, a facade for the output of the lexer and parser, documented in the [BareCommand API](BareCommand.md).
+**Designing Extractors**
+
+<box type="info" seamless>
+
+Relevant APIs:
+
+- [**`BareCommand` API**](https://github.com/AY2526S1-CS2103T-T13-2/tp/blob/master/src/main/java/seedu/address/logic/grammars/command/BareCommand.java)
+- [**`Validation` API**](https://github.com/AY2526S1-CS2103T-T13-2/tp/blob/master/src/main/java/seedu/address/logic/commands/extractors/Validation.java)
+
+</box>
+
+Extractors are where you extract parameters and options from a given input `BareCommand` and perform all your validation. `BareCommand` is a facade for the output of the lexer and parser, designed to insulate command implementors from concerns regarding the unified command grammar.
+
+To help command implementors, `Validation` is a utility class that exposes numerous common validation methods.
+
+Command implementors should look at these two classes when implementing their command extractors.
+
+When validation fails, command implementors should throw `ValidationException` with appropriate error messages from within each extractor detailing the exact reason for failing validation. All methods in `Validation` already throw automatically, but extractors may want to _enrich_ the error messages by catching and rethrowing.
 
 ### \[Proposed\] Undo/redo feature
 
