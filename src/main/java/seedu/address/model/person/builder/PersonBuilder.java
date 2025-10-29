@@ -7,6 +7,8 @@ import java.util.Set;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Info;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -28,14 +30,18 @@ public class PersonBuilder {
     // Optional fields with defaults
     private Set<Tag> tags;
     private Map<String, String> customFields;
+    private Set<Link> links;
+    private Info info;
 
     /**
-     * Creates a {@code PersonBuilder} with default empty fields. Tags and custom fields are initialized to empty
-     * collections.
+     * Creates a {@code PersonBuilder} with default empty fields. Tags, custom fields and links are initialized to empty
+     * collections. Info is initialized with the empty string.
      */
     public PersonBuilder() {
         tags = new HashSet<>();
         customFields = new LinkedHashMap<>();
+        links = new HashSet<>();
+        info = new Info("");
     }
 
     /**
@@ -50,43 +56,29 @@ public class PersonBuilder {
         // Create mutable copies of the collections
         tags = new HashSet<>(personToCopy.getTags());
         customFields = new LinkedHashMap<>(personToCopy.getCustomFields());
+        links = new HashSet<>(personToCopy.getLinks());
+        info = personToCopy.getInfo();
     }
 
-    /**
-     * Sets the {@code Name} of the {@code Person} we are building.
-     *
-     * @return This builder instance for fluent chaining.
-     */
+    /** Sets the {@code Name} of the {@code Person} we are building. */
     public PersonBuilder withName(Name name) {
         this.name = name;
         return this;
     }
 
-    /**
-     * Sets the {@code Phone} of the {@code Person} we are building.
-     *
-     * @return This builder instance for fluent chaining.
-     */
+    /** Sets the {@code Phone} of the {@code Person} we are building. */
     public PersonBuilder withPhone(Phone phone) {
         this.phone = phone;
         return this;
     }
 
-    /**
-     * Sets the {@code Email} of the {@code Person} we are building.
-     *
-     * @return This builder instance for fluent chaining.
-     */
+    /** Sets the {@code Email} of the {@code Person} we are building. */
     public PersonBuilder withEmail(Email email) {
         this.email = email;
         return this;
     }
 
-    /**
-     * Sets the {@code Address} of the {@code Person} we are building.
-     *
-     * @return This builder instance for fluent chaining.
-     */
+    /** Sets the {@code Address} of the {@code Person} we are building. */
     public PersonBuilder withAddress(Address address) {
         this.address = address;
         return this;
@@ -95,8 +87,6 @@ public class PersonBuilder {
     /**
      * Sets the {@code Set<Tag>} of the {@code Person} we are building. A new {@link HashSet} is created to ensure the
      * builder's state is independent of the provided set.
-     *
-     * @return This builder instance for fluent chaining.
      */
     public PersonBuilder withTags(Set<Tag> tags) {
         this.tags = new HashSet<>(tags);
@@ -107,11 +97,27 @@ public class PersonBuilder {
      * Sets the custom fields {@code Map<String, String>} of the {@code Person} we are building. A new
      * {@link LinkedHashMap} is created to preserve order and ensure the builder's state is independent of the provided
      * map.
-     *
-     * @return This builder instance for fluent chaining.
      */
     public PersonBuilder withCustomFields(Map<String, String> customFields) {
         this.customFields = new LinkedHashMap<>(customFields);
+        return this;
+    }
+
+    /**
+     * Sets the {@code Set<Link>} of the {@code Person} we are building. A new {@link HashSet} is created to ensure the
+     * builder's state is independent of the provided set.
+     */
+    public PersonBuilder withLinks(Set<Link> links) {
+        this.links = new HashSet<>(links);
+        return this;
+    }
+
+    /**
+     * Sets the info {@code Info} of the {@code Person} we are building.
+     * @return This builder instance for fluent chaining.
+     */
+    public PersonBuilder withInfo(Info info) {
+        this.info = info;
         return this;
     }
 
@@ -127,9 +133,7 @@ public class PersonBuilder {
                     "A required field (name, phone, email, or address) has not been set.");
         }
 
-        // The Person constructor handles the final null checks, but this
-        // builder enforces the IllegalStateException requirement.
-        // We use the full constructor to pass all fields.
-        return new Person(name, phone, email, address, tags, customFields);
+        // Use the full constructor that includes customFields and links.
+        return new Person(name, phone, email, address, tags, customFields, links, info);
     }
 }

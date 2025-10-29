@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
@@ -27,8 +26,8 @@ import seedu.address.storage.StorageManager;
 import seedu.address.testutil.PersonBuilder;
 
 /**
- * Covers the grammar shim in LogicManager: success and both save-error branches,
- * plus the fall-through path when grammar parsing fails.
+ * Covers the grammar shim in LogicManager: success and both save-error branches, plus the fall-through path when
+ * grammar parsing fails.
  */
 class LogicManagerFieldCommandTest {
 
@@ -101,26 +100,6 @@ class LogicManagerFieldCommandTest {
         assertTrue(ex.getCause() instanceof IOException);
     }
 
-    @Test
-    void executeMalformedFieldFallsThroughToLegacyParser() throws Exception {
-        Path abPath = temp.resolve("ab.json");
-        Path prefsPath = temp.resolve("prefs.json");
-        Path historyPath = temp.resolve("history.json");
-        Path sessionDir = temp.resolve("sessions");
-
-        StorageManager storage = new StorageManager(
-                new JsonAddressBookStorage(abPath),
-                new JsonUserPrefsStorage(prefsPath),
-                new JsonCommandHistoryStorage(historyPath),
-                new JsonSessionStorage(sessionDir));
-        Model model = baseModelWithOnePerson();
-        Logic logic = new LogicManager(model, storage);
-
-        // Break grammar (unclosed quote) so lexer throws and shim falls through to legacy parser,
-        // which then throws the project's ParseException (unknown command / invalid format).
-        assertThrows(ParseException.class, () -> logic.execute("field 1 /company:\"GS"));
-    }
-
     // ----- helpers -----
 
     private static Model baseModelWithOnePerson() {
@@ -130,8 +109,8 @@ class LogicManagerFieldCommandTest {
     }
 
     /**
-     * StorageManager that throws from both saveAddressBook overloads.
-     * Using subclass guarantees signatures match your project.
+     * StorageManager that throws from both saveAddressBook overloads. Using subclass guarantees signatures match your
+     * project.
      */
     private static final class SaveThrowingStorage extends StorageManager {
         private final IOException toThrow;

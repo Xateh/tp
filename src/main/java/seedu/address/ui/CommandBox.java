@@ -9,17 +9,16 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Region;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
-import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.logic.exceptions.AssemblyException;
 import seedu.address.model.history.CommandHistory;
 
 /**
  * The UI component that is responsible for receiving user command inputs.
  *
  * <p>Note: this class delegates direct interactions with the text field to
- * {@link seedu.address.ui.TextFieldAdapter}. The adapter is provided by the
- * FXML-initialized `TextField` in production, and tests can inject a
- * lightweight, pure-Java implementation of {@code TextFieldAdapter} to exercise
- * command-box behaviour without initializing the JavaFX toolkit.</p>
+ * {@link seedu.address.ui.TextFieldAdapter}. The adapter is provided by the FXML-initialized `TextField` in production,
+ * and tests can inject a lightweight, pure-Java implementation of {@code TextFieldAdapter} to exercise command-box
+ * behaviour without initializing the JavaFX toolkit.</p>
  */
 public class CommandBox extends UiPart<Region> {
 
@@ -121,7 +120,7 @@ public class CommandBox extends UiPart<Region> {
             commandExecutor.execute(commandText);
             setCommandText("");
             historyNavigator.reset(historySupplier.getHistory().getEntries());
-        } catch (CommandException | ParseException e) {
+        } catch (CommandException | AssemblyException e) {
             setStyleToIndicateCommandFailure();
             historyNavigator.reset(historySupplier.getHistory().getEntries());
         }
@@ -185,10 +184,12 @@ public class CommandBox extends UiPart<Region> {
          *
          * @see seedu.address.logic.Logic#execute(String)
          */
-        CommandResult execute(String commandText) throws CommandException, ParseException;
+        CommandResult execute(String commandText) throws CommandException, AssemblyException;
     }
 
-    /** Supplies snapshots of the command history for navigation. */
+    /**
+     * Supplies snapshots of the command history for navigation.
+     */
     @FunctionalInterface
     public interface HistorySupplier {
         CommandHistory getHistory();
