@@ -31,7 +31,7 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
    * `list` : Lists all contacts.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the address book.
+    * `add "Betsy Crowe" "1234567" "Newgate Prison" "betsycrowe@example.com" /tag:friend /tag:criminal` : Adds a contact named `Betsy Crowe` to the address book.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
@@ -186,7 +186,7 @@ Examples:
   Example output:
 
   ```
-  1. add n/John Doe p/98765432
+  1. add /name:"John Doe" /phone:98765432
   2. list
   3. delete 2
   ```
