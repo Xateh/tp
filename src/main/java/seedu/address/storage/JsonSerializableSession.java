@@ -1,7 +1,6 @@
 package seedu.address.storage;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -12,8 +11,15 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.AddressBook;
 import seedu.address.session.SessionData;
+
 /**
  * Json representation of {@link SessionData} for persistence.
+ *
+ * Persisted session JSON schema contains only:
+ * - formatVersion
+ * - savedAt
+ * - addressBook
+ * - guiSettings
  */
 @JsonRootName(value = "session")
 class JsonSerializableSession {
@@ -23,55 +29,36 @@ class JsonSerializableSession {
     private final String formatVersion;
     private final String savedAt;
     private final JsonSerializableAddressBook addressBook;
-    private final List<String> searchKeywords;
-    private final Boolean searchName;
-    private final Boolean searchPhone;
-    private final Boolean searchEmail;
-    private final Boolean searchAddress;
-    private final Boolean searchTag;
-    private final List<String> customKeys;
     private final JsonGuiSettings guiSettings;
 
+    /**
+     * Jackson-friendly constructor for Json deserialization.
+     */
     @JsonCreator
-    JsonSerializableSession(@JsonProperty("formatVersion") String formatVersion,
+    public JsonSerializableSession(@JsonProperty("formatVersion") String formatVersion,
             @JsonProperty("savedAt") String savedAt,
             @JsonProperty("addressBook") JsonSerializableAddressBook addressBook,
-            @JsonProperty("searchKeywords") List<String> searchKeywords,
-            @JsonProperty("searchName") Boolean searchName,
-            @JsonProperty("searchPhone") Boolean searchPhone,
-            @JsonProperty("searchEmail") Boolean searchEmail,
-            @JsonProperty("searchAddress") Boolean searchAddress,
-            @JsonProperty("searchTag") Boolean searchTag,
-            @JsonProperty("customKeys") List<String> customKeys,
             @JsonProperty("guiSettings") JsonGuiSettings guiSettings) {
         this.formatVersion = formatVersion;
         this.savedAt = savedAt;
         this.addressBook = addressBook;
-        this.searchKeywords = searchKeywords != null ? new ArrayList<>(searchKeywords) : new ArrayList<>();
-        this.searchName = searchName;
-        this.searchPhone = searchPhone;
-        this.searchEmail = searchEmail;
-        this.searchAddress = searchAddress;
-        this.searchTag = searchTag;
-        this.customKeys = customKeys != null ? new ArrayList<>(customKeys) : new ArrayList<>();
         this.guiSettings = guiSettings;
     }
 
-    JsonSerializableSession(SessionData source) {
+    /**
+     * Converts a {@link SessionData} into this serializable form.
+     */
+    public JsonSerializableSession(SessionData source) {
         this.formatVersion = source.getFormatVersion();
         this.savedAt = source.getSavedAt().toString();
         this.addressBook = new JsonSerializableAddressBook(source.getAddressBook());
-        this.searchKeywords = new ArrayList<>(source.getSearchKeywords());
-        this.searchName = source.isSearchName();
-        this.searchPhone = source.isSearchPhone();
-        this.searchEmail = source.isSearchEmail();
-        this.searchAddress = source.isSearchAddress();
-        this.searchTag = source.isSearchTag();
-        this.customKeys = new ArrayList<>(source.getCustomKeys());
         this.guiSettings = new JsonGuiSettings(source.getGuiSettings());
     }
 
-    SessionData toModelType() throws IllegalValueException {
+    /**
+     * Converts this Jackson-friendly object into the model's {@link SessionData}.
+     */
+    public SessionData toModelType() throws IllegalValueException {
         if (formatVersion != null && !SessionData.FORMAT_VERSION.equals(formatVersion)) {
             throw new IllegalValueException("Unsupported session format version: " + formatVersion);
         }
@@ -98,20 +85,14 @@ class JsonSerializableSession {
         AddressBook modelAddressBook = addressBook.toModelType();
         GuiSettings modelGuiSettings = guiSettings.toModelType();
 
-        // Default flags when absent in older session files: treat as searching all non-custom fields.
-        boolean modelSearchName = searchName != null ? searchName : true;
-        boolean modelSearchPhone = searchPhone != null ? searchPhone : true;
-        boolean modelSearchEmail = searchEmail != null ? searchEmail : true;
-        boolean modelSearchAddress = searchAddress != null ? searchAddress : true;
-        boolean modelSearchTag = searchTag != null ? searchTag : true;
-        List<String> modelCustomKeys = customKeys != null ? new ArrayList<>(customKeys) : new ArrayList<>();
-
-        return new SessionData(parsedSavedAt, modelAddressBook, searchKeywords,
-            modelSearchName, modelSearchPhone, modelSearchEmail, modelSearchAddress,
-            modelSearchTag, modelCustomKeys, modelGuiSettings);
+        // Persisted session JSON only includes formatVersion, savedAt, addressBook and guiSettings.
+        // Restore those and use defaults for other session metadata (empty keywords, default flags).
+        return new SessionData(parsedSavedAt, modelAddressBook, List.of(),
+            true, true, true, true, true,
+            List.of(), modelGuiSettings);
     }
 
-    private static class JsonGuiSettings {
+    private static final class JsonGuiSettings {
         private final Double windowWidth;
         private final Double windowHeight;
         private final Integer windowX;
@@ -151,8 +132,18 @@ class JsonSerializableSession {
             if (windowX != null && windowY != null) {
                 return new GuiSettings(windowWidth, windowHeight, windowX, windowY);
             }
-            // Fall back to defaults for coordinates when they were not stored.
-            return new GuiSettings(windowWidth, windowHeight, 0, 0);
+
+            // Compute center of the screen when coordinates were not stored.
+            try {
+                java.awt.Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+                int centerX = (int) Math.round((screen.getWidth() - windowWidth) / 2.0);
+                int centerY = (int) Math.round((screen.getHeight() - windowHeight) / 2.0);
+                return new GuiSettings(windowWidth, windowHeight, centerX, centerY);
+            } catch (RuntimeException e) {
+                // Fall back to origin when screen size is unavailable.
+                return new GuiSettings(windowWidth, windowHeight, 0, 0);
+            }
         }
     }
 }
+

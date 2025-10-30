@@ -65,25 +65,19 @@ public class SessionRecorder {
      */
     public SessionRecorder(ReadOnlyAddressBook initialAddressBook, GuiSettings initialGuiSettings,
             Optional<SessionData> initialSession) {
+        // Do not restore persisted search keywords or GUI settings. We intentionally ignore
+        // any saved keywords and GUI state so the application does not restore prior GUI
+        // state or previously-entered search terms on startup.
         initialSession.ifPresent(session -> {
-            searchKeywords = List.copyOf(session.getSearchKeywords());
-            searchName = session.isSearchName();
-            searchPhone = session.isSearchPhone();
-            searchEmail = session.isSearchEmail();
-            searchAddress = session.isSearchAddress();
-            searchTag = session.isSearchTag();
-            customKeys = List.copyOf(session.getCustomKeys());
+            // Hydrate current GUI settings from persisted session so runtime matches persisted state.
             currentGuiSettings = session.getGuiSettings();
-            lastPersistedSignature = new SessionSignature(session.getAddressBook(),
-                searchKeywords, searchName, searchPhone, searchEmail, searchAddress, searchTag,
-                customKeys, currentGuiSettings);
+            // Capture the persisted address book and GUI settings for equality comparisons.
+            lastPersistedSignature = new SessionSignature(session.getAddressBook(), currentGuiSettings);
         });
 
         if (initialSession.isEmpty()) {
             currentGuiSettings = initialGuiSettings;
-            lastPersistedSignature = new SessionSignature(initialAddressBook, searchKeywords,
-                    searchName, searchPhone, searchEmail, searchAddress, searchTag, customKeys,
-                    currentGuiSettings);
+            lastPersistedSignature = new SessionSignature(initialAddressBook, currentGuiSettings);
         }
 
         addressBookDirty = false;
@@ -133,12 +127,14 @@ public class SessionRecorder {
 
     /** Creates an immutable snapshot of the current session state. */
     public SessionData buildSnapshot(ReadOnlyAddressBook addressBook, GuiSettings guiSettings) {
-        currentGuiSettings = guiSettings;
-        lastBuiltSnapshotSignature = new SessionSignature(addressBook, searchKeywords,
-            searchName, searchPhone, searchEmail, searchAddress, searchTag, customKeys, currentGuiSettings);
+        // When building a persisted snapshot, exclude search keywords but persist GUI settings.
+        currentGuiSettings = guiSettings; // keep runtime value
+        lastBuiltSnapshotSignature = new SessionSignature(addressBook, currentGuiSettings);
         return new SessionData(Instant.now(), addressBook,
-            searchKeywords, searchName, searchPhone, searchEmail, searchAddress, searchTag,
-            customKeys, currentGuiSettings);
+            Collections.emptyList(), /* do not persist search keywords */
+            searchName, searchPhone, searchEmail, searchAddress, searchTag,
+            customKeys,
+            currentGuiSettings /* persist GUI settings so GUI changes get saved, but will not be restored */);
     }
 
     /** Returns {@code true} if the address book changed since the last persisted snapshot. */
@@ -160,8 +156,7 @@ public class SessionRecorder {
         boolean addressBookChanged = isAddressBookDirty(currentAddressBook);
 
         if (sessionMetadataDirty && lastPersistedSignature != null
-            && lastPersistedSignature.hasSameMetadata(searchKeywords, searchName, searchPhone,
-            searchEmail, searchAddress, searchTag, customKeys, guiSettings)) {
+            && lastPersistedSignature.hasSameMetadata(guiSettings)) {
             sessionMetadataDirty = false;
         }
 
@@ -180,12 +175,13 @@ public class SessionRecorder {
 
     private void recomputeSessionMetadataDirty() {
         if (lastPersistedSignature == null) {
-            sessionMetadataDirty = !searchKeywords.isEmpty();
+            // Without a persisted signature, only address book changes matter; metadata is clean.
+            sessionMetadataDirty = false;
             return;
         }
 
-        sessionMetadataDirty = !lastPersistedSignature.hasSameMetadata(searchKeywords, searchName,
-                searchPhone, searchEmail, searchAddress, searchTag, customKeys, currentGuiSettings);
+        // Compare metadata while ignoring persisted search keywords (we never persist keywords).
+        sessionMetadataDirty = !lastPersistedSignature.hasSameMetadata(currentGuiSettings);
     }
 
     /**
@@ -194,26 +190,10 @@ public class SessionRecorder {
      */
     private static final class SessionSignature {
         private final AddressBook addressBookSnapshot;
-        private final List<String> searchKeywordsSnapshot;
-        private final boolean searchNameSnapshot;
-        private final boolean searchPhoneSnapshot;
-        private final boolean searchEmailSnapshot;
-        private final boolean searchAddressSnapshot;
-        private final boolean searchTagSnapshot;
-        private final List<String> customKeysSnapshot;
         private final GuiSettings guiSettingsSnapshot;
 
-        private SessionSignature(ReadOnlyAddressBook addressBook, List<String> searchKeywords,
-                boolean searchName, boolean searchPhone, boolean searchEmail, boolean searchAddress,
-                boolean searchTag, List<String> customKeys, GuiSettings guiSettings) {
+        private SessionSignature(ReadOnlyAddressBook addressBook, GuiSettings guiSettings) {
             this.addressBookSnapshot = new AddressBook(addressBook);
-            this.searchKeywordsSnapshot = List.copyOf(searchKeywords);
-            this.searchNameSnapshot = searchName;
-            this.searchPhoneSnapshot = searchPhone;
-            this.searchEmailSnapshot = searchEmail;
-            this.searchAddressSnapshot = searchAddress;
-            this.searchTagSnapshot = searchTag;
-            this.customKeysSnapshot = List.copyOf(customKeys);
             this.guiSettingsSnapshot = guiSettings;
         }
 
@@ -221,17 +201,8 @@ public class SessionRecorder {
             return addressBookSnapshot.equals(new AddressBook(other));
         }
 
-        private boolean hasSameMetadata(List<String> keywords, boolean searchName, boolean searchPhone,
-                boolean searchEmail, boolean searchAddress, boolean searchTag,
-                List<String> customKeys, GuiSettings guiSettings) {
-            return searchKeywordsSnapshot.equals(keywords)
-                    && searchNameSnapshot == searchName
-                    && searchPhoneSnapshot == searchPhone
-                    && searchEmailSnapshot == searchEmail
-                    && searchAddressSnapshot == searchAddress
-                    && searchTagSnapshot == searchTag
-                    && customKeysSnapshot.equals(customKeys)
-                    && guiSettingsSnapshot.equals(guiSettings);
+        private boolean hasSameMetadata(GuiSettings guiSettings) {
+            return guiSettingsSnapshot.equals(guiSettings);
         }
     }
 }

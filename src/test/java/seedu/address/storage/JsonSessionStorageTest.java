@@ -59,7 +59,8 @@ class JsonSessionStorageTest {
 
         assertTrue(result.isPresent());
         assertEquals(newer.getSavedAt(), result.get().getSavedAt());
-        assertEquals(List.of("Bob"), result.get().getSearchKeywords());
+        // Search keywords are no longer persisted in the JSON schema
+        assertTrue(result.get().getSearchKeywords().isEmpty());
     }
 
     @Test
@@ -80,7 +81,8 @@ class JsonSessionStorageTest {
         Optional<SessionData> result = storage.readSession();
 
         assertTrue(result.isPresent());
-        assertEquals(List.of("Carl"), result.get().getSearchKeywords());
+        // Keywords are not persisted
+        assertTrue(result.get().getSearchKeywords().isEmpty());
     }
 
     @Test

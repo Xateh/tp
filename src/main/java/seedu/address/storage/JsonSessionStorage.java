@@ -84,8 +84,59 @@ public class JsonSessionStorage implements SessionStorage {
     public void saveSession(SessionData sessionData) throws IOException {
         requireNonNull(sessionData);
         Files.createDirectories(sessionDirectory);
+        // Defensive dedup: avoid writing a new session file when the persisted payload
+        // (excluding the savedAt timestamp) is identical to the latest persisted file.
+        JsonSerializableSession candidate = new JsonSerializableSession(sessionData);
+
+        // Find the most recently-modified JSON file in the session directory, if any.
+        Optional<Path> latest = Optional.empty();
+        try (Stream<Path> stream = Files.list(sessionDirectory)) {
+            latest = stream.filter(Files::isRegularFile)
+                    .filter(path -> path.getFileName().toString().endsWith(".json"))
+                    .max((a, b) -> {
+                        try {
+                            return Files.getLastModifiedTime(a).compareTo(Files.getLastModifiedTime(b));
+                        } catch (IOException e) {
+                            return 0;
+                        }
+                    });
+        }
+
+        if (latest.isPresent()) {
+            try {
+                Optional<JsonSerializableSession> existingOpt = JsonUtil.readJsonFile(latest.get(),
+                        JsonSerializableSession.class);
+                if (existingOpt.isPresent()) {
+                    JsonSerializableSession existing = existingOpt.get();
+
+                    // Compare the material parts of the session (formatVersion, addressBook, guiSettings)
+                    // and skip writing if they are identical to the latest persisted snapshot.
+                    try {
+                        SessionData existingSession = existing.toModelType();
+                        String candidateFormat = sessionData.getFormatVersion();
+                        String existingFormat = existingSession.getFormatVersion();
+                        boolean sameFormat = (candidateFormat == null) ? (existingFormat == null)
+                                : candidateFormat.equals(existingFormat);
+                        if (sameFormat
+                                && sessionData.getAddressBook().equals(existingSession.getAddressBook())
+                                && sessionData.getGuiSettings().equals(existingSession.getGuiSettings())) {
+                            logger.info("Skipping session save: payload unchanged (ignoring savedAt)");
+                            return;
+                        }
+                    } catch (seedu.address.commons.exceptions.IllegalValueException ive) {
+                        // If the existing file cannot be converted to model types, fall back to writing.
+                        logger.warning("Existing session file invalid for comparison: " + ive.getMessage());
+                    }
+                }
+            } catch (seedu.address.commons.exceptions.DataLoadingException e) {
+                logger.warning("Could not read latest session file for dedup comparison: " + e.getMessage());
+            } catch (Exception e) {
+                logger.warning("Unexpected error when comparing session payloads: " + e.getMessage());
+            }
+        }
+
         Path target = sessionDirectory.resolve(createFileName(sessionData));
-        JsonUtil.saveJsonFile(new JsonSerializableSession(sessionData), target);
+        JsonUtil.saveJsonFile(candidate, target);
     }
 
     private String createFileName(SessionData sessionData) {

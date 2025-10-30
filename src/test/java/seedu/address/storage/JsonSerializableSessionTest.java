@@ -1,14 +1,13 @@
 package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Point;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +33,12 @@ class JsonSerializableSessionTest {
         JsonSerializableSession jsonSession = new JsonSerializableSession(original);
         SessionData converted = jsonSession.toModelType();
 
-        assertEquals(original, converted);
+        // Keywords are not persisted in the JSON schema. GUI settings are persisted.
+        assertEquals(original.getFormatVersion(), converted.getFormatVersion());
+        assertEquals(original.getAddressBook(), converted.getAddressBook());
+        assertTrue(converted.getSearchKeywords().isEmpty());
+        // GUI settings should be preserved when persisted
+        assertEquals(GUI_SETTINGS, converted.getGuiSettings());
     }
 
     @Test
@@ -61,39 +65,38 @@ class JsonSerializableSessionTest {
 
     @Test
     void toModelType_missingGuiSettings_throwsIllegalValueException() throws IOException {
-        // Remove the guiSettings field entirely (including the comma before it)
+        // guiSettings are required in the persisted schema; missing guiSettings should fail
         String json = createBaseJson();
-        int idx = json.lastIndexOf(",\"guiSettings\":");
-        if (idx != -1) {
-            json = json.substring(0, idx) + "}";
-        }
+        int idx = json.indexOf(",\"guiSettings\":");
+        json = json.substring(0, idx + 1) + "\"guiSettings\":null}";
         JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
         assertThrows(IllegalValueException.class, jsonSession::toModelType);
     }
 
     @Test
     void toModelType_missingGuiWindowWidth_throwsIllegalValueException() throws IOException {
-        String json = createBaseJson().replaceFirst("\\\"windowWidth\\\":800,", "");
+        // Missing windowWidth should cause an IllegalValueException
+        String json = createBaseJson().replaceFirst("\\\"windowWidth\\\":800,", "\\\"windowWidth\\\":null,");
         JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
         assertThrows(IllegalValueException.class, jsonSession::toModelType);
     }
 
     @Test
     void toModelType_missingGuiWindowHeight_throwsIllegalValueException() throws IOException {
-        String json = createBaseJson().replaceFirst(",\\\"windowHeight\\\":600", "");
+        // Missing windowHeight should cause an IllegalValueException
+        String json = createBaseJson().replaceFirst("\\\"windowHeight\\\":600,", "\\\"windowHeight\\\":null,");
         JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
         assertThrows(IllegalValueException.class, jsonSession::toModelType);
     }
 
     @Test
     void toModelType_guiSettingsMissingCoordinates_defaultsToOrigin() throws IllegalValueException, IOException {
-        // Remove windowX and windowY fields but keep valid JSON
-        String json = createBaseJson().replace(",\"windowX\":10,\"windowY\":10", "");
+        // When coordinates are not present in persisted GUI settings, they default to origin (0,0)
+        String json = createBaseJson().replaceFirst(",\\\"windowX\\\":10,\\\"windowY\\\":10", "");
         JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
 
         SessionData converted = jsonSession.toModelType();
         Point coordinates = converted.getGuiSettings().getWindowCoordinates();
-        assertNotNull(coordinates);
         assertEquals(new Point(0, 0), coordinates);
     }
 
@@ -130,18 +133,17 @@ class JsonSerializableSessionTest {
         SessionData result = jsonSession.toModelType();
         assertEquals(data.getFormatVersion(), result.getFormatVersion());
         assertEquals(data.getAddressBook(), result.getAddressBook());
-        assertEquals(data.getSearchKeywords(), result.getSearchKeywords());
-        assertEquals(data.getGuiSettings().getWindowWidth(), result.getGuiSettings().getWindowWidth());
-        assertEquals(data.getGuiSettings().getWindowHeight(), result.getGuiSettings().getWindowHeight());
-        // After deserialization, windowCoordinates should be (0,0)
-        assertNotNull(result.getGuiSettings().getWindowCoordinates());
-        assertEquals(0, result.getGuiSettings().getWindowCoordinates().x);
-        assertEquals(0, result.getGuiSettings().getWindowCoordinates().y);
+        // Keywords are no longer persisted
+        assertTrue(result.getSearchKeywords().isEmpty());
+        // GUI settings are persisted; when constructed from a default GuiSettings the
+        // toModelType will set missing coordinates to origin (0,0)
+        assertEquals(new GuiSettings(740, 600, 0, 0), result.getGuiSettings());
     }
 
     @Test
     void toModelType_nullGuiCoordinates_defaultsToOrigin() throws IllegalValueException {
-        // Use default constructor, which sets windowCoordinates to null
+        // Use default constructor, which sets windowCoordinates to null; persisted form will
+        // set missing coordinates to origin (0,0)
         GuiSettings settings = new GuiSettings();
         SessionData data = new SessionData(
             Instant.now(),
@@ -151,18 +153,17 @@ class JsonSerializableSessionTest {
         );
         JsonSerializableSession jsonSession = new JsonSerializableSession(data);
         SessionData result = jsonSession.toModelType();
-        assertNotNull(result.getGuiSettings().getWindowCoordinates());
-        assertEquals(0, result.getGuiSettings().getWindowCoordinates().x);
-        assertEquals(0, result.getGuiSettings().getWindowCoordinates().y);
+        // Resulting coordinates will be origin (0,0)
+        assertEquals(new Point(0, 0), result.getGuiSettings().getWindowCoordinates());
     }
 
     @Test
     void toModelType_missingGuiYCoordinate_defaultsToOrigin() throws IOException, IllegalValueException {
-        String json = createBaseJson().replaceFirst("\\\"windowY\\\":10", "\"windowY\":null");
+        // When Y coordinate missing, coordinates default to origin (0,0)
+        String json = createBaseJson().replaceFirst(",\"windowY\":10", "");
         JsonSerializableSession jsonSession = JsonUtil.fromJsonString(json, JsonSerializableSession.class);
         SessionData result = jsonSession.toModelType();
-        assertEquals(0, result.getGuiSettings().getWindowCoordinates().y);
-        assertEquals(0, result.getGuiSettings().getWindowCoordinates().x);
+        assertEquals(new GuiSettings(800, 600, 0, 0), result.getGuiSettings());
     }
 
     @Test
@@ -198,16 +199,14 @@ class JsonSerializableSessionTest {
         JsonSerializableSession jsonSession = new JsonSerializableSession(original);
         SessionData converted = jsonSession.toModelType();
 
-        assertEquals(original.getSearchKeywords(), converted.getSearchKeywords());
-        assertEquals(original.isSearchName(), converted.isSearchName());
-        assertEquals(original.isSearchPhone(), converted.isSearchPhone());
-        assertEquals(original.isSearchEmail(), converted.isSearchEmail());
-        assertEquals(original.isSearchAddress(), converted.isSearchAddress());
-        assertEquals(original.isSearchTag(), converted.isSearchTag());
-        // custom keys should be preserved (order is not important) - compare as sets
-        assertEquals(
-                Set.copyOf(original.getCustomKeys()),
-                Set.copyOf(converted.getCustomKeys())
-        );
+        // Search keywords are no longer persisted
+        assertTrue(converted.getSearchKeywords().isEmpty());
+        // Find flags and custom keys are no longer persisted; defaults are used instead
+        assertTrue(converted.isSearchName());
+        assertTrue(converted.isSearchPhone());
+        assertTrue(converted.isSearchEmail());
+        assertTrue(converted.isSearchAddress());
+        assertTrue(converted.isSearchTag());
+        assertTrue(converted.getCustomKeys().isEmpty());
     }
 }

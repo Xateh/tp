@@ -261,12 +261,14 @@ public class LogicManagerTest {
         model.addPerson(new PersonBuilder().withName("Alice Pauline").build());
 
         logic.execute("find Alice");
+        // Finding should not cause search keywords to be persisted.
         assertTrue(logic.getSessionSnapshotIfDirty().isEmpty());
 
         logic.execute(SAMPLE_ADD_COMMAND_INPUT_BOB);
 
         SessionData snapshot = logic.getSessionSnapshotIfDirty().orElseThrow();
-        assertEquals(List.of("Alice"), snapshot.getSearchKeywords());
+        // Keywords should not be present in persisted snapshots.
+        assertTrue(snapshot.getSearchKeywords().isEmpty());
         logic.markSessionSnapshotPersisted();
 
         logic.execute(ListCommand.COMMAND_WORD);
@@ -275,22 +277,17 @@ public class LogicManagerTest {
         logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
 
         snapshot = logic.getSessionSnapshotIfDirty().orElseThrow();
-        assertEquals(List.of(), snapshot.getSearchKeywords());
+        assertTrue(snapshot.getSearchKeywords().isEmpty());
     }
 
     @Test
     public void getSessionSnapshotIfAnyDirty_searchKeywordsChange_present() throws Exception {
         model.addPerson(new PersonBuilder().withName("Alice Pauline").build());
 
-        // search changes should mark metadata dirty, visible via getSessionSnapshotIfAnyDirty
+        // Search keywords are not persisted and should not mark metadata dirty alone.
         logic.execute("find Alice");
         Optional<SessionData> snapshot = logic.getSessionSnapshotIfAnyDirty();
-        assertTrue(snapshot.isPresent());
-        assertEquals(List.of("Alice"), snapshot.get().getSearchKeywords());
-
-        // marking persisted clears the metadata dirty flag
-        logic.markSessionSnapshotPersisted();
-        assertTrue(logic.getSessionSnapshotIfAnyDirty().isEmpty());
+        assertTrue(snapshot.isEmpty());
     }
 
     @Test

@@ -48,7 +48,8 @@ public class SessionRecorderTest {
         SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         List<String> keywords = List.of("alice", "bob");
         recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(keywords)), false);
-        assertEquals(keywords, recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS).getSearchKeywords());
+        // Keywords are not persisted in session snapshots.
+        assertTrue(recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS).getSearchKeywords().isEmpty());
         assertFalse(recorder.isAddressBookDirty(new AddressBook()));
         recorder.afterSuccessfulCommand(new ListCommand(), false);
         assertTrue(recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS).getSearchKeywords().isEmpty());
@@ -83,7 +84,8 @@ public class SessionRecorderTest {
         SessionRecorder recorder = new SessionRecorder(addressBook, DEFAULT_GUI_SETTINGS, Optional.of(previous));
         SessionData snapshot = recorder.buildSnapshot(addressBook, DEFAULT_GUI_SETTINGS);
 
-        assertEquals(List.of("alice", "bob"), snapshot.getSearchKeywords());
+        // Previously-saved keywords should not be restored.
+        assertTrue(snapshot.getSearchKeywords().isEmpty());
         assertFalse(recorder.isAddressBookDirty(addressBook));
     }
 
@@ -111,7 +113,8 @@ public class SessionRecorderTest {
         recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(keywords)), false);
 
         SessionData snapshot = recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS);
-        assertEquals(keywords, snapshot.getSearchKeywords());
+        // Search keywords are not persisted in snapshots.
+        assertTrue(snapshot.getSearchKeywords().isEmpty());
         assertFalse(recorder.isAddressBookDirty(new AddressBook()));
     }
 
@@ -130,7 +133,8 @@ public class SessionRecorderTest {
     public void metadataChange_thenRevert_notDirty() {
         SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(List.of("alice"))), false);
-        assertTrue(recorder.isAnyDirty(new AddressBook(), DEFAULT_GUI_SETTINGS));
+        // Keyword-only changes do not mark session metadata as dirty because keywords are not persisted.
+        assertFalse(recorder.isAnyDirty(new AddressBook(), DEFAULT_GUI_SETTINGS));
 
         recorder.afterSuccessfulCommand(new ListCommand(), false);
         assertFalse(recorder.isAnyDirty(new AddressBook(), DEFAULT_GUI_SETTINGS));
@@ -201,7 +205,8 @@ public class SessionRecorderTest {
                 DEFAULT_GUI_SETTINGS);
         SessionRecorder recorder = new SessionRecorder(ab, DEFAULT_GUI_SETTINGS, Optional.of(previous));
         SessionData snapshot = recorder.buildSnapshot(ab, DEFAULT_GUI_SETTINGS);
-        assertEquals(keywords, snapshot.getSearchKeywords());
+        // Previously-saved keywords should not be restored.
+        assertTrue(snapshot.getSearchKeywords().isEmpty());
     }
 
     @Test
@@ -215,7 +220,8 @@ public class SessionRecorderTest {
         recorder.afterSuccessfulCommand(new FindCommand(predicate), false);
 
         SessionData snapshot = recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS);
-        assertEquals(keywords, snapshot.getSearchKeywords());
+        // Keywords are not persisted, but field flags and custom keys are.
+        assertTrue(snapshot.getSearchKeywords().isEmpty());
         assertFalse(snapshot.isSearchName());
         assertTrue(snapshot.isSearchPhone());
         assertFalse(snapshot.isSearchEmail());

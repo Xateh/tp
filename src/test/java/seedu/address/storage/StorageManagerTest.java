@@ -124,7 +124,8 @@ public class StorageManagerTest {
 
         SessionData retrieved = storageManager.readSession().get();
         assertEquals(newerSession.getSavedAt(), retrieved.getSavedAt());
-        assertEquals(newerSession.getSearchKeywords(), retrieved.getSearchKeywords());
+        // Keywords are not persisted in the session JSON schema
+        assertTrue(retrieved.getSearchKeywords().isEmpty());
         assertEquals(new AddressBook(newerSession.getAddressBook()), new AddressBook(retrieved.getAddressBook()));
 
         long fileCount;
