@@ -263,12 +263,11 @@ public class JsonUtilTest {
 
     @Test
     public void readJsonFile_nullSearchKeywords_returnsEmptyList() throws Exception {
-        // Simulate a session JSON with null searchKeywords
+        // Simulate a session JSON without searchKeywords field (field removed in new format)
         String json = "{"
             + "\"formatVersion\":\"2.0\","
             + "\"savedAt\":\"2025-10-14T00:00:00Z\","
             + "\"addressBook\":{\"persons\":[]},"
-            + "\"searchKeywords\":null,"
             + "\"guiSettings\":{\"windowWidth\":800,\"windowHeight\":600,\"windowX\":10,\"windowY\":10}"
             + "}";
         Class<?> sessionClass = Class.forName("seedu.address.storage.JsonSerializableSession");
@@ -276,10 +275,10 @@ public class JsonUtilTest {
         java.lang.reflect.Method toModelType = sessionClass.getDeclaredMethod("toModelType");
         toModelType.setAccessible(true);
         Object result = toModelType.invoke(session);
-        java.lang.reflect.Method getSearchKeywords = result.getClass().getMethod("getSearchKeywords");
-        Object keywords = getSearchKeywords.invoke(result);
-        assertTrue(keywords instanceof java.util.List);
-        assertTrue(((java.util.List<?>) keywords).isEmpty());
+        // Ensure deserialization produced a SessionData and GUI settings are present
+        java.lang.reflect.Method getGuiSettings = result.getClass().getMethod("getGuiSettings");
+        Object guiSettings = getGuiSettings.invoke(result);
+        assertTrue(guiSettings != null);
     }
 
     @Test

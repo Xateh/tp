@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -45,11 +44,9 @@ class JsonSessionStorageTest {
 
         SessionData older = createSessionData(
                 Instant.parse("2025-10-14T00:00:00Z"),
-                List.of("Alice"),
                 "Alice Tan");
         SessionData newer = createSessionData(
                 Instant.parse("2025-10-15T00:00:00Z"),
-                List.of("Bob"),
                 "Bob Lee");
 
         storage.saveSession(older);
@@ -59,7 +56,6 @@ class JsonSessionStorageTest {
 
         assertTrue(result.isPresent());
         assertEquals(newer.getSavedAt(), result.get().getSavedAt());
-        assertEquals(List.of("Bob"), result.get().getSearchKeywords());
     }
 
     @Test
@@ -73,14 +69,12 @@ class JsonSessionStorageTest {
 
         SessionData valid = createSessionData(
                 Instant.parse("2025-10-16T00:00:00Z"),
-                List.of("Carl"),
                 "Carl Chan");
         storage.saveSession(valid);
 
         Optional<SessionData> result = storage.readSession();
 
         assertTrue(result.isPresent());
-        assertEquals(List.of("Carl"), result.get().getSearchKeywords());
     }
 
     @Test
@@ -103,7 +97,6 @@ class JsonSessionStorageTest {
 
         storage.saveSession(createSessionData(
                 Instant.parse("2025-10-17T00:00:00Z"),
-                List.of(),
                 null));
 
         assertTrue(Files.exists(sessionDir));
@@ -121,7 +114,6 @@ class JsonSessionStorageTest {
 
         SessionData sessionData = createSessionData(
                 Instant.parse("2025-10-18T12:34:56Z"),
-                List.of("Alice"),
                 "Alice Tan");
         storage.saveSession(sessionData);
 
@@ -147,9 +139,9 @@ class JsonSessionStorageTest {
         assertFalse(result.isPresent());
     }
 
-    private SessionData createSessionData(Instant savedAt, List<String> keywords, String personName) {
+    private SessionData createSessionData(Instant savedAt, String personName) {
         AddressBook addressBook = new AddressBook();
         addressBook.addPerson(new PersonBuilder().withName(personName == null ? "Default Person" : personName).build());
-        return new SessionData(savedAt, addressBook, keywords, GUI_SETTINGS);
+        return new SessionData(savedAt, addressBook, GUI_SETTINGS);
     }
 }

@@ -43,14 +43,17 @@ public class SessionRecorderTest {
     }
 
     @Test
-    public void findAndListCommand_interleaving_keywordsAndDirtyFlag() {
+    public void findAndListCommand_interleaving_noPersistenceOfKeywords() {
         SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         List<String> keywords = List.of("alice", "bob");
         recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(keywords)), false);
-        assertEquals(keywords, recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS).getSearchKeywords());
+        // Keywords are transient and should not be included in persisted snapshots
+        SessionData snapshot = recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS);
+        assertEquals(DEFAULT_GUI_SETTINGS, snapshot.getGuiSettings());
         assertFalse(recorder.isAddressBookDirty(new AddressBook()));
         recorder.afterSuccessfulCommand(new ListCommand(), false);
-        assertTrue(recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS).getSearchKeywords().isEmpty());
+        snapshot = recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS);
+        assertEquals(DEFAULT_GUI_SETTINGS, snapshot.getGuiSettings());
         assertFalse(recorder.isAddressBookDirty(new AddressBook()));
     }
 
@@ -66,23 +69,23 @@ public class SessionRecorderTest {
         SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         SessionData snapshot = recorder.buildSnapshot(createSampleAddressBook(), DEFAULT_GUI_SETTINGS);
 
-        assertTrue(snapshot.getSearchKeywords().isEmpty());
+        // No search keywords are persisted; snapshot should contain GUI/address book state only
+        assertEquals(DEFAULT_GUI_SETTINGS, snapshot.getGuiSettings());
         assertFalse(recorder.isAddressBookDirty(createSampleAddressBook()));
     }
 
     @Test
-    public void constructor_withExistingSession_restoresKeywords() {
+    public void constructor_withExistingSession_initialisesFromGuiSettings() {
         AddressBook addressBook = createSampleAddressBook();
         SessionData previous = new SessionData(
                 Instant.parse("2024-01-01T10:10:00Z"),
                 addressBook,
-                List.of("alice", "bob"),
                 DEFAULT_GUI_SETTINGS);
 
         SessionRecorder recorder = new SessionRecorder(addressBook, DEFAULT_GUI_SETTINGS, Optional.of(previous));
         SessionData snapshot = recorder.buildSnapshot(addressBook, DEFAULT_GUI_SETTINGS);
 
-        assertEquals(List.of("alice", "bob"), snapshot.getSearchKeywords());
+        assertEquals(DEFAULT_GUI_SETTINGS, snapshot.getGuiSettings());
         assertFalse(recorder.isAddressBookDirty(addressBook));
     }
 
@@ -104,34 +107,37 @@ public class SessionRecorderTest {
     }
 
     @Test
-    public void afterSuccessfulCommand_findUpdatesKeywordsWithoutDirtyFlag() {
+    public void afterSuccessfulCommand_findDoesNotPersistKeywords() {
         SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         List<String> keywords = List.of("alice", "bob");
         recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(keywords)), false);
 
         SessionData snapshot = recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS);
-        assertEquals(keywords, snapshot.getSearchKeywords());
+        // Keywords are not persisted; snapshot should still only contain GUI/address book state
+        assertEquals(DEFAULT_GUI_SETTINGS, snapshot.getGuiSettings());
         assertFalse(recorder.isAddressBookDirty(new AddressBook()));
     }
 
     @Test
-    public void afterSuccessfulCommand_listClearsKeywords() {
+    public void afterSuccessfulCommand_listHasNoPersistentEffect() {
         SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
         recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(List.of("alice"))), false);
 
         recorder.afterSuccessfulCommand(new ListCommand(), false);
 
         SessionData snapshot = recorder.buildSnapshot(new AddressBook(), DEFAULT_GUI_SETTINGS);
-        assertTrue(snapshot.getSearchKeywords().isEmpty());
+        assertEquals(DEFAULT_GUI_SETTINGS, snapshot.getGuiSettings());
     }
 
     @Test
     public void metadataChange_thenRevert_notDirty() {
         SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
-        recorder.afterSuccessfulCommand(new FindCommand(new FieldContainsKeywordsPredicate(List.of("alice"))), false);
-        assertTrue(recorder.isAnyDirty(new AddressBook(), DEFAULT_GUI_SETTINGS));
+        // only GUI settings are considered metadata for persistence
+        GuiSettings updated = new GuiSettings(1024, 768, 10, 10);
+        recorder.afterGuiSettingsChanged(updated);
+        assertTrue(recorder.isAnyDirty(new AddressBook(), updated));
 
-        recorder.afterSuccessfulCommand(new ListCommand(), false);
+        recorder.afterGuiSettingsChanged(DEFAULT_GUI_SETTINGS);
         assertFalse(recorder.isAnyDirty(new AddressBook(), DEFAULT_GUI_SETTINGS));
     }
 
@@ -190,17 +196,15 @@ public class SessionRecorderTest {
     }
 
     @Test
-    public void searchKeywords_restoredFromSessionData() {
+    public void sessionData_restoredDoesNotIncludeKeywords() {
         AddressBook ab = createSampleAddressBook();
-        List<String> keywords = List.of("alice", "bob");
         SessionData previous = new SessionData(
                 Instant.parse("2024-01-01T10:10:00Z"),
                 ab,
-                keywords,
                 DEFAULT_GUI_SETTINGS);
         SessionRecorder recorder = new SessionRecorder(ab, DEFAULT_GUI_SETTINGS, Optional.of(previous));
         SessionData snapshot = recorder.buildSnapshot(ab, DEFAULT_GUI_SETTINGS);
-        assertEquals(keywords, snapshot.getSearchKeywords());
+        assertEquals(DEFAULT_GUI_SETTINGS, snapshot.getGuiSettings());
     }
 }
 

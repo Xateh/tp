@@ -1,8 +1,6 @@
 package seedu.address.storage;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,19 +21,15 @@ class JsonSerializableSession {
     private final String formatVersion;
     private final String savedAt;
     private final JsonSerializableAddressBook addressBook;
-    private final List<String> searchKeywords;
     private final JsonGuiSettings guiSettings;
-
     @JsonCreator
     JsonSerializableSession(@JsonProperty("formatVersion") String formatVersion,
             @JsonProperty("savedAt") String savedAt,
             @JsonProperty("addressBook") JsonSerializableAddressBook addressBook,
-            @JsonProperty("searchKeywords") List<String> searchKeywords,
             @JsonProperty("guiSettings") JsonGuiSettings guiSettings) {
         this.formatVersion = formatVersion;
         this.savedAt = savedAt;
         this.addressBook = addressBook;
-        this.searchKeywords = searchKeywords != null ? new ArrayList<>(searchKeywords) : new ArrayList<>();
         this.guiSettings = guiSettings;
     }
 
@@ -43,7 +37,8 @@ class JsonSerializableSession {
         this.formatVersion = source.getFormatVersion();
         this.savedAt = source.getSavedAt().toString();
         this.addressBook = new JsonSerializableAddressBook(source.getAddressBook());
-        this.searchKeywords = new ArrayList<>(source.getSearchKeywords());
+        // Intentionally do not persist search keywords. They are transient and should not be
+        // stored in the session file.
         this.guiSettings = new JsonGuiSettings(source.getGuiSettings());
     }
 
@@ -74,7 +69,8 @@ class JsonSerializableSession {
         AddressBook modelAddressBook = addressBook.toModelType();
         GuiSettings modelGuiSettings = guiSettings.toModelType();
 
-        return new SessionData(parsedSavedAt, modelAddressBook, searchKeywords, modelGuiSettings);
+        // Do not restore search keywords from storage — keywords are transient and not persisted.
+        return new SessionData(parsedSavedAt, modelAddressBook, modelGuiSettings);
     }
 
     private static class JsonGuiSettings {
