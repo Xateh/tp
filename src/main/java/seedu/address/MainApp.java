@@ -36,7 +36,7 @@ import seedu.address.ui.UiManager;
  */
 public class MainApp extends Application {
 
-    public static final Version VERSION = new Version(0, 2, 2, true);
+    public static final Version VERSION = new Version(1, 5, 0, true);
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
     protected Ui ui;
@@ -61,7 +61,7 @@ public class MainApp extends Application {
         Path addressBookPath = userPrefs.getAddressBookFilePath();
         AddressBookStorage addressBookStorage = new JsonAddressBookStorage(addressBookPath);
         CommandHistoryStorage commandHistoryStorage =
-            lifecycleManager.createCommandHistoryStorage(userPrefs.getCommandHistoryFilePath());
+                lifecycleManager.createCommandHistoryStorage(userPrefs.getCommandHistoryFilePath());
         SessionStorage sessionStorage = lifecycleManager.createSessionStorage(addressBookPath);
         this.storage = new StorageManager(addressBookStorage, userPrefsStorage, commandHistoryStorage, sessionStorage);
 
@@ -77,12 +77,12 @@ public class MainApp extends Application {
     }
 
     /**
-     * Returns a {@code ModelManager} with the data from {@code storage}'s address book and {@code userPrefs}. <br>
-     * The data from the sample address book will be used instead if {@code storage}'s address book is not found,
-     * or an empty address book will be used instead if errors occur when reading {@code storage}'s address book.
+     * Returns a {@code ModelManager} with the data from {@code storage}'s address book and {@code userPrefs}. <br> The
+     * data from the sample address book will be used instead if {@code storage}'s address book is not found, or an
+     * empty address book will be used instead if errors occur when reading {@code storage}'s address book.
      */
     private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs,
-            Optional<SessionData> restoredSession) {
+                                   Optional<SessionData> restoredSession) {
         return lifecycleManager.initModel(storage, userPrefs, restoredSession);
     }
 
@@ -91,9 +91,8 @@ public class MainApp extends Application {
     }
 
     /**
-     * Returns a {@code Config} using the file at {@code configFilePath}. <br>
-     * The default file path {@code Config#DEFAULT_CONFIG_FILE} will be used instead
-     * if {@code configFilePath} is null.
+     * Returns a {@code Config} using the file at {@code configFilePath}. <br> The default file path
+     * {@code Config#DEFAULT_CONFIG_FILE} will be used instead if {@code configFilePath} is null.
      */
     protected Config initConfig(Path configFilePath) {
         Config initializedConfig;
@@ -130,9 +129,8 @@ public class MainApp extends Application {
     }
 
     /**
-     * Returns a {@code UserPrefs} using the file at {@code storage}'s user prefs file path,
-     * or a new {@code UserPrefs} with default configuration if errors occur when
-     * reading from the file.
+     * Returns a {@code UserPrefs} using the file at {@code storage}'s user prefs file path, or a new {@code UserPrefs}
+     * with default configuration if errors occur when reading from the file.
      */
     protected UserPrefs initPrefs(UserPrefsStorage storage) {
         Path prefsFilePath = storage.getUserPrefsFilePath();
