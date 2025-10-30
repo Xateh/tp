@@ -29,6 +29,7 @@ public class JsonSessionStorage implements SessionStorage {
     private static final DateTimeFormatter FILE_NAME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss-SSS");
 
+    private static final String INDEX_FILE_NAME = ".session-index";
     private final Path sessionDirectory;
 
     public JsonSessionStorage(Path sessionDirectory) {
@@ -84,59 +85,80 @@ public class JsonSessionStorage implements SessionStorage {
     public void saveSession(SessionData sessionData) throws IOException {
         requireNonNull(sessionData);
         Files.createDirectories(sessionDirectory);
-        // Defensive dedup: avoid writing a new session file when the persisted payload
-        // (excluding the savedAt timestamp) is identical to the latest persisted file.
-        JsonSerializableSession candidate = new JsonSerializableSession(sessionData);
+        // Build a canonical signature of the material persisted payload (formatVersion, addressBook, guiSettings).
+        String candidateSignature = computeMaterialSignature(sessionData);
 
-        // Find the most recently-modified JSON file in the session directory, if any.
-        Optional<Path> latest = Optional.empty();
-        try (Stream<Path> stream = Files.list(sessionDirectory)) {
-            latest = stream.filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().endsWith(".json"))
-                    .max((a, b) -> {
-                        try {
-                            return Files.getLastModifiedTime(a).compareTo(Files.getLastModifiedTime(b));
-                        } catch (IOException e) {
-                            return 0;
-                        }
-                    });
-        }
+        Path indexPath = sessionDirectory.resolve(INDEX_FILE_NAME);
 
-        if (latest.isPresent()) {
+        // If an index exists, compare signatures and skip write when identical.
+        if (Files.exists(indexPath) && Files.isRegularFile(indexPath)) {
             try {
-                Optional<JsonSerializableSession> existingOpt = JsonUtil.readJsonFile(latest.get(),
-                        JsonSerializableSession.class);
-                if (existingOpt.isPresent()) {
-                    JsonSerializableSession existing = existingOpt.get();
-
-                    // Compare the material parts of the session (formatVersion, addressBook, guiSettings)
-                    // and skip writing if they are identical to the latest persisted snapshot.
-                    try {
-                        SessionData existingSession = existing.toModelType();
-                        String candidateFormat = sessionData.getFormatVersion();
-                        String existingFormat = existingSession.getFormatVersion();
-                        boolean sameFormat = (candidateFormat == null) ? (existingFormat == null)
-                                : candidateFormat.equals(existingFormat);
-                        if (sameFormat
-                                && sessionData.getAddressBook().equals(existingSession.getAddressBook())
-                                && sessionData.getGuiSettings().equals(existingSession.getGuiSettings())) {
-                            logger.info("Skipping session save: payload unchanged (ignoring savedAt)");
-                            return;
-                        }
-                    } catch (seedu.address.commons.exceptions.IllegalValueException ive) {
-                        // If the existing file cannot be converted to model types, fall back to writing.
-                        logger.warning("Existing session file invalid for comparison: " + ive.getMessage());
-                    }
+                String existingSignature = Files.readString(indexPath).trim();
+                if (!existingSignature.isEmpty() && existingSignature.equals(candidateSignature)) {
+                    logger.info("Skipping session save: payload unchanged (index match)");
+                    return;
                 }
-            } catch (seedu.address.commons.exceptions.DataLoadingException e) {
-                logger.warning("Could not read latest session file for dedup comparison: " + e.getMessage());
-            } catch (Exception e) {
-                logger.warning("Unexpected error when comparing session payloads: " + e.getMessage());
+            } catch (IOException e) {
+                logger.warning("Could not read session index for dedup comparison: " + e.getMessage());
+                // fall through and write
             }
         }
 
+        // Not a no-op: write session and update index.
+        JsonSerializableSession candidate = new JsonSerializableSession(sessionData);
         Path target = sessionDirectory.resolve(createFileName(sessionData));
         JsonUtil.saveJsonFile(candidate, target);
+
+        try {
+            Files.writeString(indexPath, candidateSignature);
+        } catch (IOException e) {
+            logger.warning("Failed to update session index: " + e.getMessage());
+        }
+    }
+
+    private String computeMaterialSignature(SessionData sessionData) {
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper =
+                    new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules();
+
+            com.fasterxml.jackson.databind.node.ObjectNode root = mapper.createObjectNode();
+            if (sessionData.getFormatVersion() != null) {
+                root.put("formatVersion", sessionData.getFormatVersion());
+            } else {
+                root.putNull("formatVersion");
+            }
+
+            // Use the existing JsonSerializableAddressBook to get a stable addressbook JSON shape
+            JsonSerializableAddressBook jBook = new JsonSerializableAddressBook(sessionData.getAddressBook());
+            // Use JsonUtil to serialize the address book in a consistent way and parse back to a JsonNode
+            root.set("addressBook", mapper.readTree(JsonUtil.toJsonString(jBook)));
+
+            // Build guiSettings node deterministically
+            com.fasterxml.jackson.databind.node.ObjectNode guiNode = mapper.createObjectNode();
+            guiNode.put("windowWidth", sessionData.getGuiSettings().getWindowWidth());
+            guiNode.put("windowHeight", sessionData.getGuiSettings().getWindowHeight());
+            if (sessionData.getGuiSettings().getWindowCoordinates() != null) {
+                guiNode.put("windowX", sessionData.getGuiSettings().getWindowCoordinates().x);
+                guiNode.put("windowY", sessionData.getGuiSettings().getWindowCoordinates().y);
+            }
+            root.set("guiSettings", guiNode);
+
+            String payload = mapper.writer()
+                    .without(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT)
+                    .writeValueAsString(root);
+
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(payload.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hash) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            // In case of any failure, fall back to a best-effort string so dedup won't erroneously skip
+            logger.warning("Failed to compute session signature: " + e.getMessage());
+            return String.valueOf(sessionData.hashCode());
+        }
     }
 
     private String createFileName(SessionData sessionData) {

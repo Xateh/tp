@@ -128,11 +128,12 @@ public class StorageManagerTest {
         assertTrue(retrieved.getSearchKeywords().isEmpty());
         assertEquals(new AddressBook(newerSession.getAddressBook()), new AddressBook(retrieved.getAddressBook()));
 
-        long fileCount;
+        long sessionFileCount;
         try (var stream = Files.list(storageManager.getSessionDirectory())) {
-            fileCount = stream.count();
+            sessionFileCount = stream.filter(path -> path.getFileName().toString().startsWith("session-"))
+                    .count();
         }
-        assertEquals(2, fileCount);
+        assertEquals(2, sessionFileCount);
     }
 
     @Test
