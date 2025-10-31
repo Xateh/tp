@@ -68,7 +68,7 @@ public class DeleteCommandTest {
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
 
         expectedModel.deletePerson(personToDelete);
-        showNoPerson(expectedModel); // keep your original expectation on the filtered list
+        showNoPerson(expectedModel);
 
         assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
     }
@@ -124,12 +124,11 @@ public class DeleteCommandTest {
         String expectedMessage = String.format(DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
                 Messages.format(personToDelete));
 
-        // expected: victim deleted, holder link removed
+
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
 
-        // Re-find the corresponding instances INSIDE expectedModel
         Person holderInExpected = expectedModel.getAddressBook().getPersonList().stream()
-                .filter(p -> p.isSamePerson(holder)) // or p::isSamePerson if available
+                .filter(p -> p.isSamePerson(holder))
                 .findFirst().orElseThrow();
         Person victimInExpected = expectedModel.getAddressBook().getPersonList().stream()
                 .filter(p -> p.isSamePerson(personToDelete))
