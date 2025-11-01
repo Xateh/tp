@@ -803,8 +803,6 @@ testers are expected to do more *exploratory* testing.
    1. Re-launch the app by double-clicking the jar file.<br>
        Expected: The most recent window size and location is retained.
 
-1. _{ more test cases …​ }_
-
 ### Deleting a person
 
 1. Deleting a person while all persons are being shown
@@ -820,14 +818,47 @@ testers are expected to do more *exploratory* testing.
    1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
       Expected: Similar to previous.
 
-1. _{ more test cases …​ }_
+### Managing custom fields
 
-### Saving data
+1. Adding or updating a custom field for a person
+
+   1. Prerequisites: List all persons using the `list` command. Ensure the target person does not already have the field to be added.
+
+   1. Test case: `field 1 /nickname:"Alpha Client"`<br>
+      Expected: Nickname field with value `Alpha Client` is shown for the first contact. Command result indicates the field was added.
+
+   1. Test case: `field 1 /nickname:"Priority Client"`<br>
+      Expected: Nickname field for the first contact is updated to `Priority Client`. Command result indicates the field was updated.
+
+   1. Test case: `field 1 /name:John`<br>
+      Expected: No changes are applied. Error message states that the field name is reserved.
+
+1. Removing a custom field from a person
+
+   1. Prerequisites: Ensure the target person has at least one custom field (e.g., add one using the previous test case).
+
+   1. Test case: `field 1 /nickname`<br>
+      Expected: Nickname field is removed from the first contact. Command result reports the field removal.
+
+   1. Test case: `field 1 /nickname` (when the field is already missing)<br>
+      Expected: No changes are applied. Command result indicates no field changes were made.
+
+   1. Test case: `field 0 /nickname`<br>
+      Expected: No changes are applied. Error message indicates the index is invalid.
+
+1. Handling invalid custom field values
+
+   1. Prerequisites: Ensure at least one person is listed.
+
+   1. Test case: `field 1 /nickname:`<br>
+      Expected: No changes are applied. Error message indicates the field value cannot be blank.
+
+   1. Test case: `field 1 /`<br>
+      Expected: No changes are applied. Error message indicates the field name cannot be blank.
+
+ ### Saving data
 
 1. Dealing with missing/corrupted data files
 
    1. _{explain how to simulate a missing/corrupted file, and the expected behavior}_
-
-1. _{ more test cases …​ }_
-
 
