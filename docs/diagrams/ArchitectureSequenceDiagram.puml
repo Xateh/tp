@@ -42,15 +42,27 @@ persisted (address book, search keywords, GUI settings) differ from the last
 persisted snapshot. The timestamp (`savedAt`) is ignored for this comparison;
 command-result-only changes do not make the session dirty.
 end note
+
 logic -[LOGIC_COLOR]> storage : saveSession(sessionData)
 activate storage STORAGE_COLOR
+
 storage -[STORAGE_COLOR]> storage : Save session file
+activate storage STORAGE_COLOR_T1
+storage --[STORAGE_COLOR]> storage
+deactivate storage
+storage --[STORAGE_COLOR]> logic
 deactivate storage
 
 note over logic,storage: Logic also persists command history
+
 logic -[LOGIC_COLOR]> storage : saveCommandHistory(commandHistory)
 activate storage STORAGE_COLOR
+
 storage -[STORAGE_COLOR]> storage : Save command history file
+activate storage STORAGE_COLOR_T1
+storage --[STORAGE_COLOR]> storage
+deactivate storage
+storage --[STORAGE_COLOR]> logic
 deactivate storage
 
 logic --[LOGIC_COLOR]> ui
