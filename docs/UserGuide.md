@@ -269,7 +269,7 @@ Examples:
 
 Sets, updates or removes one or more **custom field values** for the specified person in the address book.
 
-Format: `field <index> [/<key>[:<value>]*]+`
+Format: `field <index> [/<key>[:<value>]]+`
 
 **Parameters**
 
@@ -280,9 +280,11 @@ Format: `field <index> [/<key>[:<value>]*]+`
 * #r#At least one optional field must be provided.##
 * `<key>` (word): name of custom field
 * `<value>` (string): value of custom field
+  * Each `key` accepts at most one associated `value` in a command. A command like `field 1 /brand:nike:adidas` will be **rejected**.
   * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
   * Custom field `key` is **case-sensitive**; `key` is not equivalent to `Key`.
   * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
+    * While you **can** do `field 1 /brand:nike /brand:adidas`, the person at index 1 will only be updated with the custom field `brand: nike`. `/brand: adidas` will be ignored.
   * Omitting `value` (e.g. `/nickname`) **removes** the custom field identified by `key` if it exists.
   * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
   * `key` cannot contain spaces, even if wrapped in straight double quotes; A `key` like `"Asset Class"` will be rejected, whereas an alternative like `AssetClass` will be accepted.
@@ -487,7 +489,7 @@ Action     | Format, Examples
 **Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag` 
 **Modify Tag**    | `tag <index> [(+\|-)<tag>]+` <br> e.g., `tag 2 +friend -villain +cool -enemy`                                                                                                                          
 **View/Edit Info** | `info <index>` <br> e.g., `info 2`                                                                                                                                                                     
-**Field**  | `field <index> [/<key>[:<value>]*]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
+**Field**  | `field <index> [/<key>[:<value>]]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
 **Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`                                                                                                                                             
 **History** | `history`                                                                                                                                                                                              
 **Delete** | `delete <index>`<br> e.g., `delete 3`                                                                                                                                                                  
