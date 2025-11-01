@@ -142,6 +142,10 @@ Shows a message explaining how to access the help page.
 
 Format: `help`
 
+_Additional notes:_
+
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `help 123` are treated the same as `help` and open the help window without error.
+
 ### Adding a person: `add`
 
 Adds a person to the address book.
@@ -381,6 +385,10 @@ Format: `delete <index>`
 * `list` followed by `delete 2` deletes the 2nd person in the address book.
 * `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
 
+_Additional notes:_
+
+* The command ignores any extra arguments that follow the index. For example, `delete 2 extra words` will delete the 2nd person exactly as if `delete 2` had been entered.
+
 ### Clearing all entries : `clear`
 
 Clears all entries from the address book.
@@ -392,6 +400,10 @@ Format: `clear`
 Exits the program.
 
 Format: `exit`
+
+_Additional notes:_
+
+* Any extra words typed after `exit` are ignored. For instance, `exit now` will still close the application.
 
 ### Saving the data
 
