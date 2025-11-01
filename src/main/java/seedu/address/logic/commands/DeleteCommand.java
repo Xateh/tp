@@ -2,7 +2,6 @@ package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,8 +46,8 @@ public class DeleteCommand extends Command {
 
         Person personToDelete = lastShownList.get(targetIndex.getZeroBased());
 
-        // Make defensive copy of current shown list in ui
-        List<Person> currentList = new ArrayList<>(lastShownList);
+        // Iterate through all persons in full list
+        List<Person> currentList = model.getAddressBook().getPersonList();
         for (Person p : currentList) {
             if (p.isSamePerson(personToDelete)) {
                 continue;
