@@ -28,12 +28,16 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.person.Address;
+import seedu.address.model.person.Email;
 import seedu.address.model.person.FieldContainsKeywordsPredicate;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.Phone;
+import seedu.address.model.person.builder.PersonBuilder;
 import seedu.address.model.tag.Tag;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
-import seedu.address.testutil.PersonBuilder;
 
 /**
  * Contains integration tests (interaction with the Model) and unit tests for EditCommand.
@@ -44,7 +48,9 @@ public class EditCommandTest {
 
     @Test
     public void execute_allFieldsSpecifiedUnfilteredList_success() {
-        Person editedPerson = new PersonBuilder().build();
+        Person editedPerson = new PersonBuilder().withName(new Name("test")).withAddress(new Address("test1"))
+                .withEmail(new Email("test@example.com"))
+                .withPhone(new Phone("99999999")).withTags(Set.of()).build();
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(editedPerson).build();
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
 
@@ -62,8 +68,8 @@ public class EditCommandTest {
         Person lastPerson = model.getFilteredPersonList().get(indexLastPerson.getZeroBased());
 
         PersonBuilder personInList = new PersonBuilder(lastPerson);
-        Person editedPerson = personInList.withName(VALID_NAME_BOB).withPhone(VALID_PHONE_BOB)
-                .withTags(VALID_TAG_HUSBAND).build();
+        Person editedPerson = personInList.withName(new Name(VALID_NAME_BOB)).withPhone(new Phone(VALID_PHONE_BOB))
+                .withTags(Set.of(new Tag(VALID_TAG_HUSBAND))).build();
 
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB)
                 .withPhone(VALID_PHONE_BOB).withTags(VALID_TAG_HUSBAND).build();
@@ -94,7 +100,7 @@ public class EditCommandTest {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
 
         Person personInFilteredList = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
-        Person editedPerson = new PersonBuilder(personInFilteredList).withName(VALID_NAME_BOB).build();
+        Person editedPerson = new PersonBuilder(personInFilteredList).withName(new Name(VALID_NAME_BOB)).build();
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON,
                 new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).build());
 
@@ -115,7 +121,7 @@ public class EditCommandTest {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
 
         Person personInFilteredList = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
-        Person editedPerson = new PersonBuilder(personInFilteredList).withName(VALID_NAME_BOB).build();
+        Person editedPerson = new PersonBuilder(personInFilteredList).withName(new Name(VALID_NAME_BOB)).build();
 
         // edit so that the person's name no longer matches the active filter predicate
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON,
@@ -139,7 +145,7 @@ public class EditCommandTest {
     public void execute_removeAllTags_success() {
         // remove all tags from the first person
         Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
-        Person editedPerson = new PersonBuilder(personToEdit).withTags().build();
+        Person editedPerson = new PersonBuilder(personToEdit).withTags(Set.of()).build();
 
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON,
                 new EditPersonDescriptorBuilder().withTags().build());
@@ -195,7 +201,7 @@ public class EditCommandTest {
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
 
         Person expectedEditedPerson = new PersonBuilder(personWithCustomFields)
-                .withPhone(VALID_PHONE_BOB)
+                .withPhone(new Phone(VALID_PHONE_BOB))
                 .build();
         String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS,
                 Messages.format(expectedEditedPerson));
@@ -321,6 +327,80 @@ public class EditCommandTest {
     }
 
     @Test
+    public void execute_editPersonWithNoLinks_keepsOthersUnchanged() {
+        // Person 1 has no links by default in TypicalPersons
+        Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+
+        // Edit only the name
+        String newName = "test";
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(personToEdit).withName(newName).build();
+        EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
+
+        Person expectedEdited = new PersonBuilder(personToEdit).withName(new Name(newName)).build();
+        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS,
+                Messages.format(expectedEdited));
+
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        expectedModel.setPerson(personToEdit, expectedEdited);
+
+        // No extra updateFilteredPersonList() is called; setPerson() should be sufficient
+        assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+
+        // Sanity: edited person in actual model matches expected, and links remain empty
+        Person actualEdited = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        assertEquals(expectedEdited.getLinks(), actualEdited.getLinks());
+    }
+
+    @Test
+    public void execute_editPerson_cascadesLinkUpdates() {
+        // Get two existing persons from the model
+        Person p1 = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person p2 = model.getFilteredPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
+
+        // Create a link: p1 (holder) -> friend -> p2 (target)
+        Link link = new Link(p1, p2, "friend");
+        Person p1WithLink = new PersonBuilder(p1).withLinks(Set.of(link)).build();
+        model.setPerson(p1, p1WithLink);
+
+        // Edit the target's name (p2)
+        String newName = "Updated Target";
+        EditCommand editCommand = new EditCommand(INDEX_SECOND_PERSON,
+                new EditPersonDescriptorBuilder().withName(newName).build());
+
+        Person editedP2 = new PersonBuilder(p2).withName(new Name(newName)).build();
+        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedP2));
+
+        // Build expected model FROM current address book (already has p1WithLink),
+        // then find the corresponding instances inside expectedModel.
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+
+        // Get holder & target instances that exist inside expectedModel
+        Person holderInExpected = expectedModel.getAddressBook().getPersonList().stream()
+                .filter(px -> px.isSamePerson(p1)) // will resolve to p1WithLink instance in expectedModel
+                .findFirst().orElseThrow();
+
+        Person targetInExpected = expectedModel.getAddressBook().getPersonList().stream()
+                .filter(px -> px.isSamePerson(p2))
+                .findFirst().orElseThrow();
+
+        // Prepare edited target for expectedModel (same identity as targetInExpected, new name)
+        Person editedTargetInExpected = new PersonBuilder(targetInExpected)
+                .withName(new Name(newName))
+                .build();
+
+        // Update the link on the holder to point at the edited target
+        Person holderAfterCascadeInExpected = new PersonBuilder(holderInExpected)
+                .withLinks(Set.of(new Link(holderInExpected, editedTargetInExpected, "friend")))
+                .build();
+
+        // Apply changes to expectedModel using the instances that actually exist inside it
+        expectedModel.setPerson(targetInExpected, editedTargetInExpected);
+        expectedModel.setPerson(holderInExpected, holderAfterCascadeInExpected);
+
+        assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
     public void toStringMethod() {
         Index index = Index.fromOneBased(1);
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
@@ -329,5 +409,4 @@ public class EditCommandTest {
                 + editPersonDescriptor + "}";
         assertEquals(expected, editCommand.toString());
     }
-
 }
