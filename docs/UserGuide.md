@@ -78,7 +78,7 @@ Options are optional settings to customise your command. They always come _after
     - **Example:** `add "Finish report" /priority:high`
     - If the value has spaces, wrap the value in quotes: `add "New event" /due:"tomorrow at 5"`
 
-#g#To avoid cluttering the syntax for each command, options may be specified in a particular order in the formats given below for better readability. But, it is always fine to specify the options in **any order**.##
+#g#To avoid cluttering the syntax for each command, options may be specified in a particular order in the formats given below for better readability. However, it is always fine to specify the options in **any order**.##
 
 When you look at the help for a command, you'll see this notation:
 
@@ -114,7 +114,7 @@ _Example:_ `tag <index>+ [/tag:<tag>]+` means you must provide at least one inde
 By default:
 - #r#The number of parameters are fixed for commands and should be strictly adhered to. Using a number of parameters that does not conform to the requirements of the command format is **undefined behaviour** (we leave it to individual commands to decide what to do). In most cases, this is an error.##
 - #m#Some commands may gracefully handle extraneous parameters if it is sensible to do so, but this behaviour _should not be relied on_.##
-- #m#Extraneous options are *always* ignored, unless the command allows variable option keys (it cannot tell what the difference is between a legitimate option key and one that is extraneous.##
+- #m#Extraneous options are *always* ignored, unless the command allows variable option keys (it cannot tell what the difference is between a legitimate option key and one that is extraneous).##
 - #m#If an option name is specified multiple times when the command expects it to be specified only once, it will accept the first value specified.##
 
 </box>
@@ -422,34 +422,45 @@ If you observe unexpected behaviour around session restoration or command histor
 2. Check the `data/sessions/` folder for session files. Corrupted or invalid session files are ignored at startup.
 3. If needed, remove problematic session files and restart the app — a new snapshot will be created when you exit.
 
-### Editing the data file
+### Editing the data files
 
-AssetSphere data are saved automatically as a JSON file under the `data/sessions/`. Advanced users are welcome to update data directly by editing that data file.
+The main address book data file is saved as JSON at
 
-Caution:
+```
+[JAR file location]/data/addressbook.json
+```
 
-- Do not edit the JSON file while the application is running. If the file becomes malformed, the app may discard the data or fail to load it correctly.
+In addition, session snapshots (containing address book contacts, and GUI layout) are saved under the `data/sessions/` subdirectory next to the main data file, for example:
+
+```
+[JAR file location]/data/sessions/session-2025-10-18T12-34-56-789-Asia-Singapore.json
+```
+
+Advanced users may edit these JSON files while the application is not running, but proceed with caution: malformed edits can cause the app to discard data or fail to load. Always make a backup before editing.
 
 ### Finding the command history file
-Command history data are saved automatically as a JSON file `[JAR file location]/data/commandhistory.json`. Advanced users are welcome to update data directly by editing that data file.
 
-The file is in JSON format and contains an array of recorded commands. Example structure:
+Command history is persisted on normal exit to:
 
-  ```json
-  {
-    "commandhistory": {
-      "commands": [
-        "add n/John Doe p/98765432",
-        "list",
-        "delete 2"
-      ]
-    }
-  }
-  ```
+```
+[JAR file location]/data/commandhistory.json
+```
+
+The file is a JSON object that contains the recorded commands. Example structure (actual format contains a single `commands` array):
+
+```json
+{
+  "commands": [
+    "add \"John Doe\" 98765432 \"John street, block 123, #01-01\" \"johnd@example.com\"",
+    "list",
+    "delete 2"
+  ]
+}
+```
 
 Caution:
 
-- Do not edit the JSON file while the application is running. If the file becomes malformed, the app may discard the history or fail to load it correctly.
+- Do not edit these JSON files while the application is running. If the file becomes malformed, the app may discard the data or fail to load it correctly.
 
 <box type="warning" seamless>
 
