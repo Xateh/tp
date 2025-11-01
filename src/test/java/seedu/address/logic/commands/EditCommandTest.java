@@ -400,6 +400,196 @@ public class EditCommandTest {
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
     }
 
+    /**
+     * Target (p2) is linked from TWO different holders (p1, p3).
+     * After editing p2's name, both holders' links should point to the edited p2.
+     */
+    @Test
+    public void execute_editTarget_updatesMultipleHolders() {
+        Person p1 = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person p2 = model.getFilteredPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
+        // create a third person (clone the last with a new name to ensure uniqueness)
+        Person p3 = new PersonBuilder().withName(new Name("test")).withAddress(new Address("test1"))
+                .withEmail(new Email("test@example.com"))
+                .withPhone(new Phone("99999999")).withTags(Set.of()).build();
+        model.addPerson(p3);
+
+        // Setup: p1 --mentor--> p2,  p3 --coach--> p2
+        Person p1WithLink = new PersonBuilder(p1).withLinks(Set.of(new Link(p1, p2, "mentor"))).build();
+        model.setPerson(p1, p1WithLink);
+        Person p3WithLink = new PersonBuilder(p3).withLinks(Set.of(new Link(p3, p2, "coach"))).build();
+        model.setPerson(p3, p3WithLink);
+
+        // Edit target p2's name
+        String newName = "Edited Target";
+        EditCommand cmd = new EditCommand(Index.fromOneBased(2),
+                new EditPersonDescriptorBuilder().withName(newName).build());
+        Person editedP2 = new PersonBuilder(p2).withName(new Name(newName)).build();
+        String expectedMsg = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedP2));
+
+        // expectedModel from current state (already has links set up)
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+
+        // Resolve instances inside expectedModel
+        Person p1Exp = expectedModel.getAddressBook().getPersonList()
+                .stream().filter(px -> px.isSamePerson(p1)).findFirst().orElseThrow();
+        Person p2Exp = expectedModel.getAddressBook().getPersonList()
+                .stream().filter(px -> px.isSamePerson(p2)).findFirst().orElseThrow();
+        Person p3Exp = expectedModel.getAddressBook().getPersonList()
+                .stream().filter(px -> px.isSamePerson(p3)).findFirst().orElseThrow();
+
+        Person editedP2Exp = new PersonBuilder(p2Exp).withName(new Name(newName)).build();
+
+        Person p1After = new PersonBuilder(p1Exp)
+                .withLinks(Set.of(new Link(p1Exp, editedP2Exp, "mentor")))
+                .build();
+        Person p3After = new PersonBuilder(p3Exp)
+                .withLinks(Set.of(new Link(p3Exp, editedP2Exp, "coach")))
+                .build();
+
+        // Apply in expectedModel
+        expectedModel.setPerson(p2Exp, editedP2Exp);
+        expectedModel.setPerson(p1Exp, p1After);
+        expectedModel.setPerson(p3Exp, p3After);
+
+        assertCommandSuccess(cmd, model, expectedMsg, expectedModel);
+    }
+
+    /**
+     * Holder (p1) has links to TWO different targets (p2, p3).
+     * After editing p1's name, both links held by others should point to edited p1.
+     */
+    @Test
+    public void execute_editHolder_updatesMultipleTargets() {
+        Person p1 = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person p2 = model.getFilteredPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
+        // create a third target
+        Person p3 = new PersonBuilder().withName(new Name("test")).withAddress(new Address("test1"))
+                .withEmail(new Email("test@example.com"))
+                .withPhone(new Phone("99999999")).withTags(Set.of()).build();
+        model.addPerson(p3);
+
+        // Store links on targets (so cascade must update them):
+        // p1 --advisor--> p2, and p1 --lawyer--> p3 (links stored on p2 and p3)
+        Person p2WithLink = new PersonBuilder(p2).withLinks(Set.of(new Link(p1, p2, "advisor"))).build();
+        model.setPerson(p2, p2WithLink);
+        Person p3WithLink = new PersonBuilder(p3).withLinks(Set.of(new Link(p1, p3, "lawyer"))).build();
+        model.setPerson(p3, p3WithLink);
+
+        // Edit holder p1's name
+        String newName = "Edited Holder";
+        EditCommand cmd = new EditCommand(INDEX_FIRST_PERSON,
+                new EditPersonDescriptorBuilder().withName(newName).build());
+        Person editedP1 = new PersonBuilder(p1).withName(new Name(newName)).build();
+        String expectedMsg = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedP1));
+
+        // expectedModel from current state (already has links)
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+
+        // Resolve instances
+        Person p1Exp = expectedModel.getAddressBook().getPersonList()
+                .stream().filter(px -> px.isSamePerson(p1)).findFirst().orElseThrow();
+        Person p2Exp = expectedModel.getAddressBook().getPersonList()
+                .stream().filter(px -> px.isSamePerson(p2)).findFirst().orElseThrow();
+        Person p3Exp = expectedModel.getAddressBook().getPersonList()
+                .stream().filter(px -> px.isSamePerson(p3)).findFirst().orElseThrow();
+
+        Person editedP1Exp = new PersonBuilder(p1Exp).withName(new Name(newName)).build();
+
+        Person p2After = new PersonBuilder(p2Exp)
+                .withLinks(Set.of(new Link(editedP1Exp, p2Exp, "advisor")))
+                .build();
+        Person p3After = new PersonBuilder(p3Exp)
+                .withLinks(Set.of(new Link(editedP1Exp, p3Exp, "lawyer")))
+                .build();
+
+        // Apply in expectedModel
+        expectedModel.setPerson(p1Exp, editedP1Exp);
+        expectedModel.setPerson(p2Exp, p2After);
+        expectedModel.setPerson(p3Exp, p3After);
+
+        assertCommandSuccess(cmd, model, expectedMsg, expectedModel);
+    }
+
+    /**
+     * Editing an unrelated person (p3) must not touch existing links between p1 and p2.
+     */
+    @Test
+    public void execute_editUnrelatedPerson_doesNotAffectExistingLinks() {
+        Person p1 = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person p2 = model.getFilteredPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
+        Person p3 = new PersonBuilder().withName(new Name("test")).withAddress(new Address("test1"))
+                .withEmail(new Email("test@example.com"))
+                .withPhone(new Phone("99999999")).withTags(Set.of()).build();
+        model.addPerson(p3);
+
+        // p1 --friend--> p2 (stored on p1)
+        Person p1WithLink = new PersonBuilder(p1).withLinks(Set.of(new Link(p1, p2, "friend"))).build();
+        model.setPerson(p1, p1WithLink);
+
+        // Edit unrelated p3 (shouldn't change p1<->p2 link)
+        String newName = "Edited Unrelated";
+        EditCommand cmd = new EditCommand(Index.fromOneBased(model.getFilteredPersonList().size()),
+                new EditPersonDescriptorBuilder().withName(newName).build());
+        Person editedP3 = new PersonBuilder(p3).withName(new Name(newName)).build();
+        String expectedMsg = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedP3));
+
+        // expectedModel mirrors: only p3 changes; link stays the same
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        Person p3Exp = expectedModel.getAddressBook().getPersonList()
+                .stream().filter(px -> px.isSamePerson(p3)).findFirst().orElseThrow();
+        Person editedP3Exp = new PersonBuilder(p3Exp).withName(new Name(newName)).build();
+        expectedModel.setPerson(p3Exp, editedP3Exp);
+
+        // p1 in expected should still have the same link to p2
+        Person p1Exp = expectedModel.getAddressBook().getPersonList()
+                .stream().filter(px -> px.isSamePerson(p1)).findFirst().orElseThrow();
+        assertTrue(p1Exp.getLinks().stream().anyMatch(l ->
+                l.getLinker().isSamePerson(p1Exp)
+                        && l.getLinkee().isSamePerson(expectedModel.getAddressBook().getPersonList().stream()
+                        .filter(px -> px.isSamePerson(p2)).findFirst().orElseThrow())
+                        && l.getLinkName().equals("friend")));
+
+        assertCommandSuccess(cmd, model, expectedMsg, expectedModel);
+    }
+
+    /**
+     * Editing a non-link field (e.g., phone) should not alter links referencing the person.
+     */
+    @Test
+    public void execute_editNonLinkField_preservesLinks() {
+        Person p1 = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person p2 = model.getFilteredPersonList().get(INDEX_SECOND_PERSON.getZeroBased());
+
+        // Set a link stored on p2: p1 --colleague--> p2
+        Person p2WithLink = new PersonBuilder(p2).withLinks(Set.of(new Link(p1, p2, "colleague"))).build();
+        model.setPerson(p2, p2WithLink);
+
+        // Edit p2's phone only
+        String newPhone = "99999999";
+        EditCommand cmd = new EditCommand(INDEX_SECOND_PERSON,
+                new EditPersonDescriptorBuilder().withPhone(newPhone).build());
+        Person editedP2 = new PersonBuilder(p2).withPhone(new Phone(newPhone)).build();
+        String expectedMsg = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedP2));
+
+        // expectedModel from current (has link)
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        Person p1Exp = expectedModel.getAddressBook().getPersonList()
+                .stream().filter(px -> px.isSamePerson(p1)).findFirst().orElseThrow();
+        Person p2Exp = expectedModel.getAddressBook().getPersonList()
+                .stream().filter(px -> px.isSamePerson(p2)).findFirst().orElseThrow();
+
+        Person editedP2Exp = new PersonBuilder(p2Exp).withPhone(new Phone(newPhone)).build();
+        // Link should still be p1 -> p2 (edited)
+        Person p2After = new PersonBuilder(editedP2Exp)
+                .withLinks(Set.of(new Link(p1Exp, editedP2Exp, "colleague")))
+                .build();
+
+        expectedModel.setPerson(p2Exp, p2After);
+
+        assertCommandSuccess(cmd, model, expectedMsg, expectedModel);
+    }
+
     @Test
     public void toStringMethod() {
         Index index = Index.fromOneBased(1);
