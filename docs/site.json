@@ -3,9 +3,6 @@
   "titlePrefix": "AssetSphere",
   "titleSuffix": "",
   "faviconPath": "favicon.ico",
-  "style": {
-    "codeTheme": "dark"
-  },
   "ignore": [
     "_markbind/layouts/*",
     "_markbind/logs/*",
