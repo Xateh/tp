@@ -16,6 +16,10 @@
 AssetSphere builds upon the AddressBook-Level3 project maintained by the CS2103T teaching team and community contributors.
 We also acknowledge the JavaFX and PlantUML projects for providing the UI framework and diagram tooling used throughout this guide.
 
+AI was used for the following purposes:
+- Generating test cases
+- Debugging errors / issues
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Setting up, getting started**
