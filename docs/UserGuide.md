@@ -122,11 +122,11 @@ By default:
 <box type="important" seamless header="Built-in and Custom Fields">
 
 The following are **built-in fields**. There are additional restrictions on each of them:
-- `name`s must only contain letters, numbers, or spaces, and it should not be blank
-- `phone`s must only contain numbers, and it should be at least 3 digits long
-- `address`s must not be blank
-- `email`s must be of a valid email address form
-- `tag`s must only contain letters and numbers
+- `name` must only contain letters, numbers, or spaces, and it should not be blank
+- `phone` must only contain numbers, and it should be at least 3 digits long
+- `address` must not be blank
+- `email` must be of a valid email address form
+- `tag` must only contain letters and numbers
 
 For **custom fields** (those added with the `field` command):
 - Custom field names must only contain letters and numbers
