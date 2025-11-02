@@ -43,7 +43,7 @@ public class Validation {
             "Insufficient number of parameters supplied: expected at least %1$s variable parameters starting from "
                     + "index %2$s, got %3$s.";
     public static final String MESSAGE_INCORRECT_PARAMETER_KIND =
-            "Unexpected parameter kind at index $1%s: expected one of $2%s, got $3%s.";
+            "Unexpected parameter kind at index %1$s: expected one of %2$s, got %3$s.";
     public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
 
