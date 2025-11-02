@@ -16,6 +16,8 @@ import seedu.address.model.tag.Tag;
 public final class AddCommandExtractor {
     // Messages for extraction
     public static final String MESSAGE_INVALID_TAGS = "If the tag option is specified, it must not be empty.";
+    public static final String MESSAGE_REMIND_QUOTES = "If any fields you specify contain whitespace or special "
+            + "symbols, you must enclose them in quotes.";
 
     // Options
     public static final String OPTION_KEY_TAG = "tag";
@@ -33,14 +35,32 @@ public final class AddCommandExtractor {
     public static AddCommand extract(BareCommand bareCommand) throws ValidationException {
         PersonBuilder personBuilder = new PersonBuilder();
 
-        personBuilder.withName(Validation.validateName(
-                Validation.validateParameter(bareCommand, 0, NORMAL).getValue()));
-        personBuilder.withPhone(Validation.validatePhone(
-                Validation.validateParameter(bareCommand, 1, NORMAL).getValue()));
-        personBuilder.withAddress(Validation.validateAddress(
-                Validation.validateParameter(bareCommand, 2, NORMAL).getValue()));
-        personBuilder.withEmail(Validation.validateEmail(
-                Validation.validateParameter(bareCommand, 3, NORMAL).getValue()));
+        try {
+            String name = Validation.validateParameter(bareCommand, 0, NORMAL).getValue();
+            personBuilder.withName(Validation.validateName(name));
+        } catch (ValidationException e) {
+            throw new ValidationException(e.getMessage() + "\n" + "Expected a name." + "\n" + MESSAGE_REMIND_QUOTES);
+        }
+        try {
+            String phone = Validation.validateParameter(bareCommand, 1, NORMAL).getValue();
+            personBuilder.withPhone(Validation.validatePhone(phone));
+        } catch (ValidationException e) {
+            throw new ValidationException(e.getMessage() + "\n" + "Expected a phone number." + "\n"
+                    + MESSAGE_REMIND_QUOTES);
+        }
+        try {
+            String address = Validation.validateParameter(bareCommand, 2, NORMAL).getValue();
+            personBuilder.withAddress(Validation.validateAddress(address));
+        } catch (ValidationException e) {
+            throw new ValidationException(e.getMessage() + "\n" + "Expected an address." + "\n"
+                    + MESSAGE_REMIND_QUOTES);
+        }
+        try {
+            String email = Validation.validateParameter(bareCommand, 3, NORMAL).getValue();
+            personBuilder.withEmail(Validation.validateEmail(email));
+        } catch (ValidationException e) {
+            throw new ValidationException(e.getMessage() + "\n" + "Expected an email." + "\n" + MESSAGE_REMIND_QUOTES);
+        }
         if (bareCommand.hasOption(OPTION_KEY_TAG)) {
             Set<Tag> tags = Validation.validateTags(bareCommand.getOptionAllValues(OPTION_KEY_TAG).get());
             if (tags.isEmpty()) {
