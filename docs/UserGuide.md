@@ -98,11 +98,11 @@ When you look at the help for a command, you'll see this notation:
     - `<item>*`: Zero or more (it's optional and you can provide many).
     - Multiple items may be grouped with square brackets `[]` and assigned a multiplicity. In such a case, the entire group may be repeated as many times as specified.
 
-_Example:_ `tag <index>+ [/tag:<tag>]+` means you must provide at least one index, followed by at least one tag with option key `tag`. These are all acceptable inputs:
-- `tag 1 /tag:friend`
-- `tag 1 /tag:enemy`
-- `tag 1 /tag`
-- `tag 1 /tag:enemy /tag:colleague`
+_Example:_ `edit <index>+ [/tag:<tag>]+` means you must provide at least one index, followed by at least one tag with option key `tag`. These are all acceptable inputs:
+- `edit 1 /tag:friend`
+- `edit 1 /tag:enemy`
+- `edit 1 /tag`
+- `edit 1 /tag:enemy /tag:colleague`
 
 **Whitespace and Special Characters**
 
