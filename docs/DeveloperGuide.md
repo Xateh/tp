@@ -251,8 +251,8 @@ Options are optional, named inputs that modify command behavior.
 - **Default Behaviour:** Because all options are by definition optional, your command implementation **must provide a default behaviour** for every option it supports.
 - **Minimum Multiplicity:** Even though all options are optional as described above, it is valid to require a **minimum multiplicity**; that is, require at least a certain number of options to be supplied for the command to work.
 - **Formats:** The parser supports two formats and delivers them as such:
-    1. **Name-only (Flag):** `/force`. Your code should check for the _presence_ of the "force" key.
-    2. **Name-Value Pair:** `/priority:high`. Your code should retrieve the "priority" key and its associated _value_ ("high").
+    1. **Name-only (Flag):** e.g. `/force`. Your code should check for the _presence_ of the "force" key.
+    2. **Name-Value Pair:** e.g. `/priority:high`. Your code should retrieve the "priority" key and its associated _value_ ("high").
 
 **Error Handling**
 
