@@ -202,7 +202,7 @@ Format(s):
 * Existing values will be updated to the input values.
 * When editing tags, the existing tags of the person will be removed i.e adding of tags is not cumulative.
 * You can remove all the person’s tags by typing `/tag` without specifying any tags after it.
-* Edit cannot be used to modify fields or links.
+* Edit cannot be used to modify custom fields or links.
 
 **Parameters**
 
@@ -211,7 +211,8 @@ Format(s):
 **Options**
 
 * #r#At least one optional field must be provided.##
-* `<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+* `<field>` (word): one of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+  * #m#Option keys are case-sensitive.##
 * `<new-value>` (string): any valid field entry (dependent on the modified field)
   * For options other than `tag`, a value **must** be specified.
   * If `tag` is specified without any value, all tags on the person are removed.
@@ -226,8 +227,8 @@ Format(s):
 
 **Warnings and Errors**
 
-* #m#If the `tag` field is specified with values, any boolean options specified for `tag` are ignored (see above examples).##
 * #r#Values for each field must conform to the listed restrictions above.##
+* #m#If the `tag` field is specified with values, any boolean options specified for `tag` are ignored (see above examples).##
 
 ### Modifying tags : `tag`
 
