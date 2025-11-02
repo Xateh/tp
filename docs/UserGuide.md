@@ -312,19 +312,15 @@ Format: `find <keyword>+ [/<field>]*`
 
 **Parameters**
 
-* `<keyword>` (string): keyword to search on. Only fields containing the full word (case insensitive) will be matched.
+* `<keyword>` (word): keyword to search on. Only fields containing the full word (case insensitive) will be matched.
 
 **Options**
 
 Note that if specifying to search on built in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For eg, `/name` NOT `/NAME`.
-* `/name` (string): specified to search on persons' name field.
-* `/address` (string): specified to search on persons' address field
-* `/phone` (string): specified to search on persons' phone field
-* `/email` (string): specified to search on persons' email field
-* `/tag` (string): specified to search on persons' tag field
-* `/from` (string): search all links where the person is the linker.
-* `/to` (string): search all links where the person is the linkee (one being linked to).
-* `/<custom-field>` (string): specified to search on persons' custom added fields. (does not match if field provided is not existent)
+* `/field` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+* `/from` (word): search all links where the person is the linker.
+* `/to` (word): search all links where the person is the linkee (one being linked to).
+* `/<custom-field>` (word): specified to search on persons' custom added fields. (does not match if field provided is not existent)
 
 Examples: (no specified fields to search on, default all built in)
 * `find 99999999` returns all persons whose built-in fields contain `99999999`.
