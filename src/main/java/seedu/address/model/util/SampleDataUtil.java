@@ -21,25 +21,159 @@ import seedu.address.model.tag.Tag;
  */
 public class SampleDataUtil {
     public static Person[] getSamplePersons() {
+        // Demo-focused sample persons: includes the three demo contacts (Alice, Bob, Cassandra)
+        LinkedHashMap<String, String> aliceFields = new LinkedHashMap<>();
+        aliceFields.put("assetClass", "Gold");
+        aliceFields.put("notes", "Met at FinTech conf 2025");
+
+        LinkedHashMap<String, String> bobFields = new LinkedHashMap<>();
+        bobFields.put("assetClass", "Banking");
+
+        LinkedHashMap<String, String> cassFields = new LinkedHashMap<>();
+        cassFields.put("specialty", "Corporate Law");
+
+        LinkedHashMap<String, String> farahFields = new LinkedHashMap<>();
+        farahFields.put("firm", "KhanCo");
+        farahFields.put("cert", "CPA");
+
+        LinkedHashMap<String, String> georgeFields = new LinkedHashMap<>();
+        georgeFields.put("bank", "FirstCapital");
+
+        LinkedHashMap<String, String> hannahFields = new LinkedHashMap<>();
+        hannahFields.put("license", "BrokerAX3");
+
+        LinkedHashMap<String, String> jasmineFields = new LinkedHashMap<>();
+        jasmineFields.put("title", "VPInvestments");
+
+        LinkedHashMap<String, String> natalieFields = new LinkedHashMap<>();
+        natalieFields.put("specialty", "StrategyConsulting");
+
+        LinkedHashMap<String, String> oliverFields = new LinkedHashMap<>();
+        oliverFields.put("company", "LedgerSupplies");
+
         return new Person[] {
-            new Person(new Name("Alex Yeoh"), new Phone("87438807"), new Email("alexyeoh@example.com"),
+            new Person(
+                    new Name("Alice Tan"),
+                    new Phone("90123456"),
+                    new Email("alice@example.com"),
+                    new Address("12 Orchard Road"),
+                    getTagSet("client"),
+                    aliceFields,
+                    new HashSet<>(),
+                    new Info("Met at FinTech conf 2025")
+            ),
+            new Person(
+                    new Name("Bob Ong"),
+                    new Phone("92233344"),
+                    new Email("bob@example.com"),
+                    new Address("5 Finance Ave"),
+                    getTagSet("bank"),
+                    bobFields,
+                    new HashSet<>(),
+                    new Info("")
+            ),
+            new Person(
+                    new Name("Cassandra Law"),
+                    new Phone("93344455"),
+                    new Email("cass@example.com"),
+                    new Address("33 Legal St"),
+                    getTagSet("lawyer"),
+                    cassFields,
+                    new HashSet<>(),
+                    new Info("")
+            ),
+
+            // A few familiar example contacts retained for context
+            new Person(
+                    new Name("Alex Yeoh"),
+                    new Phone("87438807"),
+                    new Email("alexyeoh@example.com"),
                     new Address("Blk 30 Geylang Street 29, #06-40"),
-                    getTagSet("friends"), new LinkedHashMap<>(), new HashSet<>(), new Info("")),
-            new Person(new Name("Bernice Yu"), new Phone("99272758"), new Email("berniceyu@example.com"),
+                    getTagSet("friends"),
+                    new LinkedHashMap<>(),
+                    new HashSet<>(),
+                    new Info("")
+            ),
+            new Person(
+                    new Name("Bernice Yu"),
+                    new Phone("99272758"),
+                    new Email("berniceyu@example.com"),
                     new Address("Blk 30 Lorong 3 Serangoon Gardens, #07-18"),
-                    getTagSet("colleagues", "friends"), new LinkedHashMap<>(), new HashSet<>(), new Info("")),
-            new Person(new Name("Charlotte Oliveiro"), new Phone("93210283"), new Email("charlotte@example.com"),
-                    new Address("Blk 11 Ang Mo Kio Street 74, #11-04"),
-                    getTagSet("neighbours"), new LinkedHashMap<>(), new HashSet<>(), new Info("")),
-            new Person(new Name("David Li"), new Phone("91031282"), new Email("lidavid@example.com"),
-                    new Address("Blk 436 Serangoon Gardens Street 26, #16-43"),
-                    getTagSet("family"), new LinkedHashMap<>(), new HashSet<>(), new Info("")),
-            new Person(new Name("Irfan Ibrahim"), new Phone("92492021"), new Email("irfan@example.com"),
-                    new Address("Blk 47 Tampines Street 20, #17-35"),
-                    getTagSet("classmates"), new LinkedHashMap<>(), new HashSet<>(), new Info("")),
-            new Person(new Name("Roy Balakrishnan"), new Phone("92624417"), new Email("royb@example.com"),
-                    new Address("Blk 45 Aljunied Street 85, #11-31"),
-                    getTagSet("colleagues"), new LinkedHashMap<>(), new HashSet<>(), new Info(""))
+                    getTagSet("colleagues", "friends"),
+                    new LinkedHashMap<>(),
+                    new HashSet<>(),
+                    new Info("")
+            ),
+            new Person(
+                    new Name("Betsy Crowe"),
+                    new Phone("1234567"),
+                    new Email("betsycrowe@example.com"),
+                    new Address("Newgate Prison"),
+                    getTagSet("friend", "criminal"),
+                    new LinkedHashMap<>(),
+                    new HashSet<>(),
+                    new Info("")
+            ),
+            new Person(
+                    new Name("Farah Khan"),
+                    new Phone("98765432"),
+                    new Email("farah@example.com"),
+                    new Address("1 Business Rd"),
+                    getTagSet("client"),
+                    farahFields,
+                    new HashSet<>(),
+                    new Info("")
+            ),
+            new Person(
+                    new Name("George Smith"),
+                    new Phone("87654321"),
+                    new Email("george@example.com"),
+                    new Address("2 Finance St"),
+                    getTagSet("bank"),
+                    georgeFields,
+                    new HashSet<>(),
+                    new Info("")
+            ),
+            new Person(
+                    new Name("Hannah Lee"),
+                    new Phone("76543210"),
+                    new Email("hannah@example.com"),
+                    new Address("3 Investment Ave"),
+                    getTagSet("broker"),
+                    hannahFields,
+                    new HashSet<>(),
+                    new Info("")
+            ),
+            new Person(
+                    new Name("Jasmine Tan"),
+                    new Phone("65432109"),
+                    new Email("jasmine@example.com"),
+                    new Address("4 Wealth St"),
+                    getTagSet("investor"),
+                    jasmineFields,
+                    new HashSet<>(),
+                    new Info("")
+            ),
+            new Person(
+                    new Name("Natalie Wong"),
+                    new Phone("54321098"),
+                    new Email("natalie@example.com"),
+                    new Address("5 Strategy Rd"),
+                    getTagSet("consultant"),
+                    natalieFields,
+                    new HashSet<>(),
+                    new Info("")
+            ),
+            new Person(
+                    new Name("Oliver Twist"),
+                    new Phone("43210987"),
+                    new Email("oliver@example.com"),
+                    new Address("6 Ledger St"),
+                    getTagSet("business"),
+                    oliverFields,
+                    new HashSet<>(),
+                    new Info("")
+            )
         };
     }
 
