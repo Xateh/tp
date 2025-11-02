@@ -11,9 +11,11 @@ import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Info;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.builder.PersonBuilder;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -182,7 +184,83 @@ public class SampleDataUtil {
         for (Person samplePerson : getSamplePersons()) {
             sampleAb.addPerson(samplePerson);
         }
+        // Seed a few directed links for demo purposes. These links are added to both the linker and linkee.
+        try {
+            // Cassandra is the lawyer of Alice
+            Person cassandra = findByName(sampleAb, "Cassandra Law");
+            Person alice = findByName(sampleAb, "Alice Tan");
+            if (cassandra != null && alice != null) {
+                Link l = new Link(cassandra, alice, "lawyer");
+                sampleAb.setPerson(cassandra, new PersonBuilder(cassandra)
+                        .withLinks(new HashSet<>(Arrays.asList(l)))
+                        .build());
+                sampleAb.setPerson(alice, new PersonBuilder(alice)
+                        .withLinks(new HashSet<>(Arrays.asList(l)))
+                        .build());
+            }
+
+            // Farah is the accountant for Alice
+            Person farah = findByName(sampleAb, "Farah Khan");
+            if (farah != null && alice != null) {
+                Link a = new Link(farah, alice, "accountant");
+                sampleAb.setPerson(farah, new PersonBuilder(farah)
+                        .withLinks(new HashSet<>(Arrays.asList(a)))
+                        .build());
+                sampleAb.setPerson(alice, new PersonBuilder(alice)
+                        .withLinks(new HashSet<>(Arrays.asList(a)))
+                        .build());
+            }
+
+            // George is the banker for Bob
+            Person george = findByName(sampleAb, "George Smith");
+            Person bob = findByName(sampleAb, "Bob Ong");
+            if (george != null && bob != null) {
+                Link b = new Link(george, bob, "banker");
+                sampleAb.setPerson(george, new PersonBuilder(george)
+                        .withLinks(new HashSet<>(Arrays.asList(b)))
+                        .build());
+                sampleAb.setPerson(bob, new PersonBuilder(bob)
+                        .withLinks(new HashSet<>(Arrays.asList(b)))
+                        .build());
+            }
+
+            // Hannah is broker for Jasmine
+            Person hannah = findByName(sampleAb, "Hannah Lee");
+            Person jasmine = findByName(sampleAb, "Jasmine Tan");
+            if (hannah != null && jasmine != null) {
+                Link c = new Link(hannah, jasmine, "broker");
+                sampleAb.setPerson(hannah, new PersonBuilder(hannah)
+                        .withLinks(new HashSet<>(Arrays.asList(c)))
+                        .build());
+                sampleAb.setPerson(jasmine, new PersonBuilder(jasmine)
+                        .withLinks(new HashSet<>(Arrays.asList(c)))
+                        .build());
+            }
+
+            // Alex and Bernice are colleagues
+            Person alex = findByName(sampleAb, "Alex Yeoh");
+            Person bernice = findByName(sampleAb, "Bernice Yu");
+            if (alex != null && bernice != null) {
+                Link d = new Link(alex, bernice, "colleague");
+                sampleAb.setPerson(alex, new PersonBuilder(alex)
+                        .withLinks(new HashSet<>(Arrays.asList(d)))
+                        .build());
+                sampleAb.setPerson(bernice, new PersonBuilder(bernice)
+                        .withLinks(new HashSet<>(Arrays.asList(d)))
+                        .build());
+            }
+        } catch (Exception e) {
+            // If any link creation fails, fall back to returning the address book without seeded links.
+        }
+
         return sampleAb;
+    }
+
+    private static Person findByName(AddressBook ab, String fullName) {
+        return ab.getPersonList().stream()
+                .filter(p -> p.getName().fullName.equals(fullName))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
