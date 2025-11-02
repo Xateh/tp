@@ -26,12 +26,13 @@ public class TagCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds tags to person identified "
             + "by the index number used in the displayed person list. "
-            + "New tags will be added on top of existing tags.\n"
-            + "Parameters: index (must be a positive integer) "
-            + "[TAG NAME]...\n"
-            + "Example: " + COMMAND_WORD + " 1 beast friend";
+            + "New tags will be added to/removed from existing tags.\n"
+            + "Format: tag <index> [(+|-)<tag>]+"
+            + "Parameters: <index> (must be a positive integer) "
+            + "<tag> (must be a valid tag)\n"
+            + "Example: " + COMMAND_WORD + " 1 +friend +colleague -enemy";
 
-    public static final String MESSAGE_CHANGE_TAGS_SUCCESS = "Tags changed on person %1$s; added %2$s, removed %3$s";
+    public static final String MESSAGE_CHANGE_TAGS_SUCCESS = "Tags changed on person %1$s: added {%2$s}, removed {%3$s}";
 
     private final Index index;
     private final Set<Tag> addTags;
