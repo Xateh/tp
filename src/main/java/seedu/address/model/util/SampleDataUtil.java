@@ -190,25 +190,37 @@ public class SampleDataUtil {
             Person cassandra = findByName(sampleAb, "Cassandra Law");
             Person alice = findByName(sampleAb, "Alice Tan");
             if (cassandra != null && alice != null) {
+                // re-fetch fresh references and merge links to avoid overwriting
                 Link l = new Link(cassandra, alice, "lawyer");
-                sampleAb.setPerson(cassandra, new PersonBuilder(cassandra)
-                        .withLinks(new HashSet<>(Arrays.asList(l)))
-                        .build());
-                sampleAb.setPerson(alice, new PersonBuilder(alice)
-                        .withLinks(new HashSet<>(Arrays.asList(l)))
-                        .build());
+                Person freshCass = findByName(sampleAb, "Cassandra Law");
+                Person freshAlice = findByName(sampleAb, "Alice Tan");
+                java.util.Set<Link> cassLinks = new java.util.HashSet<>(freshCass.getLinks());
+                cassLinks.add(l);
+                sampleAb.setPerson(freshCass,
+                        new PersonBuilder(freshCass).withLinks(cassLinks).build());
+
+                java.util.Set<Link> aliceLinks = new java.util.HashSet<>(freshAlice.getLinks());
+                aliceLinks.add(l);
+                sampleAb.setPerson(freshAlice,
+                        new PersonBuilder(freshAlice).withLinks(aliceLinks).build());
             }
 
             // Farah is the accountant for Alice
             Person farah = findByName(sampleAb, "Farah Khan");
             if (farah != null && alice != null) {
                 Link a = new Link(farah, alice, "accountant");
-                sampleAb.setPerson(farah, new PersonBuilder(farah)
-                        .withLinks(new HashSet<>(Arrays.asList(a)))
-                        .build());
-                sampleAb.setPerson(alice, new PersonBuilder(alice)
-                        .withLinks(new HashSet<>(Arrays.asList(a)))
-                        .build());
+                Person freshFarah = findByName(sampleAb, "Farah Khan");
+                Person freshAlice = findByName(sampleAb, "Alice Tan");
+
+                java.util.Set<Link> farahLinks = new java.util.HashSet<>(freshFarah.getLinks());
+                farahLinks.add(a);
+                sampleAb.setPerson(freshFarah,
+                        new PersonBuilder(freshFarah).withLinks(farahLinks).build());
+
+                java.util.Set<Link> aliceLinks = new java.util.HashSet<>(freshAlice.getLinks());
+                aliceLinks.add(a);
+                sampleAb.setPerson(freshAlice,
+                        new PersonBuilder(freshAlice).withLinks(aliceLinks).build());
             }
 
             // George is the banker for Bob
@@ -216,12 +228,18 @@ public class SampleDataUtil {
             Person bob = findByName(sampleAb, "Bob Ong");
             if (george != null && bob != null) {
                 Link b = new Link(george, bob, "banker");
-                sampleAb.setPerson(george, new PersonBuilder(george)
-                        .withLinks(new HashSet<>(Arrays.asList(b)))
-                        .build());
-                sampleAb.setPerson(bob, new PersonBuilder(bob)
-                        .withLinks(new HashSet<>(Arrays.asList(b)))
-                        .build());
+                Person freshGeorge = findByName(sampleAb, "George Smith");
+                Person freshBob = findByName(sampleAb, "Bob Ong");
+
+                java.util.Set<Link> georgeLinks = new java.util.HashSet<>(freshGeorge.getLinks());
+                georgeLinks.add(b);
+                sampleAb.setPerson(freshGeorge,
+                        new PersonBuilder(freshGeorge).withLinks(georgeLinks).build());
+
+                java.util.Set<Link> bobLinks = new java.util.HashSet<>(freshBob.getLinks());
+                bobLinks.add(b);
+                sampleAb.setPerson(freshBob,
+                        new PersonBuilder(freshBob).withLinks(bobLinks).build());
             }
 
             // Hannah is broker for Jasmine
@@ -229,12 +247,18 @@ public class SampleDataUtil {
             Person jasmine = findByName(sampleAb, "Jasmine Tan");
             if (hannah != null && jasmine != null) {
                 Link c = new Link(hannah, jasmine, "broker");
-                sampleAb.setPerson(hannah, new PersonBuilder(hannah)
-                        .withLinks(new HashSet<>(Arrays.asList(c)))
-                        .build());
-                sampleAb.setPerson(jasmine, new PersonBuilder(jasmine)
-                        .withLinks(new HashSet<>(Arrays.asList(c)))
-                        .build());
+                Person freshHannah = findByName(sampleAb, "Hannah Lee");
+                Person freshJasmine = findByName(sampleAb, "Jasmine Tan");
+
+                java.util.Set<Link> hannahLinks = new java.util.HashSet<>(freshHannah.getLinks());
+                hannahLinks.add(c);
+                sampleAb.setPerson(freshHannah,
+                        new PersonBuilder(freshHannah).withLinks(hannahLinks).build());
+
+                java.util.Set<Link> jasmineLinks = new java.util.HashSet<>(freshJasmine.getLinks());
+                jasmineLinks.add(c);
+                sampleAb.setPerson(freshJasmine,
+                        new PersonBuilder(freshJasmine).withLinks(jasmineLinks).build());
             }
 
             // Alex and Bernice are colleagues
@@ -242,12 +266,18 @@ public class SampleDataUtil {
             Person bernice = findByName(sampleAb, "Bernice Yu");
             if (alex != null && bernice != null) {
                 Link d = new Link(alex, bernice, "colleague");
-                sampleAb.setPerson(alex, new PersonBuilder(alex)
-                        .withLinks(new HashSet<>(Arrays.asList(d)))
-                        .build());
-                sampleAb.setPerson(bernice, new PersonBuilder(bernice)
-                        .withLinks(new HashSet<>(Arrays.asList(d)))
-                        .build());
+                Person freshAlex = findByName(sampleAb, "Alex Yeoh");
+                Person freshBernice = findByName(sampleAb, "Bernice Yu");
+
+                java.util.Set<Link> alexLinks = new java.util.HashSet<>(freshAlex.getLinks());
+                alexLinks.add(d);
+                sampleAb.setPerson(freshAlex,
+                        new PersonBuilder(freshAlex).withLinks(alexLinks).build());
+
+                java.util.Set<Link> berniceLinks = new java.util.HashSet<>(freshBernice.getLinks());
+                berniceLinks.add(d);
+                sampleAb.setPerson(freshBernice,
+                        new PersonBuilder(freshBernice).withLinks(berniceLinks).build());
             }
         } catch (Exception e) {
             // If any link creation fails, fall back to returning the address book without seeded links.
