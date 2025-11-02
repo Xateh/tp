@@ -282,17 +282,17 @@ Format: `field <index> [/<key>[:<value>]]+`
 **Options**
 
 * #r#At least one optional field must be provided.##
-* `<key>` (word): name of custom field
+* `<key>` (word): name of custom field (strictly alphanumeric)
 * `<value>` (string): value of custom field
-  * Each `key` accepts at most one associated `value` in a command. A command like `field 1 /brand:nike:adidas` will be **rejected**.
+  * Each `key` accepts exactly one associated `value` in a command. A command like `field 1 /brand:nike:adidas` will be **rejected**.
   * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
   * Custom field `key` is **case-sensitive**; `key` is not equivalent to `Key`.
   * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
     * While you **can** do `field 1 /brand:nike /brand:adidas`, the person at index 1 will only be updated with the custom field `brand: nike`. `/brand: adidas` will be ignored.
   * Omitting `value` (e.g. `/nickname`) **removes** the custom field identified by `key` if it exists.
-  * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
+  * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, `field` or with keywords such as `to` and `from` (in any casing).
   * `key` cannot contain spaces, even if wrapped in straight double quotes; A `key` like `"Asset Class"` will be rejected, whereas an alternative like `AssetClass` will be accepted.
-  * If a `value` contains spaces, wrap it in straight double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
+  * If a `value` contains spaces or special characters ('@', '?', '!' etc.), wrap it in straight double quotes, e.g. `/notes:"Met @ FinTech conf 2025!"`.
 
 You may mix additions/updates and removals in a single command by providing multiple key-value options.
 
