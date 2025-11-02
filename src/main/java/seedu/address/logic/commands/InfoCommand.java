@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.logic.Logic;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -95,9 +96,29 @@ public class InfoCommand extends Command {
      * Saves info for the person at the specified index.
      * This method is called directly from the UI when saving changes.
      */
-    public static CommandResult saveInfo(Model model, Index index, Info info) throws CommandException {
-        InfoCommand saveCommand = new InfoCommand(index, info);
-        return saveCommand.execute(model);
+    public static CommandResult saveInfo(Model model, Logic logic, Index index, Info info)
+            throws CommandException {
+        requireNonNull(model);
+        requireNonNull(logic);
+        requireNonNull(index);
+        requireNonNull(info);
+
+        List<Person> lastShownList = model.getFilteredPersonList();
+
+        if (index.getZeroBased() >= lastShownList.size()) {
+            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        }
+
+        Person personToEdit = lastShownList.get(index.getZeroBased());
+        Person editedPerson = new PersonBuilder(personToEdit).withInfo(info).build();
+
+        model.setPerson(personToEdit, editedPerson);
+        model.updateFilteredPersonList(Model.PREDICATE_SHOW_ALL_PERSONS);
+
+        // Notify logic that the address book has been modified
+        logic.markAddressBookDirty();
+
+        return new CommandResult(String.format(MESSAGE_SUCCESS, Messages.format(editedPerson)));
     }
 
     public Index getIndex() {
