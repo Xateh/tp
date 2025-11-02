@@ -228,7 +228,7 @@ Format(s):
 **Warnings and Errors**
 
 * #r#Values for each field must conform to the listed restrictions above.##
-* #m#If the `tag` field is specified with values, any boolean options specified for `tag` are ignored (see above examples).##
+* #m#If the `tag` field is specified with values, any empty-value options specified for `tag` are ignored (see above examples).##
 
 ### Modifying tags : `tag`
 
