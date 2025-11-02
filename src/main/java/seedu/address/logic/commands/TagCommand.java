@@ -32,7 +32,8 @@ public class TagCommand extends Command {
             + "<tag> (must be a valid tag)\n"
             + "Example: " + COMMAND_WORD + " 1 +friend +colleague -enemy";
 
-    public static final String MESSAGE_CHANGE_TAGS_SUCCESS = "Tags changed on person %1$s: added {%2$s}, removed {%3$s}";
+    public static final String MESSAGE_CHANGE_TAGS_SUCCESS = "Tags changed on person %1$s: added {%2$s}, "
+            + "removed {%3$s}";
 
     private final Index index;
     private final Set<Tag> addTags;
