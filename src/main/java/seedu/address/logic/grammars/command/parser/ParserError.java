@@ -15,6 +15,7 @@ class ParserError {
     private final String ingest;
     private final Token offendingToken;
     private final TokenType[] expectedTokenTypes;
+    private String hint;
 
     ParserError(String ingest, Token offendingToken, TokenType... expectedTokenTypes) {
         this.ingest = ingest;
@@ -26,20 +27,19 @@ class ParserError {
         this.productionNonterminalStack.add(productionRule);
     }
 
+    void setHint(String hint) {
+        this.hint = hint;
+    }
+
     @Override
     public String toString() {
         ArrayList<String> lines = new ArrayList<>();
 
         lines.add("Error occurred during parsing.");
 
-        String productionRuleStack = String.join(" > ", reverseArrayList(this.productionNonterminalStack));
-        lines.add(String.format("Error occurred while applying production rules: %s", productionRuleStack));
-
-        lines.add(String.format("Expected token types: one of {%s}",
-                String.join(",", Arrays.stream(this.expectedTokenTypes)
-                        .map(Enum::toString).toArray(String[]::new))));
-
-        lines.add(String.format("Found: %s", offendingToken.getType().getDescription()));
+        if (hint != null) {
+            lines.add(hint);
+        }
 
         return String.join("\n", lines);
     }
