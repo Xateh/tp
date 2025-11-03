@@ -19,22 +19,22 @@ import seedu.address.model.person.builder.PersonBuilder;
 
 /**
  * Creates a directed link between two persons in the address book.
- * Syntax: link INDEX1 LINK_NAME INDEX2
- * Meaning: person at INDEX1 is the LINK_NAME of the person at INDEX2.
  */
 public class LinkCommand extends Command {
 
     public static final String COMMAND_WORD = "link";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Links two persons.\n"
-            + "Parameters: INDEX1 LINK_NAME INDEX2\n"
-            + "Example: " + COMMAND_WORD + " 1 lawyer 2";
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Links two persons together with a specified relationship.\n"
+            + "Format: link <index-from> <link-name> <index-to>\n"
+            + "All parameters must be specified.\n"
+            + "Example: " + COMMAND_WORD + " 1 mentor 2";
 
     public static final String MESSAGE_SUCCESS = "%1$s is now %2$s of %3$s";
     public static final String MESSAGE_DUPLICATE_LINK = "No change: that link already exists.";
-    private final Index linkerIndex; // INDEX1
-    private final String linkName; // LINK_NAME
-    private final Index linkeeIndex; // INDEX2
+    private final Index linkerIndex; // INDEX-FROM
+    private final String linkName; // LINK-NAME
+    private final Index linkeeIndex; // INDEX-TO
 
     /**
      * Constructs a {@code LinkCommand} that creates a named link between two persons in the address book.
