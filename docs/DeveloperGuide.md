@@ -800,9 +800,7 @@ testers are expected to do more *exploratory* testing.
 
 ### Covering individual commands
 
-For command-specific walkthroughs (inputs, expected outputs, and edge cases), refer to the examples in the
-[User Guide](UserGuide.md#features). Each command subsection there documents the canonical success path, common variations,
-and the validation rules enforced by AssetSphere.
+For command-specific walkthroughs (inputs, expected outputs, and edge cases), refer to the examples in the [User Guide](UserGuide.md#features). Each command subsection there documents the canonical success path, common variations, and the validation rules enforced by AssetSphere.
 
 ### Launch and shutdown
 
