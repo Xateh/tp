@@ -798,6 +798,12 @@ testers are expected to do more *exploratory* testing.
 
 </box>
 
+### Covering individual commands
+
+For command-specific walkthroughs (inputs, expected outputs, and edge cases), refer to the examples in the
+[User Guide](UserGuide.md#features). Each command subsection there documents the canonical success path, common variations,
+and the validation rules enforced by AssetSphere.
+
 ### Launch and shutdown
 
 1. Initial launch
@@ -805,67 +811,70 @@ testers are expected to do more *exploratory* testing.
    1. Download the jar file `assetsphere.jar` and copy into an empty folder `./dir/`.
 
    1. Launch the jar file with `java -jar ./dir/assetsphere.jar`.<br>
-        Expected: Shows the GUI with a set of sample contacts. The window size may not be optimum.
+      Expected: Shows the GUI with a set of sample contacts. The window size may not be optimum.
 
 1. Saving window preferences
 
    1. Resize the window to an optimum size. Move the window to a different location. Close the window.
 
    1. Re-launch the app with `java -jar ./dir/assetsphere.jar`.<br>
-       Expected: The most recent window size and location is retained.
+      Expected: The most recent window size and location is retained.
 
-### Deleting a person
+### Scenario-based end-to-end testing
 
-1. Deleting a person while all persons are being shown
+Use the following extended scenarios to exercise multiple features together. They are written so that the cases, when executed
+in order, collectively cover the command set exposed in the User Guide.
 
-   1. Prerequisites: List all persons using the `list` command. Multiple persons in the list.
+#### Scenario 1: Onboard new clients during a strategy meeting
 
-   1. Test case: `delete 1`<br>
-      Expected: First contact is deleted from the list. Details of the deleted contact shown in the status message. Timestamp in the status bar is updated.
+1. Preparation
 
-   1. Test case: `delete 0`<br>
-      Expected: No person is deleted. Error details shown in the status message. Status bar remains the same.
+   1. Run `clear` to start from an empty address book.<br>
+      Expected: The contact list becomes empty and the status bar shows an updated sync timestamp.
 
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
-      Expected: Similar to previous.
+   1. Use `add` to register five new contacts (example data shown below). Repeat until five names appear in the list.
+      ```
+      add "Angeline Tan" 91234567 "1 Raffles Place" "angeline@example.com" /tag:prospect
+      add "Bernard Chua" 92345678 "20 Cecil Street" "bernard@example.com"
+      add "Clara Goh" 93456789 "8 Marina Boulevard" "clara@example.com"
+      add "Dinesh Rao" 94567890 "15 Scotts Road" "dinesh@example.com"
+      add "Evelyn Lim" 95678901 "9 Battery Road" "evelyn@example.com"
+      ```
+      Expected: After each command, the new person card appears in the list and the command result confirms the addition.
 
-### Managing custom fields
+   1. Enter `list` to ensure all five contacts are visible.<br>
+      Expected: The person list displays the five newly added entries in insertion order.
 
-1. Adding or updating a custom field for a person
+2. Capture evolving context during the meeting
 
-   1. Prerequisites: List all persons using the `list` command. Ensure the target person does not already have the field to be added.
+   1. Correct an earlier typo using `edit 2 /phone:98887776 /email:"bernard.c@example.com"`.<br>
+      Expected: Bernard's phone and email fields update; the command feedback summarises the edited fields.
 
-   1. Test case: `field 1 /nickname:"Alpha Client"`<br>
-      Expected: Nickname field with value `Alpha Client` is shown for the first contact. Command result indicates the field was added.
+   1. Invoke `info 3` and type a short note such as "Leads regional partnerships" before saving.<br>
+      Expected: A modal text editor opens. After saving, Clara's card shows an information badge and re-opening `info 3` reveals the saved text.
 
-   1. Test case: `field 1 /nickname:"Priority Client"`<br>
-      Expected: Nickname field for the first contact is updated to `Priority Client`. Command result indicates the field was updated.
+   1. Attach structured metadata with `field 4 /specialty:"Regulatory advisory" /assistant:"Mei"`.<br>
+      Expected: Dinesh's card shows the newly added custom fields under the contact details panel.
 
-   1. Test case: `field 1 /name:John`<br>
-      Expected: No changes are applied. Error message states that the field name is reserved.
+   1. Tag interested parties in bulk via `tag 1 +priority +client` and `tag 5 +interested`.<br>
+      Expected: The specified tags appear on the respective person cards without affecting other tags.
 
-1. Removing a custom field from a person
+   1. Highlight referral relationships with `link 1 mentor 3`.<br>
+      Expected: Angeline shows Clara as a mentee, and Clara lists Angeline as her mentor in the links section.
 
-   1. Prerequisites: Ensure the target person has at least one custom field (e.g., add one using the previous test case).
+   1. Surface everyone marked as interested stakeholders by running `find interested /tag`.<br>
+      Expected: The filtered list displays contacts tagged `interested`; removing the filter with `list` restores the full view.
 
-   1. Test case: `field 1 /nickname`<br>
-      Expected: Nickname field is removed from the first contact. Command result reports the field removal.
+   1. Verify the command log using `history`.<br>
+      Expected: Recent commands (including `add`, `edit`, `field`, `tag`, `link`, `find`) appear in chronological order.
 
-   1. Test case: `field 1 /nickname` (when the field is already missing)<br>
-      Expected: No changes are applied. Command result indicates no field changes were made.
+3. Cleanup and persistence
 
-   1. Test case: `field 0 /nickname`<br>
-      Expected: No changes are applied. Error message indicates the index is invalid.
+   1. Remove an erroneous duplicate, if any, with `delete <index>` (e.g. `delete 5`).<br>
+      Expected: The specified card disappears and the command result shows the deleted person's details.
 
-1. Handling invalid custom field values
-
-   1. Prerequisites: Ensure at least one person is listed.
-
-   1. Test case: `field 1 /nickname:`<br>
-      Expected: No changes are applied. Error message indicates the field value cannot be blank.
-
-   1. Test case: `field 1 /`<br>
-      Expected: No changes are applied. Error message indicates the field name cannot be blank.
+   1. Exit the app with `exit` or by closing the window.<br>
+      Expected: AssetSphere saves the latest address book, command history, and a session snapshot under `data/sessions/`.
 
  ### Saving data
 
