@@ -6,7 +6,25 @@
 
 # AssetSphere User Guide
 
-AssetSphere is a **desktop app for managing contacts, optimized for use via a Command Line Interface** (CLI) while still having the benefits of a Graphical User Interface (GUI). If you can type fast, AssetSphere can get your contact management tasks done faster than traditional GUI apps.
+AssetSphere is a desktop contact management application purpose-built for professional asset managers and wealth management teams. It combines a command-line, scriptable interface for high-throughput operations with a graphical UI for focused review and editing. The application supports modeling of complex client hierarchies and directional relationships, enabling teams to maintain structured, auditable records for high-net-worth individuals (HNWIs), counterparties, and institutional stakeholders.
+
+## Target user profile
+
+AssetSphere is intended for:
+
+- Asset managers and portfolio managers responsible for client relationship management, reporting, and operational workflows that require structured metadata and relationship modeling.
+- Client onboarding, operations, and compliance teams that require traceable change history, reproducible session snapshots, and the ability to audit and revert modifications.
+
+## Value proposition
+
+AssetSphere provides:
+
+- Improve operational throughput: CLI-first design enables batch operations and scripted workflows to reduce manual maintenance time.
+- Model real-world relationships: Custom fields and directional relationship links let teams represent roles, accounts, mandates and hierarchical links without schema migrations.
+- Improve discoverability and context: Field-aware keyword search (including custom fields and link names) enables rapid location of contacts and relationships; persistent, freeform notes attached to records preserve meeting details, onboarding context, and compliance annotations for reliable handover and auditability.
+- Support audit and recovery: Command history, session snapshots, and undo/redo provide an auditable trail and enable safe recovery from accidental changes.
+- Maintain local control and reliability: Desktop-first persistence (JSON-based) keeps data on the user's machine, facilitating local backup strategies and operational resilience.
+
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -47,8 +65,6 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
 <box type="info" seamless header="Basic Command Structure">
 
-**NOTE TO REVIEWERS**: This part of the UG contains the updated command syntax that the app will eventually use. However, not all of the rest of the UG has been updated to be aligned with this new syntax. This **will be fixed** in a later version.
-
 All commands follow the same simple format:
 
 `command <parameters...> <options...>`
@@ -78,15 +94,15 @@ Options are optional settings to customise your command. They always come _after
     - **Example:** `add "Finish report" /priority:high`
     - If the value has spaces, wrap the value in quotes: `add "New event" /due:"tomorrow at 5"`
 
-#g#To avoid cluttering the syntax for each command, options may be specified in a particular order in the formats given below for better readability. But, it is always fine to specify the options in **any order**.##
+#g#To avoid cluttering the syntax for each command, options may be specified in a particular order in the formats given below for better readability. However, it is always fine to specify the options in **any order**.##
 
 When you look at the help for a command, you'll see this notation:
 
 - **Parameter Variants:**
     - The acceptable parameter variants are placed as a prefix before the field, e.g. (+, -) `<tag>`. By default, if the variant is not specified, then the parameter must be a normal parameter and not have any prefix.
-    - (*): Normal parameter (no prefix)
-    - (+): Additive parameter (prefix `+`)
-    - (-): Subtractive parameter (prefix `-`)
+    - (*): Normal parameter (no prefix).
+    - (+): Additive parameter (prefix `+`).
+    - (-): Subtractive parameter (prefix `-`).
 - **Field Types:**
     - `(string)`: Text that can be a single `word` or `"text with spaces"`.
     - `(word)`: Text that must be a single `word` (without quotes).
@@ -98,11 +114,11 @@ When you look at the help for a command, you'll see this notation:
     - `<item>*`: Zero or more (it's optional and you can provide many).
     - Multiple items may be grouped with square brackets `[]` and assigned a multiplicity. In such a case, the entire group may be repeated as many times as specified.
 
-_Example:_ `tag <index>+ [/tag:<tag>]+` means you must provide at least one index, followed by at least one tag with option key `tag`. These are all acceptable inputs:
-- `tag 1 /tag:friend`
-- `tag 1 /tag:enemy`
-- `tag 1 /tag`
-- `tag 1 /tag:enemy /tag:colleague`
+_Example:_ `edit <index>+ [/tag:<tag>]+` means you must provide at least one index, followed by at least one tag with option key `tag`. These are all acceptable inputs:
+- `edit 1 /tag:friend`
+- `edit 1 /tag:enemy`
+- `edit 1 /tag`
+- `edit 1 /tag:enemy /tag:colleague`
 
 **Whitespace and Special Characters**
 
@@ -114,25 +130,39 @@ _Example:_ `tag <index>+ [/tag:<tag>]+` means you must provide at least one inde
 By default:
 - #r#The number of parameters are fixed for commands and should be strictly adhered to. Using a number of parameters that does not conform to the requirements of the command format is **undefined behaviour** (we leave it to individual commands to decide what to do). In most cases, this is an error.##
 - #m#Some commands may gracefully handle extraneous parameters if it is sensible to do so, but this behaviour _should not be relied on_.##
-- #m#Extraneous options are *always* ignored, unless the command allows variable option keys (it cannot tell what the difference is between a legitimate option key and one that is extraneous.##
+- #m#Extraneous options are *always* ignored, unless the command allows variable option keys (it cannot tell what the difference is between a legitimate option key and one that is extraneous).##
 - #m#If an option name is specified multiple times when the command expects it to be specified only once, it will accept the first value specified.##
 
 </box>
 
 <box type="important" seamless header="Built-in and Custom Fields">
 
-The following are **built-in fields**. There are additional restrictions on each of them:
-- `name`s must only contain letters, numbers, or spaces, and it should not be blank
-- `phone`s must only contain numbers, and it should be at least 3 digits long
-- `address`s must not be blank
-- `email`s must be of a valid email address form
-- `tag`s must only contain letters and numbers
+The following are **built-in simple fields**. There are additional restrictions on each of them:
+- `name` must only contain letters, numbers, or spaces, and it should not be blank
+- `phone` must only contain numbers, and it should be at least 3 digits long
+- `address` must not be blank
+- `email` must be of a valid email address form
+- `tag` must only contain letters and numbers
 
 For **custom fields** (those added with the `field` command):
 - Custom field names must only contain letters and numbers
 - Custom field values must not be blank
 
 </box>
+
+### Command Inference
+
+If you type a command keyword/imperative partially, and the partial command keyword/imperative you typed in is a unique prefix of exactly one of these commands, then that command will be run.
+
+For example:
+- `ed 1 /name:"John Doe"` resolves to the equivalent command `edit 1 /name:"John Doe"`
+- `e` results in an error: both `edit` and `exit` have this prefix, so it is ambiguous as to which command should be run.
+- `x` results in an error: there are no command imperatives that begin with the letter `x`, so there is no valid command to run.
+
+**Errors and Warnings**
+
+* #r#If more than one command or no commands are found, an error occurs and no command is run.##
+* #m#The command to run is inferred only from the keyword/imperative supplied, and not from any of the parameters or options given.##
 
 ### Viewing help : `help`
 
@@ -141,6 +171,10 @@ Shows a message explaining how to access the help page.
 ![help message](images/helpMessage.png)
 
 Format: `help`
+
+_Additional notes:_
+
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `help 123` are treated the same as `help` and open the help window without error.
 
 ### Adding a person: `add`
 
@@ -174,6 +208,8 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `list 123` are treated the same as `list` and open the help window without error.
+
 ### Viewing command history : `history`
 
 Displays the list of commands previously entered.
@@ -191,6 +227,10 @@ Examples:
   3. delete 2
   ```
 
+_Additional notes:_
+
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `history 123` are treated the same as `history` and open the help window without error.
+
 ### Editing a person : `edit`
 
 Edits an existing person in the address book.
@@ -202,7 +242,7 @@ Format(s):
 * Existing values will be updated to the input values.
 * When editing tags, the existing tags of the person will be removed i.e adding of tags is not cumulative.
 * You can remove all the person’s tags by typing `/tag` without specifying any tags after it.
-* Edit cannot be used to modify fields or links.
+* Edit cannot be used to modify custom fields or links.
 
 **Parameters**
 
@@ -211,7 +251,8 @@ Format(s):
 **Options**
 
 * #r#At least one optional field must be provided.##
-* `<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+* `<field>` (word): one of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+  * #m#Option keys are case-sensitive.##
 * `<new-value>` (string): any valid field entry (dependent on the modified field)
   * For options other than `tag`, a value **must** be specified.
   * If `tag` is specified without any value, all tags on the person are removed.
@@ -226,8 +267,8 @@ Format(s):
 
 **Warnings and Errors**
 
-* #m#If the `tag` field is specified with values, any boolean options specified for `tag` are ignored (see above examples).##
 * #r#Values for each field must conform to the listed restrictions above.##
+* #m#If the `tag` field is specified with values, any empty-value options specified for `tag` are ignored (see above examples).##
 
 ### Modifying tags : `tag`
 
@@ -243,11 +284,19 @@ Format: `tag <index> [(+|-)<tag>]+`
 * `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
 * (+, -) `<tag>` (string): tags to add to or remove from a person
 
-Examples:
+**Examples**
 
 * `list` followed by `tag 2 +friend +cool` will add `friend` and `cool` to the 2nd person in the address book.
 * `list` followed by `tag 1 -villain -enemy` will remove `villain` and `enemy` from the 1st person in the address book.
 * `list` followed by `tag 2 +friend -villain +cool -enemy` will add `friend` and `cool` to and remove `villain` and `enemy` from the 2nd person in the address book.
+
+**Warnings and Errors**
+
+- #r#At least one tag change must be specified.##
+- #m#The command does not warn if:##
+    - #m#the tags to be added already exist,##
+    - #m#the tags to be removed don't already exist, or##
+    - #m#at least one tag change is specified, but the tag changes end up having no effect.##
 
 ### Adding information to a person: `info`
 
@@ -269,7 +318,7 @@ Examples:
 
 Sets, updates or removes one or more **custom field values** for the specified person in the address book.
 
-Format: `field <index> [/<key>[:<value>]*]+`
+Format: `field <index> [/<key>[:<value>]?]+`
 
 **Parameters**
 
@@ -278,15 +327,17 @@ Format: `field <index> [/<key>[:<value>]*]+`
 **Options**
 
 * #r#At least one optional field must be provided.##
-* `<key>` (word): name of custom field
+* `<key>` (word): name of custom field (strictly alphanumeric)
 * `<value>` (string): value of custom field
+  * Each `key` accepts exactly one associated `value` in a command. A command like `field 1 /brand:nike:adidas` will be **rejected**.
   * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
   * Custom field `key` is **case-sensitive**; `key` is not equivalent to `Key`.
   * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
+    * While you **can** do `field 1 /brand:nike /brand:adidas`, the person at index 1 will only be updated with the custom field `brand: nike`. `/brand: adidas` will be ignored.
   * Omitting `value` (e.g. `/nickname`) **removes** the custom field identified by `key` if it exists.
-  * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
+  * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, `field` or with keywords such as `to` and `from` (in any casing).
   * `key` cannot contain spaces, even if wrapped in straight double quotes; A `key` like `"Asset Class"` will be rejected, whereas an alternative like `AssetClass` will be accepted.
-  * If a `value` contains spaces, wrap it in straight double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
+  * If a `value` contains spaces or special characters ('@', '?', '!' etc.), wrap it in straight double quotes, e.g. `/notes:"Met @ FinTech conf 2025!"`.
 
 You may mix additions/updates and removals in a single command by providing multiple key-value options.
 
@@ -304,24 +355,25 @@ Finds persons whose fields contain any of the given keywords.
 Format: `find <keyword>+ [/<field>]*`
 
 * If no specific field is provided, all built-in fields (not including custom fields and links) will be searched.
-* The search is case-insensitive. e.g `hans` will match `Hans`.
-* The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`.
-* All the built-in fields are searched.
+* The search keyword is case-insensitive. e.g `hans` will match `Hans`.
+* The order of the keywords does not matter. e.g. `Hans Bo` will be treated the same as `Bo Hans`.
 * Only full words will be matched e.g. `Han` will not match `Hans`.
 * Persons matching at least one keyword on any one field will be returned (i.e. `OR` search).
   e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
 
 **Parameters**
 
-* `<keyword>` (string): keyword to search on. Only fields containing the full word (case insensitive) will be matched.
+* `<keyword>` (string): keyword to search on. Only fields containing the full word (case-insensitive) will be matched. Multi-worded strings for keywords like `"alex yeoh"` is not allowed, unquote them as such, `alex yeoh`.
 
 **Options**
 
-* `/<field>` (string): specified field to search on (both built in and custom added).
-* `/from` (string): search all links where the person is the linker.
-* `/to` (string): search all links where the person is the linkee (one being linked to).
+Note that if specifying to search on built in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For eg, `/name` NOT `/NAME`.
+* `/<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+* `/from` (word): search all links where the person matched is the linker.
+* `/to` (word): search all links where the person matched is the linkee (one being linked to).
+* `/<custom-field>` (word): specified to search on persons' custom added fields. (does not match if field provided is not existent)
 
-Examples:
+Examples: (no specified fields to search on, default all built in)
 * `find 99999999` returns all persons whose built-in fields contain `99999999`.
 * `find test.dummy@gmail.com` returns all persons whose built-in fields contain `test.dummy@gmail.com`.
 * `find friend` returns all persons whose built-in fields contain `"friend"`.
@@ -334,33 +386,33 @@ You can limit the search to specific fields by adding options after your keyword
 Examples:
 * `find John /name` returns persons whose name contains `john`.
 * `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
-* `find 99999999 /phone` returns all persons whose phone number is `99999999`.
+* `find 99999999 /phone` returns all persons whose phone number contains the word `99999999`.
 * `find test /name /email` returns all persons whose name or email contains the word `test`.
-* `find lawyer /from` returns all persons who are the linkers to other persons with linkname "lawyer".
-* `find lawyer /to` returns all persons who are the linkees to other persons with linkname "lawyer".
+* `find lawyer /from` returns all persons who are the linkers to other persons with linkname containing the word `lawyer`.
+* `find lawyer /to` returns all persons who are the linkees to other persons with linkname containing the word `lawyer`.
 
 ### Creating links between persons: `link`
 
 Creates a relationship link between two persons in the address book.
 
-Format: `link <index1> <linkName> <index2>`
+Format: `link <index-from> <link-name> <index-to>`
 
-* Establishes a directed relationship where the person at <index1> is the <linkName> of the person at <index2>.
-* Both persons will display the link in their contact cards.
+* Establishes a directed relationship where the person at `<index-from>` is the `<link-name>` of the person at `<index-to>`.
+* Both persons will display the link in their contact cards with the specified directions.
 * Self-links (e.g. linking a person to themselves) are not allowed.
 * If the same link already exists, the command will have no effect.
+* Editing/deleting a person with a link to someone will make the necessary changes in the address book.
 
 **Parameters**
 
-* `<index1>` (index): index of the linker (the person initiating the link)
-* `<linkName>` (string): name of the relationship (eg., lawyer, client)
-* `<index2>` (index): index of the linkee (the person being linked to)
+* `<index-from>` (index): index of the linker (the person initiating the link)
+* `<link-name>` (string): name of the relationship (eg., lawyer, client)
+* `<index-to>` (index): index of the linkee (the person being linked to)
 
 Examples:
 
-* list followed by link 1 lawyer 2 — person 1 becomes the lawyer of person 2.
-* list followed by link 2 "best-friend" 3 — person 2 becomes the best-friend of person 3 (note that quotes allow link names with special characters).
-* list followed by link 2 client 1 — person 2 becomes the client of person 1.
+* `list` followed by `link 1 lawyer 2` will result in person 1 becoming the lawyer of person 2.
+* `list` followed by `link 2 "best-friend" 3` will result in person 2 becoming the best-friend of person 3 (note that quotes allow link names with special characters).
 
 ### Deleting a person : `delete`
 
@@ -379,17 +431,38 @@ Format: `delete <index>`
 * `list` followed by `delete 2` deletes the 2nd person in the address book.
 * `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
 
+_Additional notes:_
+
+* The command ignores any extra arguments that follow the index. For example, `delete 2 extra words` will delete the 2nd person exactly as if `delete 2` had been entered.
+
 ### Clearing all entries : `clear`
 
 Clears all entries from the address book.
 
 Format: `clear`
 
+* Any extra words typed after `clear` are ignored. For instance, `clear now` will still clear the entries from the address book.
+
 ### Exiting the program : `exit`
 
 Exits the program.
 
 Format: `exit`
+
+_Additional notes:_
+
+* Any extra words typed after `exit` are ignored. For instance, `exit now` will still close the application.
+
+### Recalling previous commands (Up / Down arrow keys)
+
+While the command box is focused you can press the Up and Down arrow keys to cycle through previously entered commands.
+Press Up to recall the most recent command (and keep pressing Up to move to older commands). Press Down to move forward in the history; pressing Down when there is no newer command will clear the command box.
+
+After recalling a command, press Enter to execute it. This is useful for quickly re-running or editing recent commands without retyping them.
+
+_Additional notes:_
+
+* Like the `history` command, only valid commands will be saved and cycled. Invalid commands will ignored.
 
 ### Saving the data
 
@@ -422,34 +495,45 @@ If you observe unexpected behaviour around session restoration or command histor
 2. Check the `data/sessions/` folder for session files. Corrupted or invalid session files are ignored at startup.
 3. If needed, remove problematic session files and restart the app — a new snapshot will be created when you exit.
 
-### Editing the data file
+### Editing the data files
 
-AssetSphere data are saved automatically as a JSON file under the `data/sessions/`. Advanced users are welcome to update data directly by editing that data file.
+The main address book data file is saved as JSON at
 
-Caution:
+```
+[JAR file location]/data/addressbook.json
+```
 
-- Do not edit the JSON file while the application is running. If the file becomes malformed, the app may discard the data or fail to load it correctly.
+In addition, session snapshots (containing address book contacts, and GUI layout) are saved under the `data/sessions/` subdirectory next to the main data file, for example:
+
+```
+[JAR file location]/data/sessions/session-2025-10-18T12-34-56-789-Asia-Singapore.json
+```
+
+Advanced users may edit these JSON files while the application is not running, but proceed with caution: malformed edits can cause the app to discard data or fail to load. Always make a backup before editing.
 
 ### Finding the command history file
-Command history data are saved automatically as a JSON file `[JAR file location]/data/commandhistory.json`. Advanced users are welcome to update data directly by editing that data file.
 
-The file is in JSON format and contains an array of recorded commands. Example structure:
+Command history is persisted on normal exit to:
 
-  ```json
-  {
-    "commandhistory": {
-      "commands": [
-        "add n/John Doe p/98765432",
-        "list",
-        "delete 2"
-      ]
-    }
-  }
-  ```
+```
+[JAR file location]/data/commandhistory.json
+```
+
+The file is a JSON object that contains the recorded commands. Example structure (actual format contains a single `commands` array):
+
+```json
+{
+  "commands": [
+    "add \"John Doe\" 98765432 \"John street, block 123, #01-01\" \"johnd@example.com\"",
+    "list",
+    "delete 2"
+  ]
+}
+```
 
 Caution:
 
-- Do not edit the JSON file while the application is running. If the file becomes malformed, the app may discard the history or fail to load it correctly.
+- Do not edit these JSON files while the application is running. If the file becomes malformed, the app may discard the data or fail to load it correctly.
 
 <box type="warning" seamless>
 
@@ -487,8 +571,9 @@ Action     | Format, Examples
 **Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag` 
 **Modify Tag**    | `tag <index> [(+\|-)<tag>]+` <br> e.g., `tag 2 +friend -villain +cool -enemy`                                                                                                                          
 **View/Edit Info** | `info <index>` <br> e.g., `info 2`                                                                                                                                                                     
-**Field**  | `field <index> [/<key>[:<value>]*]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
+**Field**  | `field <index> [/<key>[:<value>]?]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
 **Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`                                                                                                                                             
+**Link**   | `link <index-from> <link-name> <index-to>` <br> e.g., `link 1 lawyer 2`
 **History** | `history`                                                                                                                                                                                              
 **Delete** | `delete <index>`<br> e.g., `delete 3`                                                                                                                                                                  
 **Clear**  | `clear`                                                                                                                                                                                                

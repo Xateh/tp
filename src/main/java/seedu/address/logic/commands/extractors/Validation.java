@@ -43,9 +43,15 @@ public class Validation {
             "Insufficient number of parameters supplied: expected at least %1$s variable parameters starting from "
                     + "index %2$s, got %3$s.";
     public static final String MESSAGE_INCORRECT_PARAMETER_KIND =
-            "Unexpected parameter kind at index $1%s: expected one of $2%s, got $3%s.";
+            "Unexpected parameter kind at index %1$s: expected one of %2$s, got %3$s.";
     public static final String MESSAGE_INDEX_FAILED_TO_PARSE = "Invalid index: expected positive integer, got %1$s";
     public static final String MESSAGE_INDEX_OUT_OF_RANGE = "Invalid index: expected positive integer, got %1$s";
+    public static final String MESSAGE_REMIND_NORMAL_PARAMETER = "Normal parameters must not start with any of the "
+            + "reserved prefixes (+, -).";
+    public static final String MESSAGE_REMIND_ADDITIVE_PARAMETER = "Additive parameters must start with the reserved "
+            + "prefix (+).";
+    public static final String MESSAGE_REMIND_SUBTRACTIVE_PARAMETER = "Subtractive parameters must start with the "
+            + "reserved prefix (-).";
 
     private Validation() {
     }
@@ -72,9 +78,24 @@ public class Validation {
 
         Parameter parameter = bareCommand.getParameter(position);
 
-        if (!Set.of(parameterKinds).contains(parameter.getKind())) {
-            throw new ValidationException(String.format(MESSAGE_INCORRECT_PARAMETER_KIND,
+        Set<ParameterKind> parameterKindsSet = Set.of(parameterKinds);
+        if (!parameterKindsSet.contains(parameter.getKind())) {
+            ArrayList<String> lines = new ArrayList<>();
+
+            lines.add(String.format(MESSAGE_INCORRECT_PARAMETER_KIND,
                     position, Arrays.toString(parameterKinds), parameter.getKind()));
+
+            if (parameterKindsSet.contains(ParameterKind.NORMAL)) {
+                lines.add(MESSAGE_REMIND_NORMAL_PARAMETER);
+            }
+            if (parameterKindsSet.contains(ParameterKind.ADDITIVE)) {
+                lines.add(MESSAGE_REMIND_ADDITIVE_PARAMETER);
+            }
+            if (parameterKindsSet.contains(ParameterKind.SUBTRACTIVE)) {
+                lines.add(MESSAGE_REMIND_SUBTRACTIVE_PARAMETER);
+            }
+
+            throw new ValidationException(String.join("\n", lines));
         }
 
         return parameter;
@@ -102,12 +123,7 @@ public class Validation {
         ArrayList<Parameter> parameters = new ArrayList<>();
 
         for (int i = startPosition; i < parameterCount; i++) {
-            Parameter parameter = bareCommand.getParameter(i);
-
-            if (!Set.of(parameterKinds).contains(parameter.getKind())) {
-                throw new ValidationException(String.format(MESSAGE_INCORRECT_PARAMETER_KIND,
-                        i, Arrays.toString(parameterKinds), parameter.getKind()));
-            }
+            Parameter parameter = Validation.validateParameter(bareCommand, i, parameterKinds);
 
             parameters.add(parameter);
         }
