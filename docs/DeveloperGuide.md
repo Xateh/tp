@@ -767,7 +767,7 @@ For command-specific walkthroughs (inputs, expected outputs, and edge cases), re
 Use the following extended scenarios to exercise multiple features together. They are written so that the cases, when executed
 in order, collectively cover the command set exposed in the User Guide.
 
-#### Scenario 1: Onboard new clients during a strategy meeting
+#### Onboarding new clients during a strategy meeting
 
 1. Preparation
 
