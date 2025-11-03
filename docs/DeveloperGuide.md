@@ -890,7 +890,7 @@ in order, collectively cover the command set exposed in the User Guide.
       Expected: Bernard's phone and email fields update; the command feedback summarises the edited fields.
 
    1. Invoke `info 3` and type a short note such as "Leads regional partnerships" before saving.<br>
-      Expected: A modal text editor opens. After saving, Clara's card shows an information badge and re-opening `info 3` reveals the saved text.
+      Expected: A modal text editor opens. After saving (by closing the modal text editor), re-opening `info 3` reveals the saved text.
 
    1. Attach structured metadata with `field 4 /specialty:"Regulatory advisory" /assistant:"Mei"`.<br>
       Expected: Dinesh's card shows the newly added custom fields under the contact details panel.
