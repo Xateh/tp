@@ -16,6 +16,10 @@
 AssetSphere builds upon the AddressBook-Level3 project maintained by the CS2103T teaching team and community contributors.
 We also acknowledge the JavaFX and PlantUML projects for providing the UI framework and diagram tooling used throughout this guide.
 
+AI was used for the following purposes:
+- Generating test cases
+- Debugging errors / issues
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Setting up, getting started**
@@ -500,7 +504,7 @@ _{Explain here how the data archiving feature will be implemented}_
 
 ### Product Scope
 
-**Target User Profile**: This is primarily for **technologically-inclined asset managers for high-net-worth individuals (HWNIs)** that require managing **complex** relationships and hierarchies between large groups of people.
+**Target User Profile**: This is primarily for **technologically-inclined asset managers for high-net-worth individuals (HNWIs)** that require managing **complex** relationships and hierarchies between large groups of people.
 
 In addition, they:
 - prefer desktop apps over other types
@@ -512,42 +516,42 @@ In addition, they:
 
 ### User Stories
 
-**User type/role**<br />_As a_ | **Function**<br />_I can_                                               | **Benefit**<br />_so that_ | Priority
--|-------------------------------------------------------------------------| - | -
-Asset manager | find for contacts using keywords based on all fields | cast wider searches | Must-have (✓✓)
-Asset manager | additively add tags | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
-Asset manager | remove existing tags | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
-Asset manager | save data between sessions                                              | I don’t have to re-enter information after relaunching | Must-have (✓✓)
-Organised asset manager | categorise contacts based on asset classes                              | I can quickly identify relevant people per portfolio | Must-have (✓✓)
-Detailed asset manager | customise client profiles with custom fields                            | I can track unique client details/needs | Must-have (✓✓)
-Asset manager | define links between clients and their contacts                         | I can navigate complex relationship networks | Must-have (✓✓)
-Asset manager | view all clients linked to a specific asset class                       | I can understand dependencies within each asset | Must-have (✓✓)
-Tech-savvy asset manager | save my data in a portable, human-readable format                       | I can edit/process data in other apps and move between devices | Must-have (✓✓)
-Asset manager | have tiers/priority flags in my client list                             | I can track who the big players are | Must-have (✓✓)
-Asset manager | have custom notes for each contact                                      | I can attach longer pieces of information to contacts | Must-have (✓✓)
-Tech-savvy asset manager | make custom aliases for commands                                        | I can use shortcuts that match my preferences | Nice-to-have (✓)
-Clumsy asset manager | have my commands be inferred (string matching, autocorrect, fuzzy find) | I don’t have to retype or I can use shorter variants | Nice-to-have (✓)
-Considerate asset manager | see the time zone for a contact                                         | I can schedule sensibly | Nice-to-have (✓)
-Asset manager | delete contacts                                                         | the app remains clean and easy to find things | Nice-to-have (✓)
-Asset manager | have my address book flag important dates (e.g., birthdays)             | I can remember important dates and maintain relationships | Nice-to-have (✓)
-Clumsy asset manager | merge/handle duplicate records                                          | the network remains clean and accurate | Nice-to-have (✓)
-Asset manager | view my command history                                                 | I can redo regularly used commands | Nice-to-have (✓)
-Tech-savvy asset manager | save custom workflows (sequences of commands)                           | I can quickly execute common workflows | Nice-to-have (✓)
-Tech-savvy asset manager | have my commands be tab-completable                                     | I can quickly fill in command information | Nice-to-have (✓)
-Asset manager | have syntax highlighting and diagnostics for commands                   | I can more easily spot mistakes as I type | Nice-to-have (✓)
-Asset manager | see detailed, decorated error messages                                  | I can quickly understand and fix mistyped commands | Nice-to-have (✓)
-Asset manager | have command syntax hints show up as I type                             | I can see what I need to fill in | Nice-to-have (✓)
-Busy asset manager | segment users via predefined metrics (e.g., geography, sector)          | I can find useful contacts faster for different scenarios | Nice-to-have (✓)
-Tech-savvy asset manager | use shell-like expansion for commands                                   | I can batch-run commands | Nice-to-have (✓)
-Tech-savvy asset manager | use command pipes (\|) to chain commands                                | I can create complex workflows | Nice-to-have (✓)
-Asset manager | recursively delete contacts                                             | related links/notes are cleaned up safely | Nice-to-have (✓)
-Asset manager | set (scoped) default values for common command flags/inputs             | I can type shorter commands by omitting defaults | Nice-to-have (✓)
-Asset manager | have the system flag potential conflicts                                | I can proactively see clashes in notes/tags/tiers | Rejected (✗)
-Asset manager | navigate past commands quickly                                          | I can scroll through previous commands | Rejected (✗)
-Asset manager | hide or expire old contacts automatically                               | I can keep my list tidy without manual effort | Rejected (✗)
-Tech-savvy asset manager | use a custom search syntax                                              | I can craft advanced queries beyond basic filters | Rejected (✗)
-Asset manager | store key files (e.g., NDAs, letters) with contacts                     | I can keep documents alongside records | Rejected (✗)
-Asset manager | assign follow-ups to team members                                       | I can distribute work across the team from the app | Rejected (✗)
+**User type/role**<br />_As a_ | **Function**<br />_I can_                                                      | **Benefit**<br />_so that_ | Priority
+-|--------------------------------------------------------------------------------| - | -
+Asset manager | find for contacts using keywords based on all fields                           | cast wider searches | Must-have (✓✓)
+Asset manager | additively add tags                                                            | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
+Asset manager | remove existing tags                                                           | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
+Asset manager | save data between sessions                                                     | I don’t have to re-enter information after relaunching | Must-have (✓✓)
+Organised asset manager | categorise contacts based on asset classes                                     | I can quickly identify relevant people per portfolio | Must-have (✓✓)
+Detailed asset manager | customise client profiles with custom fields                                   | I can track unique client details/needs | Must-have (✓✓)
+Asset manager | define links between clients and their contacts                                | I can navigate complex relationship networks | Must-have (✓✓)
+Asset manager | view all clients linked to a specific asset class                              | I can understand dependencies within each asset | Must-have (✓✓)
+Tech-savvy asset manager | save my data in a portable, human-readable format                              | I can edit/process data in other apps and move between devices | Must-have (✓✓)
+Asset manager | have tiers/priority flags in my client list                                    | I can track who the big players are | Must-have (✓✓)
+Asset manager | have custom notes for each contact                                             | I can attach longer pieces of information to contacts | Must-have (✓✓)
+Tech-savvy asset manager | make custom aliases for commands                                               | I can use shortcuts that match my preferences | Nice-to-have (✓)
+Clumsy asset manager | have my commands be inferred                                                   | I don’t have to retype or I can use shorter variants | Nice-to-have (✓)
+Considerate asset manager | see the time zone for a contact                                                | I can schedule sensibly | Nice-to-have (✓)
+Asset manager | delete contacts                                                                | the app remains clean and easy to find things | Nice-to-have (✓)
+Asset manager | have my address book flag important dates (e.g., birthdays)                    | I can remember important dates and maintain relationships | Nice-to-have (✓)
+Clumsy asset manager | merge/handle duplicate records                                                 | the network remains clean and accurate | Nice-to-have (✓)
+Asset manager | view my command history                                                        | I can redo regularly used commands | Nice-to-have (✓)
+Tech-savvy asset manager | save custom workflows (sequences of commands)                                  | I can quickly execute common workflows | Nice-to-have (✓)
+Tech-savvy asset manager | have my commands be tab-completable                                            | I can quickly fill in command information | Nice-to-have (✓)
+Asset manager | have syntax highlighting and diagnostics for commands                          | I can more easily spot mistakes as I type | Nice-to-have (✓)
+Asset manager | see detailed, decorated error messages                                         | I can quickly understand and fix mistyped commands | Nice-to-have (✓)
+Asset manager | have command syntax hints show up as I type                                    | I can see what I need to fill in | Nice-to-have (✓)
+Busy asset manager | segment users via predefined metrics (e.g., geography, sector)                 | I can find useful contacts faster for different scenarios | Nice-to-have (✓)
+Tech-savvy asset manager | use shell-like expansion for commands                                          | I can batch-run commands | Nice-to-have (✓)
+Tech-savvy asset manager | chain commands by passing outputs from previous commands as inputs to the next | I can create complex workflows | Nice-to-have (✓)
+Asset manager | recursively delete contacts                                                    | related links/notes are cleaned up safely | Nice-to-have (✓)
+Asset manager | set (scoped) default values for common command flags/inputs                    | I can type shorter commands by omitting defaults | Nice-to-have (✓)
+Asset manager | have the system flag potential conflicts                                       | I can proactively see clashes in notes/tags/tiers | Rejected (✗)
+Asset manager | navigate past commands quickly                                                 | I can scroll through previous commands | Rejected (✗)
+Asset manager | hide or expire old contacts automatically                                      | I can keep my list tidy without manual effort | Rejected (✗)
+Tech-savvy asset manager | use a custom search syntax                                                     | I can craft advanced queries beyond basic filters | Rejected (✗)
+Asset manager | store key files (e.g., NDAs, letters) with contacts                            | I can keep documents alongside records | Rejected (✗)
+Asset manager | assign follow-ups to team members                                              | I can distribute work across the team from the app | Rejected (✗)
 
 
 ### Use Cases
@@ -775,6 +779,12 @@ added.
 * **Mainstream OS**: Windows, Linux, Unix, MacOS
 * **Private contact detail**: A contact detail that is not meant to be shared with others
 
+**Assembly-Related**
+
+* **Command Assembly**: The logic subsystem that manages the full process from parsing a user command to constructing the executable command object.
+* **AST**: Abstract syntax tree; this is the tree-like structure generated after parsing a string that conforms to a formal grammar defined in terms of production rules.
+* **Lexing**: The process of converting text into meaningful lexical tokens belong to specific categories. As an analogy, English sentences can be lexed into nouns, verbs, adjectives, etc. The list of lexical tokens used by the command grammar can be found [here](CommandAssembly.md).
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Appendix: Instructions for manual testing**
@@ -792,15 +802,16 @@ testers are expected to do more *exploratory* testing.
 
 1. Initial launch
 
-   1. Download the jar file and copy into an empty folder
+   1. Download the jar file `assetsphere.jar` and copy into an empty folder `./dir/`.
 
-   1. Double-click the jar file Expected: Shows the GUI with a set of sample contacts. The window size may not be optimum.
+   1. Launch the jar file with `java -jar ./dir/assetsphere.jar`.<br>
+        Expected: Shows the GUI with a set of sample contacts. The window size may not be optimum.
 
 1. Saving window preferences
 
    1. Resize the window to an optimum size. Move the window to a different location. Close the window.
 
-   1. Re-launch the app by double-clicking the jar file.<br>
+   1. Re-launch the app with `java -jar ./dir/assetsphere.jar`.<br>
        Expected: The most recent window size and location is retained.
 
 1. _{ more test cases …​ }_
