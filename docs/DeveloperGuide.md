@@ -796,11 +796,25 @@ added.
 * **Mainstream OS**: Windows, Linux, Unix, MacOS
 * **Private contact detail**: A contact detail that is not meant to be shared with others
 
+* **Refactor**: Changing the internal structure of the code (how it's written) to make it clearer, simpler, or easier to maintain — without changing what the application does for users.
+* **Session snapshot**: A saved copy of the app’s current working state used to restore window view and settings after closing and reopening the app (for example: address book contents, and window size/position).
+* **Stop-time persistence**: The process that runs when the application is closing which saves the session snapshot and related data (for example: command history, and window size/position) to disk so the app can restore the same state when reopened.
+* **API**: Short for Application Programming Interface — a set of rules and named operations that lets different parts of the program (or other programs) ask for data or request actions from a component.
+* **GUI (Graphical User Interface)**: The visual parts of the app you interact with — windows, buttons, lists and menus — as opposed to typing commands in a text console.
+* **JavaFX**: A Java toolkit used to build the app's graphical interface (windows, controls, and layouts). The app's UI is implemented using JavaFX.
+* **PlantUML**: A text-based tool that generates diagrams (architecture, sequence, etc.) from simple textual descriptions; used to produce the diagrams in this guide.
+* **JSON**: A lightweight, human-readable text format used to store structured data (for example, the address book and user preferences are saved in JSON files).
+* **ObservableList**: A list type that notifies the user interface when items are added, removed or changed so the display updates automatically (e.g., the person list refreshes when you add a contact).
+* **Undo/redo**: The ability to revert the most recent change (undo) or reapply a reverted change (redo), usually implemented by keeping past copies of the data so you can move backward or forward through them.
+* **CLI (Command-Line Interface)**: An alternative to the GUI where you control the app by typing commands into a console or terminal.
+
 **Assembly-Related**
 
 * **Command Assembly**: The logic subsystem that manages the full process from parsing a user command to constructing the executable command object.
 * **AST**: Abstract syntax tree; this is the tree-like structure generated after parsing a string that conforms to a formal grammar defined in terms of production rules.
 * **Lexing**: The process of converting text into meaningful lexical tokens belong to specific categories. As an analogy, English sentences can be lexed into nouns, verbs, adjectives, etc. The list of lexical tokens used by the command grammar can be found [here](CommandAssembly.md).
+* **Token**: A small, meaningful piece of input produced by the lexer (for example, a single word, a number, or a quoted phrase); tokens are the basic units the parser uses to understand a command.
+* **Parser**: The component that analyses a sequence of tokens and determines their grammatical structure (often producing an AST) so the application can decide what action to perform.
 
 --------------------------------------------------------------------------------------------------------------------
 
