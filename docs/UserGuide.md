@@ -6,7 +6,25 @@
 
 # AssetSphere User Guide
 
-AssetSphere is a **desktop app for managing contacts, optimized for use via a Command Line Interface** (CLI) while still having the benefits of a Graphical User Interface (GUI). If you can type fast, AssetSphere can get your contact management tasks done faster than traditional GUI apps.
+AssetSphere is a desktop contact management application purpose-built for professional asset managers and wealth management teams. It combines a command-line, scriptable interface for high-throughput operations with a graphical UI for focused review and editing. The application supports modeling of complex client hierarchies and directional relationships, enabling teams to maintain structured, auditable records for high-net-worth individuals (HNWIs), counterparties, and institutional stakeholders.
+
+## Target user profile
+
+AssetSphere is intended for:
+
+- Asset managers and portfolio managers responsible for client relationship management, reporting, and operational workflows that require structured metadata and relationship modeling.
+- Client onboarding, operations, and compliance teams that require traceable change history, reproducible session snapshots, and the ability to audit and revert modifications.
+
+## Value proposition
+
+AssetSphere provides:
+
+- Improve operational throughput: CLI-first design enables batch operations and scripted workflows to reduce manual maintenance time.
+- Model real-world relationships: Custom fields and directional relationship links let teams represent roles, accounts, mandates and hierarchical links without schema migrations.
+- Improve discoverability and context: Field-aware keyword search (including custom fields and link names) enables rapid location of contacts and relationships; persistent, freeform notes attached to records preserve meeting details, onboarding context, and compliance annotations for reliable handover and auditability.
+- Support audit and recovery: Command history, session snapshots, and undo/redo provide an auditable trail and enable safe recovery from accidental changes.
+- Maintain local control and reliability: Desktop-first persistence (JSON-based) keeps data on the user's machine, facilitating local backup strategies and operational resilience.
+
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -82,9 +100,9 @@ When you look at the help for a command, you'll see this notation:
 
 - **Parameter Variants:**
     - The acceptable parameter variants are placed as a prefix before the field, e.g. (+, -) `<tag>`. By default, if the variant is not specified, then the parameter must be a normal parameter and not have any prefix.
-    - (*): Normal parameter (no prefix)
-    - (+): Additive parameter (prefix `+`)
-    - (-): Subtractive parameter (prefix `-`)
+    - (*): Normal parameter (no prefix).
+    - (+): Additive parameter (prefix `+`).
+    - (-): Subtractive parameter (prefix `-`).
 - **Field Types:**
     - `(string)`: Text that can be a single `word` or `"text with spaces"`.
     - `(word)`: Text that must be a single `word` (without quotes).
@@ -190,6 +208,8 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `list 123` are treated the same as `list` and open the help window without error.
+
 ### Viewing command history : `history`
 
 Displays the list of commands previously entered.
@@ -206,6 +226,10 @@ Examples:
   2. list
   3. delete 2
   ```
+
+_Additional notes:_
+
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `history 123` are treated the same as `history` and open the help window without error.
 
 ### Editing a person : `edit`
 
@@ -417,6 +441,8 @@ Clears all entries from the address book.
 
 Format: `clear`
 
+* Any extra words typed after `clear` are ignored. For instance, `clear now` will still clear the entries from the address book.
+
 ### Exiting the program : `exit`
 
 Exits the program.
@@ -426,6 +452,17 @@ Format: `exit`
 _Additional notes:_
 
 * Any extra words typed after `exit` are ignored. For instance, `exit now` will still close the application.
+
+### Recalling previous commands (Up / Down arrow keys)
+
+While the command box is focused you can press the Up and Down arrow keys to cycle through previously entered commands.
+Press Up to recall the most recent command (and keep pressing Up to move to older commands). Press Down to move forward in the history; pressing Down when there is no newer command will clear the command box.
+
+After recalling a command, press Enter to execute it. This is useful for quickly re-running or editing recent commands without retyping them.
+
+_Additional notes:_
+
+* Like the `history` command, only valid commands will be saved and cycled. Invalid commands will ignored.
 
 ### Saving the data
 
