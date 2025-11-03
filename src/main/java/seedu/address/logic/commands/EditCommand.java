@@ -84,7 +84,7 @@ public class EditCommand extends Command {
                 if (link.getLinker().isSamePerson(personToEdit)) {
                     updatedLinks.add(new Link(editedPerson, link.getLinkee(), link.getLinkName()));
                     hasChanged = true;
-                } else if (link.getLinkee().equals(personToEdit)) {
+                } else if (link.getLinkee().isSamePerson(personToEdit)) {
                     updatedLinks.add(new Link(link.getLinker(), editedPerson, link.getLinkName()));
                     hasChanged = true;
                 } else {

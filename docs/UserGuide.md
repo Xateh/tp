@@ -6,7 +6,25 @@
 
 # AssetSphere User Guide
 
-AssetSphere is a **desktop app for managing contacts, optimized for use via a Command Line Interface** (CLI) while still having the benefits of a Graphical User Interface (GUI). If you can type fast, AssetSphere can get your contact management tasks done faster than traditional GUI apps.
+AssetSphere is a desktop contact management application purpose-built for professional asset managers and wealth management teams. It combines a command-line, scriptable interface for high-throughput operations with a graphical UI for focused review and editing. The application supports modeling of complex client hierarchies and directional relationships, enabling teams to maintain structured, auditable records for high-net-worth individuals (HNWIs), counterparties, and institutional stakeholders.
+
+## Target user profile
+
+AssetSphere is intended for:
+
+- Asset managers and portfolio managers responsible for client relationship management, reporting, and operational workflows that require structured metadata and relationship modeling.
+- Client onboarding, operations, and compliance teams that require traceable change history, reproducible session snapshots, and the ability to audit and revert modifications.
+
+## Value proposition
+
+AssetSphere provides:
+
+- Improve operational throughput: CLI-first design enables batch operations and scripted workflows to reduce manual maintenance time.
+- Model real-world relationships: Custom fields and directional relationship links let teams represent roles, accounts, mandates and hierarchical links without schema migrations.
+- Improve discoverability and context: Field-aware keyword search (including custom fields and link names) enables rapid location of contacts and relationships; persistent, freeform notes attached to records preserve meeting details, onboarding context, and compliance annotations for reliable handover and auditability.
+- Support audit and recovery: Command history, session snapshots, and undo/redo provide an auditable trail and enable safe recovery from accidental changes.
+- Maintain local control and reliability: Desktop-first persistence (JSON-based) keeps data on the user's machine, facilitating local backup strategies and operational resilience.
+
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -82,9 +100,9 @@ When you look at the help for a command, you'll see this notation:
 
 - **Parameter Variants:**
     - The acceptable parameter variants are placed as a prefix before the field, e.g. (+, -) `<tag>`. By default, if the variant is not specified, then the parameter must be a normal parameter and not have any prefix.
-    - (*): Normal parameter (no prefix)
-    - (+): Additive parameter (prefix `+`)
-    - (-): Subtractive parameter (prefix `-`)
+    - (*): Normal parameter (no prefix).
+    - (+): Additive parameter (prefix `+`).
+    - (-): Subtractive parameter (prefix `-`).
 - **Field Types:**
     - `(string)`: Text that can be a single `word` or `"text with spaces"`.
     - `(word)`: Text that must be a single `word` (without quotes).
@@ -132,6 +150,20 @@ For **custom fields** (those added with the `field` command):
 
 </box>
 
+### Command Inference
+
+If you type a command keyword/imperative partially, and the partial command keyword/imperative you typed in is a unique prefix of exactly one of these commands, then that command will be run.
+
+For example:
+- `ed 1 /name:"John Doe"` resolves to the equivalent command `edit 1 /name:"John Doe"`
+- `e` results in an error: both `edit` and `exit` have this prefix, so it is ambiguous as to which command should be run.
+- `x` results in an error: there are no command imperatives that begin with the letter `x`, so there is no valid command to run.
+
+**Errors and Warnings**
+
+* #r#If more than one command or no commands are found, an error occurs and no command is run.##
+* #m#The command to run is inferred only from the keyword/imperative supplied, and not from any of the parameters or options given.##
+
 ### Viewing help : `help`
 
 Shows a message explaining how to access the help page.
@@ -176,6 +208,8 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `list 123` are treated the same as `list` and open the help window without error.
+
 ### Viewing command history : `history`
 
 Displays the list of commands previously entered.
@@ -192,6 +226,10 @@ Examples:
   2. list
   3. delete 2
   ```
+
+_Additional notes:_
+
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `history 123` are treated the same as `history` and open the help window without error.
 
 ### Editing a person : `edit`
 
@@ -246,11 +284,19 @@ Format: `tag <index> [(+|-)<tag>]+`
 * `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
 * (+, -) `<tag>` (string): tags to add to or remove from a person
 
-Examples:
+**Examples**
 
 * `list` followed by `tag 2 +friend +cool` will add `friend` and `cool` to the 2nd person in the address book.
 * `list` followed by `tag 1 -villain -enemy` will remove `villain` and `enemy` from the 1st person in the address book.
 * `list` followed by `tag 2 +friend -villain +cool -enemy` will add `friend` and `cool` to and remove `villain` and `enemy` from the 2nd person in the address book.
+
+**Warnings and Errors**
+
+- #r#At least one tag change must be specified.##
+- #m#The command does not warn if:##
+    - #m#the tags to be added already exist,##
+    - #m#the tags to be removed don't already exist, or##
+    - #m#at least one tag change is specified, but the tag changes end up having no effect.##
 
 ### Adding information to a person: `info`
 
@@ -317,14 +363,14 @@ Format: `find <keyword>+ [/<field>]*`
 
 **Parameters**
 
-* `<keyword>` (word): keyword to search on. Only fields containing the full word (case insensitive) will be matched.
+* `<keyword>` (string): keyword to search on. Only fields containing the full word (case-insensitive) will be matched. Multi-worded strings for keywords like `"alex yeoh"` is not allowed, unquote them as such, `alex yeoh`.
 
 **Options**
 
 Note that if specifying to search on built in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For eg, `/name` NOT `/NAME`.
-* `/field` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
-* `/from` (word): search all links where the person is the linker.
-* `/to` (word): search all links where the person is the linkee (one being linked to).
+* `/<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+* `/from` (word): search all links where the person matched is the linker.
+* `/to` (word): search all links where the person matched is the linkee (one being linked to).
 * `/<custom-field>` (word): specified to search on persons' custom added fields. (does not match if field provided is not existent)
 
 Examples: (no specified fields to search on, default all built in)
@@ -340,10 +386,10 @@ You can limit the search to specific fields by adding options after your keyword
 Examples:
 * `find John /name` returns persons whose name contains `john`.
 * `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
-* `find 99999999 /phone` returns all persons whose phone number is `99999999`.
+* `find 99999999 /phone` returns all persons whose phone number contains the word `99999999`.
 * `find test /name /email` returns all persons whose name or email contains the word `test`.
-* `find lawyer /from` returns all persons who are the linkers to other persons with linkname "lawyer".
-* `find lawyer /to` returns all persons who are the linkees to other persons with linkname "lawyer".
+* `find lawyer /from` returns all persons who are the linkers to other persons with linkname containing the word `lawyer`.
+* `find lawyer /to` returns all persons who are the linkees to other persons with linkname containing the word `lawyer`.
 
 ### Creating links between persons: `link`
 
@@ -355,7 +401,7 @@ Format: `link <index-from> <link-name> <index-to>`
 * Both persons will display the link in their contact cards with the specified directions.
 * Self-links (e.g. linking a person to themselves) are not allowed.
 * If the same link already exists, the command will have no effect.
-* Editing/deleting a person with a link to someone will make the necessary changes.
+* Editing/deleting a person with a link to someone will make the necessary changes in the address book.
 
 **Parameters**
 
@@ -365,8 +411,8 @@ Format: `link <index-from> <link-name> <index-to>`
 
 Examples:
 
-* list followed by link 1 lawyer 2 will result in person 1 becoming the lawyer of person 2.
-* list followed by link 2 "best-friend" 3 will result in person 2 becoming the best-friend of person 3 (note that quotes allow link names with special characters).
+* `list` followed by `link 1 lawyer 2` will result in person 1 becoming the lawyer of person 2.
+* `list` followed by `link 2 "best-friend" 3` will result in person 2 becoming the best-friend of person 3 (note that quotes allow link names with special characters).
 
 ### Deleting a person : `delete`
 
@@ -395,6 +441,8 @@ Clears all entries from the address book.
 
 Format: `clear`
 
+* Any extra words typed after `clear` are ignored. For instance, `clear now` will still clear the entries from the address book.
+
 ### Exiting the program : `exit`
 
 Exits the program.
@@ -405,29 +453,40 @@ _Additional notes:_
 
 * Any extra words typed after `exit` are ignored. For instance, `exit now` will still close the application.
 
+### Recalling previous commands (Up / Down arrow keys)
+
+While the command box is focused you can press the Up and Down arrow keys to cycle through previously entered commands.
+Press Up to recall the most recent command (and keep pressing Up to move to older commands). Press Down to move forward in the history; pressing Down when there is no newer command will clear the command box.
+
+After recalling a command, press Enter to execute it. This is useful for quickly re-running or editing recent commands without retyping them.
+
+_Additional notes:_
+
+* Like the `history` command, only valid commands will be saved and cycled. Invalid commands will ignored.
+
 ### Saving the data
 
 AssetSphere data are saved in the hard disk automatically after any command that changes the data. There is no need to save manually.
 
 #### Session snapshots
 
-In addition to the main address book file, AssetSphere writes a snapshot of your current session (recent commands, active `find` keywords, and window layout) every time the app exits normally. These JSON files live beside the main data file inside a `sessions/` sub-folder, for example:
+In addition to the main address book file, AssetSphere writes a snapshot of your current session (recent commands and window layout) every time the app exits normally. These JSON files live beside the main data file inside a `sessions/` sub-folder, for example:
 
 ```
 [JAR file location]/data/sessions/session-2025-10-18T12-34-56-789-Asia-Singapore.json
 ```
 
-At start-up AssetSphere loads the most recent valid snapshot so that the app opens with the same filters and window placement you last used. You can safely delete older session files if you want to reclaim disk space; the app will automatically create a fresh snapshot the next time you close it.
+At start-up AssetSphere loads the most recent valid snapshot so that the app opens with the same window placement and address book state you last used. Note: active search filters/keywords are no longer persisted across restarts — the app starts with the unfiltered list by default. You can safely delete older session files if you want to reclaim disk space; the app will automatically create a fresh snapshot the next time you close it.
 
 Note about when a snapshot is created:
 
 - A new session snapshot is only saved on exit when the information that will be written to the session file has actually changed since the last saved snapshot. The timestamp stored in the snapshot (`savedAt`) is ignored for this comparison — changing only the timestamp will not cause a new file to be written.
-- Transient UI changes that do not affect the persisted session attributes (address book contents, active `find` keywords, or GUI settings) — for example, brief differences in the feedback text shown in the command-result box — will not trigger a new session file.
+- Transient UI changes that do not affect the persisted session attributes (address book contents or GUI settings) — for example, brief differences in the feedback text shown in the command-result box — will not trigger a new session file.
 
 #### Notes for this release (fix/command-history)
 
 Behavior for end users remains unchanged by the recent internal refactor. The app still:
-* Restores the most recent valid session snapshot at startup (filters, window layout, and address book snapshot).
+* Restores the most recent valid session snapshot at startup (window layout and address book snapshot).
 * Persists a session JSON file on normal exit under the `data/sessions/` subdirectory next to your main data file.
 * Persists the command history to `data/commandhistory.json` on exit.
 
@@ -436,7 +495,9 @@ If you observe unexpected behaviour around session restoration or command histor
 2. Check the `data/sessions/` folder for session files. Corrupted or invalid session files are ignored at startup.
 3. If needed, remove problematic session files and restart the app — a new snapshot will be created when you exit.
 
-### Editing the data files
+Note: This release no longer saves or restores the active `find` keywords or filters as part of the session snapshot. If you relied on the prior behaviour of restoring search filters on startup, you will need to re-run your `find` commands after launching the app.
+
+### Editing the data file
 
 The main address book data file is saved as JSON at
 

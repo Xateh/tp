@@ -132,8 +132,8 @@ public class UiManager implements Ui {
             Index index = Index.fromOneBased(personIndex + 1);
             Info info = new Info(infoText);
 
-            // Use InfoEditCommand.saveInfo instead of InfoSaveCommand
-            CommandResult result = InfoCommand.saveInfo(logic.getModel(), index, info);
+            // Pass logic to ensure session tracking works
+            CommandResult result = InfoCommand.saveInfo(logic.getModel(), logic, index, info);
 
             // Update the main window's result display
             mainWindow.showFeedback(result.getFeedbackToUser());

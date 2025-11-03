@@ -266,7 +266,9 @@ public class LogicManagerTest {
         logic.execute(SAMPLE_ADD_COMMAND_INPUT_BOB);
 
         SessionData snapshot = logic.getSessionSnapshotIfDirty().orElseThrow();
-        assertEquals(List.of("Alice"), snapshot.getSearchKeywords());
+        // Address book changed; snapshot should reflect the updated address book but not search keywords
+        assertTrue(snapshot.getAddressBook().getPersonList().stream()
+                .anyMatch(p -> p.getName().toString().contains("Bob")));
         logic.markSessionSnapshotPersisted();
 
         logic.execute(ListCommand.COMMAND_WORD);
@@ -275,7 +277,8 @@ public class LogicManagerTest {
         logic.execute(SAMPLE_ADD_COMMAND_INPUT_AMY);
 
         snapshot = logic.getSessionSnapshotIfDirty().orElseThrow();
-        assertEquals(List.of(), snapshot.getSearchKeywords());
+        assertTrue(snapshot.getAddressBook().getPersonList().stream()
+                .anyMatch(p -> p.getName().toString().contains("Amy")));
     }
 
     @Test
@@ -284,13 +287,9 @@ public class LogicManagerTest {
 
         // search changes should mark metadata dirty, visible via getSessionSnapshotIfAnyDirty
         logic.execute("find Alice");
+        // search keywords are no longer persisted; metadata snapshot should not be produced
         Optional<SessionData> snapshot = logic.getSessionSnapshotIfAnyDirty();
-        assertTrue(snapshot.isPresent());
-        assertEquals(List.of("Alice"), snapshot.get().getSearchKeywords());
-
-        // marking persisted clears the metadata dirty flag
-        logic.markSessionSnapshotPersisted();
-        assertTrue(logic.getSessionSnapshotIfAnyDirty().isEmpty());
+        assertTrue(snapshot.isEmpty());
     }
 
     @Test
@@ -398,20 +397,20 @@ public class LogicManagerTest {
         Person alice = new PersonBuilder().withName("Alice Pauline").build();
         model.addPerson(alice);
 
-        JsonAddressBookStorage addressBookStorage =
-                new JsonAddressBookStorage(temporaryFolder.resolve("restoreAddressBook.json"));
-        JsonUserPrefsStorage userPrefsStorage =
-                new JsonUserPrefsStorage(temporaryFolder.resolve("restorePrefs.json"));
-        JsonCommandHistoryStorage commandHistoryStorage =
-                new JsonCommandHistoryStorage(temporaryFolder.resolve("restoreHistory.json"));
-        JsonSessionStorage sessionStorage = new JsonSessionStorage(temporaryFolder.resolve("restoreSessions"));
+        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(
+                temporaryFolder.resolve("restoreAddressBook.json"));
+        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(
+                temporaryFolder.resolve("restorePrefs.json"));
+        JsonCommandHistoryStorage commandHistoryStorage = new JsonCommandHistoryStorage(
+                temporaryFolder.resolve("restoreHistory.json"));
+        JsonSessionStorage sessionStorage = new JsonSessionStorage(
+                temporaryFolder.resolve("restoreSessions"));
         StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage,
                 commandHistoryStorage, sessionStorage);
 
         SessionData previousSession = new SessionData(
                 Instant.parse("2025-10-14T00:00:00Z"),
                 model.getAddressBook(),
-                List.of("Alice"),
                 new GuiSettings());
 
         logic = new LogicManager(model, storage, Optional.of(previousSession));
@@ -422,20 +421,20 @@ public class LogicManagerTest {
 
     @Test
     public void constructor_withSessionWithoutKeywords_doesNotFilter() throws Exception {
-        JsonAddressBookStorage addressBookStorage =
-                new JsonAddressBookStorage(temporaryFolder.resolve("emptyRestoreAddressBook.json"));
-        JsonUserPrefsStorage userPrefsStorage =
-                new JsonUserPrefsStorage(temporaryFolder.resolve("emptyRestorePrefs.json"));
-        JsonCommandHistoryStorage commandHistoryStorage =
-                new JsonCommandHistoryStorage(temporaryFolder.resolve("emptyRestoreHistory.json"));
-        JsonSessionStorage sessionStorage = new JsonSessionStorage(temporaryFolder.resolve("emptyRestoreSessions"));
+        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(
+                temporaryFolder.resolve("emptyRestoreAddressBook.json"));
+        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(
+                temporaryFolder.resolve("emptyRestorePrefs.json"));
+        JsonCommandHistoryStorage commandHistoryStorage = new JsonCommandHistoryStorage(
+                temporaryFolder.resolve("emptyRestoreHistory.json"));
+        JsonSessionStorage sessionStorage = new JsonSessionStorage(
+                temporaryFolder.resolve("emptyRestoreSessions"));
         StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage,
                 commandHistoryStorage, sessionStorage);
 
         SessionData previousSession = new SessionData(
                 Instant.parse("2025-10-14T00:00:00Z"),
                 model.getAddressBook(),
-                List.of(),
                 new GuiSettings());
 
         logic = new LogicManager(model, storage, Optional.of(previousSession));

@@ -37,6 +37,10 @@ import seedu.address.logic.grammars.command.parser.ast.visitors.AstPrinter;
 public class CommandParser {
     private static final Logger logger = LogsCenter.getLogger(CommandParser.class);
 
+    private static final String ERROR_HINT_IMPERATIVE = "Failed to parse imperative.";
+    private static final String ERROR_HINT_PARAMETER = "Failed to parse parameter.";
+    private static final String ERROR_HINT_OPTION = "Failed to parse option.";
+
     private final TokenisedCommand tokenisedCommand;
     private int currentTokenIndex = 0;
 
@@ -93,6 +97,7 @@ public class CommandParser {
         } catch (ProductionApplicationException e) {
             ParserError error = e.getParserError();
             error.addProductionNonterminal("imperative");
+            error.setHint(ERROR_HINT_IMPERATIVE);
             throw e;
         }
     }
@@ -135,6 +140,7 @@ public class CommandParser {
         } catch (ProductionApplicationException e) {
             ParserError error = e.getParserError();
             error.addProductionNonterminal("parameter");
+            error.setHint(ERROR_HINT_PARAMETER);
             throw e;
         }
     }
@@ -208,6 +214,7 @@ public class CommandParser {
         } catch (ProductionApplicationException e) {
             ParserError error = e.getParserError();
             error.addProductionNonterminal("option");
+            error.setHint(ERROR_HINT_OPTION);
             throw e;
         }
     }

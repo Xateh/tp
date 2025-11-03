@@ -19,7 +19,7 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.history.CommandHistory;
-import seedu.address.model.person.FieldContainsKeywordsPredicate;
+// session restoration of search keywords removed
 import seedu.address.model.person.Person;
 import seedu.address.session.SessionData;
 import seedu.address.storage.Storage;
@@ -56,7 +56,6 @@ public class LogicManager implements Logic {
         CommandHistory initialHistory = loadCommandHistory(storage);
         this.model.setCommandHistory(initialHistory);
         sessionRecorder = new SessionRecorder(model.getAddressBook(), model.getGuiSettings(), initialSession);
-        initialSession.ifPresent(this::restoreSessionState);
     }
 
     @Override
@@ -83,6 +82,14 @@ public class LogicManager implements Logic {
         sessionRecorder.afterSuccessfulCommand(command, addressBookChanged);
 
         return commandResult;
+    }
+
+    @Override
+    public void markAddressBookDirty() {
+        Command dummyCommand = new seedu.address.logic.commands.InfoCommand(
+                seedu.address.commons.core.index.Index.fromZeroBased(0)
+        );
+        sessionRecorder.afterSuccessfulCommand(dummyCommand, true);
     }
 
     @Override
@@ -154,9 +161,5 @@ public class LogicManager implements Logic {
         return new CommandHistory(model.getCommandHistory().getEntries());
     }
 
-    private void restoreSessionState(SessionData sessionData) {
-        if (!sessionData.getSearchKeywords().isEmpty()) {
-            model.updateFilteredPersonList(new FieldContainsKeywordsPredicate(sessionData.getSearchKeywords()));
-        }
-    }
+    // Intentionally do not restore transient session attributes such as search keywords.
 }

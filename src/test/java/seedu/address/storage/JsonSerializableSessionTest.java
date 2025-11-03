@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.awt.Point;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +26,6 @@ class JsonSerializableSessionTest {
         SessionData original = new SessionData(
                 Instant.parse("2025-10-14T00:00:00Z"),
                 new AddressBook(),
-                List.of("Alice"),
                 GUI_SETTINGS);
 
         JsonSerializableSession jsonSession = new JsonSerializableSession(original);
@@ -122,14 +120,12 @@ class JsonSerializableSessionTest {
         SessionData data = new SessionData(
             Instant.now(),
             new seedu.address.model.AddressBook(),
-            List.of(),
             new GuiSettings()
         );
         JsonSerializableSession jsonSession = new JsonSerializableSession(data);
         SessionData result = jsonSession.toModelType();
         assertEquals(data.getFormatVersion(), result.getFormatVersion());
         assertEquals(data.getAddressBook(), result.getAddressBook());
-        assertEquals(data.getSearchKeywords(), result.getSearchKeywords());
         assertEquals(data.getGuiSettings().getWindowWidth(), result.getGuiSettings().getWindowWidth());
         assertEquals(data.getGuiSettings().getWindowHeight(), result.getGuiSettings().getWindowHeight());
         // After deserialization, windowCoordinates should be (0,0)
@@ -145,7 +141,6 @@ class JsonSerializableSessionTest {
         SessionData data = new SessionData(
             Instant.now(),
             new seedu.address.model.AddressBook(),
-            List.of(),
             settings
         );
         JsonSerializableSession jsonSession = new JsonSerializableSession(data);
@@ -174,7 +169,7 @@ class JsonSerializableSessionTest {
 
     private String createBaseJson() {
         return String.format("{\"formatVersion\":\"2.0\",\"savedAt\":\"%s\",\"addressBook\":%s,"
-                + "\"searchKeywords\":[\"Alice\"],\"guiSettings\":{\"windowWidth\":800,"
+                + "\"guiSettings\":{\"windowWidth\":800,"
                 + "\"windowHeight\":600,\"windowX\":10,\"windowY\":10}}",
                 "2025-10-14T00:00:00Z", ADDRESS_BOOK_JSON);
     }

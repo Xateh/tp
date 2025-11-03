@@ -8,7 +8,6 @@ import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -111,12 +110,10 @@ public class StorageManagerTest {
         SessionData olderSession = new SessionData(
                 Instant.parse("2025-10-14T00:00:00Z"),
                 olderAddressBook,
-                List.of("Alice"),
                 new GuiSettings());
         SessionData newerSession = new SessionData(
                 Instant.parse("2025-10-15T00:00:00Z"),
                 newerAddressBook,
-                List.of("Bob"),
                 new GuiSettings());
 
         storageManager.saveSession(olderSession);
@@ -124,7 +121,6 @@ public class StorageManagerTest {
 
         SessionData retrieved = storageManager.readSession().get();
         assertEquals(newerSession.getSavedAt(), retrieved.getSavedAt());
-        assertEquals(newerSession.getSearchKeywords(), retrieved.getSearchKeywords());
         assertEquals(new AddressBook(newerSession.getAddressBook()), new AddressBook(retrieved.getAddressBook()));
 
         long fileCount;

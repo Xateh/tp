@@ -87,6 +87,16 @@ The `UI` component,
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component, as it displays `Person` object residing in the `Model`.
 
+### Command recall (Up/Down arrow keys)
+
+The command box supports keyboard-based command recall: when the command box is focused the user can press the Up and Down arrow keys to navigate previously entered commands. This behaviour is implemented in `CommandBox` (see `src/main/java/seedu/address/ui/CommandBox.java`) which registers a key event filter for `KeyCode.UP` and `KeyCode.DOWN` and uses `HistoryNavigator` (`src/main/java/seedu/address/ui/HistoryNavigator.java`) to walk the history entries supplied by a `HistorySupplier` (typically `logic::getCommandHistorySnapshot`).
+
+Implementation notes for developers:
+
+- `HistoryNavigator` keeps a pointer that is reset to the end of the entries snapshot; `previous()` returns the most recent entry and moves the pointer backwards; `next()` moves the pointer forward and returns the newer entry or empty if the navigator reaches the end (the command box should be cleared in that case).
+- Tests covering this behaviour can be found in `src/test/java/seedu/address/ui/CommandBoxTest.java`.
+
+
 ### Logic component
 
 Here's a (partial) class diagram of the `Logic` component:
@@ -255,8 +265,8 @@ Options are optional, named inputs that modify command behavior.
 - **Default Behaviour:** Because all options are by definition optional, your command implementation **must provide a default behaviour** for every option it supports.
 - **Minimum Multiplicity:** Even though all options are optional as described above, it is valid to require a **minimum multiplicity**; that is, require at least a certain number of options to be supplied for the command to work.
 - **Formats:** The parser supports two formats and delivers them as such:
-    1. **Name-only (Flag):** `/force`. Your code should check for the _presence_ of the "force" key.
-    2. **Name-Value Pair:** `/priority:high`. Your code should retrieve the "priority" key and its associated _value_ ("high").
+    1. **Name-only (Flag):** e.g. `/force`. Your code should check for the _presence_ of the "force" key.
+    2. **Name-Value Pair:** e.g. `/priority:high`. Your code should retrieve the "priority" key and its associated _value_ ("high").
 
 **Error Handling**
 
@@ -333,17 +343,17 @@ Key points for developers:
 * The helper is deliberately small and designed to be exercised with pure unit tests. See `src/test/java/seedu/address/MainAppLifecycleManagerTest.java` for example tests and expected behaviours (including failure paths).
 
 Additional note about session metadata persistence:
-* Session metadata such as the most-recent search keywords and GUI settings are now tracked as "session metadata" and marked dirty when they change. These metadata-only changes do not trigger immediate disk writes; instead they are recorded by `SessionRecorder` and a lifecycle-specific API (`Logic#getSessionSnapshotIfAnyDirty()`, implemented in `LogicManager`) exposes a session snapshot when either the address book or session metadata are dirty. `MainAppLifecycleManager#persistOnStop` consumes that snapshot so that shutdown-time persistence includes metadata-only changes (search keywords, window size/position, etc.). See `src/main/java/seedu/address/logic/session/SessionRecorder.java`, `src/main/java/seedu/address/logic/LogicManager.java`, and `src/main/java/seedu/address/MainAppLifecycleManager.java`.
+* Session metadata such as GUI settings are now tracked as "session metadata" and marked dirty when they change. These metadata-only changes do not trigger immediate disk writes; instead they are recorded by `SessionRecorder` and a lifecycle-specific API (`Logic#getSessionSnapshotIfAnyDirty()`, implemented in `LogicManager`) exposes a session snapshot when either the address book or session metadata are dirty. `MainAppLifecycleManager#persistOnStop` consumes that snapshot so that shutdown-time persistence includes metadata-only changes (for example, window size/position). See `src/main/java/seedu/address/logic/session/SessionRecorder.java`, `src/main/java/seedu/address/logic/LogicManager.java`, and `src/main/java/seedu/address/MainAppLifecycleManager.java`.
 
 Important refinement — what actually triggers a session file write:
 
-* The app now persists a session snapshot on stop only when the information that will be written to the session file has changed compared to the last persisted snapshot. Concretely, this comparison ignores the snapshot timestamp (`savedAt`) — i.e., a different `savedAt` value alone will *not* cause a new file to be written. Only changes to the address book contents, the active search keywords, or the GUI settings (window size/position) will make the session "dirty" for persistence.
+* The app now persists a session snapshot on stop only when the information that will be written to the session file has changed compared to the last persisted snapshot. Concretely, this comparison ignores the snapshot timestamp (`savedAt`) — i.e., a different `savedAt` value alone will *not* cause a new file to be written. Only changes to the address book contents or the GUI settings (window size/position) will make the session "dirty" for persistence.
 
 * As a consequence, transient UI-only changes that do not affect any of the persisted session attributes (for example, the textual feedback displayed in the command-result box) do not mark the session as dirty and will not cause an extra session file to be created on exit.
 
-This behaviour is implemented by maintaining a persisted "session signature" (a snapshot of address book, search keywords and GUI settings) and comparing prospective snapshots against that signature before saving; see `SessionRecorder` for details.
+This behaviour is implemented by maintaining a persisted "session signature" (a snapshot of address book contents and GUI settings) and comparing prospective snapshots against that signature before saving; see `SessionRecorder` for details.
 
-Testing tip: Add unit tests that mutate only GUI settings or execute `find`/`list` commands and assert that `getSessionSnapshotIfAnyDirty()` returns a snapshot (while `getSessionSnapshotIfDirty()` remains reserved for address-book-only dirty checks). This ensures the lifecycle save-on-stop behaviour remains correct.
+Testing tip: Add unit tests that mutate only GUI settings (for example, window size/position) and assert that `getSessionSnapshotIfAnyDirty()` returns a snapshot (while `getSessionSnapshotIfDirty()` remains reserved for address-book-only dirty checks). This ensures the lifecycle save-on-stop behaviour remains correct.
 
 Developer notes when modifying lifecycle behaviour:
 * Keep `MainApp` changes minimal: prefer delegating to `MainAppLifecycleManager` rather than pulling JavaFX logic into the helper. This preserves production behaviour while improving testability.
@@ -375,118 +385,38 @@ The `info` command provides a way to add or edit a multi-line, free-text note fo
 
 The mechanism is split into two distinct phases: opening the editor and saving the changes.
 
-1.  **Opening the Editor**:
+1.  **Opening the Editor (Command Execution Phase)**:
     *   The user executes `info <index>`, for example, `info 1`.
-    *   The `LogicManager` parses this and creates an `InfoCommand` with a `targetIndex`.
-    *   When `InfoCommand#execute(model)` is called, it does **not** modify the model. Instead, it calls `UiManager#showInfoEditor(person, index)`.
-    *   The `UiManager` is responsible for creating and displaying a separate dialog window containing a text area, pre-filled with the person's existing info.
+    *   The `LogicManager` parses this via `Decoder` and creates an `InfoCommand` with a `targetIndex`.
+    *   When `InfoCommand#execute(model)` is called, it validates the index and retrieves the person, but does **not** immediately modify the model. Instead, it:
+        *   Validates the index against the filtered person list
+        *   Retrieves the person at that index
+        *   Calls `UiManager#showInfoEditor(person, index)` to display the editor
+        *   Returns a `CommandResult` indicating the editor was opened
+    *   The `UiManager` wraps the dialog creation in `Platform.runLater()` to ensure it executes on the JavaFX Application Thread.
+    *   A JavaFX `Dialog` is created containing:
+        *   A `TextArea` pre-filled with the person's existing info
+        *   A `VBox` container for layout
+        *   OK and CANCEL buttons
+        *   A result converter that captures the edited text when OK is clicked
 
-2.  **Saving the Changes**:
+2.  **Saving the Changes (UI Callback Phase)**:
     *   The user edits the text in the dialog and clicks the "OK" button.
-    *   The `UiManager` captures the new text and calls the static method `InfoCommand.saveInfo(model, index, newInfo)`.
-    *   This static method creates a *new* `InfoCommand` instance, this time containing both the `targetIndex` and the `updatedInfo`.
-    *   This new command is executed immediately. It creates a new `Person` object with the updated `Info` and uses `model.setPerson(...)` to replace the old person object in the address book.
-    *   This change to the model triggers the undo/redo mechanism via `Model#commitAddressBook()` and updates the UI to reflect the new data.
+    *   The dialog's result converter captures the edited text.
+    *   The `UiManager#savePersonInfo(personIndex, infoText)` method is invoked, which:
+        *   Creates an `Info` object from the text
+        *   Calls the static method `InfoCommand.saveInfo(model, logic, index, newInfo)`
+    *   This static method:
+        *   Validates the index again against the current filtered list
+        *   Creates a new `Person` object with the updated `Info` using `PersonBuilder`
+        *   Uses `model.setPerson(...)` to replace the old person in the address book
+        *   Calls `logic.markAddressBookDirty()` to ensure the session snapshot will be persisted
+        *   Returns a `CommandResult` with success feedback
+    *   The change triggers the model's change listeners, updating the UI.
+    *   The `UiManager` calls `mainWindow.showFeedback()` to display the success message in the result display.
 
 The following sequence diagram illustrates the process of opening the info editor:
-<puml src="diagrams/InfoSequenceDiagram.puml" width="550" />
-
-### \[Proposed\] Undo/redo feature
-
-#### Proposed Implementation
-
-The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AssetSphere` with an undo/redo history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the following operations:
-
-* `VersionedAddressBook#commit()` — Saves the current address book state in its history.
-* `VersionedAddressBook#undo()` — Restores the previous address book state from its history.
-* `VersionedAddressBook#redo()` — Restores a previously undone address book state from its history.
-
-These operations are exposed in the `Model` interface as `Model#commitAddressBook()`, `Model#undoAddressBook()` and `Model#redoAddressBook()` respectively.
-
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
-
-Step 1. The user launches the application for the first time. The `VersionedAddressBook` will be initialized with the initial address book state, and the `currentStatePointer` pointing to that single address book state.
-
-<puml src="diagrams/UndoRedoState0.puml" alt="UndoRedoState0" />
-
-Step 2. The user executes `delete 5` command to delete the 5th person in the address book. The `delete` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete 5` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
-
-<puml src="diagrams/UndoRedoState1.puml" alt="UndoRedoState1" />
-
-Step 3. The user executes `add n/David …​` to add a new person. The `add` command also calls `Model#commitAddressBook()`, causing another modified address book state to be saved into the `addressBookStateList`.
-
-<puml src="diagrams/UndoRedoState2.puml" alt="UndoRedoState2" />
-
-<box type="info" seamless>
-
-**Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will not be saved into the `addressBookStateList`.
-
-</box>
-
-Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoAddressBook()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous address book state, and restores the address book to that state.
-
-<puml src="diagrams/UndoRedoState3.puml" alt="UndoRedoState3" />
-
-
-<box type="info" seamless>
-
-**Note:** If the `currentStatePointer` is at index 0, pointing to the initial address book state, then there are no previous address book states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the case. If so, it will return an error to the user rather
-than attempting to perform the undo.
-
-</box>
-
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
-
-<puml src="diagrams/UndoSequenceDiagram-Logic.puml" alt="UndoSequenceDiagram-Logic" />
-
-<box type="info" seamless>
-
-**Note:** The lifeline for `UndoCommand` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.
-
-</box>
-
-Similarly, how an undo operation goes through the `Model` component is shown below:
-
-<puml src="diagrams/UndoSequenceDiagram-Model.puml" alt="UndoSequenceDiagram-Model" />
-
-The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
-
-<box type="info" seamless>
-
-**Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address book state, then there are no undone address book states to restore. The `redo` command uses `Model#canRedoAddressBook()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
-
-</box>
-
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as `list`, will usually not call `Model#commitAddressBook()`, `Model#undoAddressBook()` or `Model#redoAddressBook()`. Thus, the `addressBookStateList` remains unchanged.
-
-<puml src="diagrams/UndoRedoState4.puml" alt="UndoRedoState4" />
-
-Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Since the `currentStatePointer` is not pointing at the end of the `addressBookStateList`, all address book states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add n/David …​` command. This is the behavior that most modern desktop applications follow.
-
-<puml src="diagrams/UndoRedoState5.puml" alt="UndoRedoState5" />
-
-The following activity diagram summarizes what happens when a user executes a new command:
-
-<puml src="diagrams/CommitActivityDiagram.puml" width="250" />
-
-#### Design considerations:
-
-**Aspect: How undo & redo executes:**
-
-* **Alternative 1 (current choice):** Saves the entire address book.
-  * Pros: Easy to implement.
-  * Cons: May have performance issues in terms of memory usage.
-
-* **Alternative 2:** Individual command knows how to undo/redo by
-  itself.
-  * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
-  * Cons: We must ensure that the implementation of each individual command are correct.
-
-_{more aspects and alternatives to be added}_
-
-### \[Proposed\] Data archiving
-
-_{Explain here how the data archiving feature will be implemented}_
+<puml src="diagrams/InfoSequenceDiagram.puml" width="574" />
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -779,11 +709,25 @@ added.
 * **Mainstream OS**: Windows, Linux, Unix, MacOS
 * **Private contact detail**: A contact detail that is not meant to be shared with others
 
+* **Refactor**: Changing the internal structure of the code (how it's written) to make it clearer, simpler, or easier to maintain — without changing what the application does for users.
+* **Session snapshot**: A saved copy of the app’s current working state used to restore window view and settings after closing and reopening the app (for example: address book contents, and window size/position).
+* **Stop-time persistence**: The process that runs when the application is closing which saves the session snapshot and related data (for example: command history, and window size/position) to disk so the app can restore the same state when reopened.
+* **API**: Short for Application Programming Interface — a set of rules and named operations that lets different parts of the program (or other programs) ask for data or request actions from a component.
+* **GUI (Graphical User Interface)**: The visual parts of the app you interact with — windows, buttons, lists and menus — as opposed to typing commands in a text console.
+* **JavaFX**: A Java toolkit used to build the app's graphical interface (windows, controls, and layouts). The app's UI is implemented using JavaFX.
+* **PlantUML**: A text-based tool that generates diagrams (architecture, sequence, etc.) from simple textual descriptions; used to produce the diagrams in this guide.
+* **JSON**: A lightweight, human-readable text format used to store structured data (for example, the address book and user preferences are saved in JSON files).
+* **ObservableList**: A list type that notifies the user interface when items are added, removed or changed so the display updates automatically (e.g., the person list refreshes when you add a contact).
+* **Undo/redo**: The ability to revert the most recent change (undo) or reapply a reverted change (redo), usually implemented by keeping past copies of the data so you can move backward or forward through them.
+* **CLI (Command-Line Interface)**: An alternative to the GUI where you control the app by typing commands into a console or terminal.
+
 **Assembly-Related**
 
 * **Command Assembly**: The logic subsystem that manages the full process from parsing a user command to constructing the executable command object.
 * **AST**: Abstract syntax tree; this is the tree-like structure generated after parsing a string that conforms to a formal grammar defined in terms of production rules.
 * **Lexing**: The process of converting text into meaningful lexical tokens belong to specific categories. As an analogy, English sentences can be lexed into nouns, verbs, adjectives, etc. The list of lexical tokens used by the command grammar can be found [here](CommandAssembly.md).
+* **Token**: A small, meaningful piece of input produced by the lexer (for example, a single word, a number, or a quoted phrase); tokens are the basic units the parser uses to understand a command.
+* **Parser**: The component that analyses a sequence of tokens and determines their grammatical structure (often producing an AST) so the application can decide what action to perform.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -798,6 +742,10 @@ testers are expected to do more *exploratory* testing.
 
 </box>
 
+### Covering individual commands
+
+For command-specific walkthroughs (inputs, expected outputs, and edge cases), refer to the examples in the [User Guide](UserGuide.md#features). Each command subsection there documents the canonical success path, common variations, and the validation rules enforced by AssetSphere.
+
 ### Launch and shutdown
 
 1. Initial launch
@@ -805,40 +753,125 @@ testers are expected to do more *exploratory* testing.
    1. Download the jar file `assetsphere.jar` and copy into an empty folder `./dir/`.
 
    1. Launch the jar file with `java -jar ./dir/assetsphere.jar`.<br>
-        Expected: Shows the GUI with a set of sample contacts. The window size may not be optimum.
+      Expected: Shows the GUI with a set of sample contacts. The window size may not be optimum.
 
 1. Saving window preferences
 
    1. Resize the window to an optimum size. Move the window to a different location. Close the window.
 
    1. Re-launch the app with `java -jar ./dir/assetsphere.jar`.<br>
-       Expected: The most recent window size and location is retained.
+      Expected: The most recent window size and location is retained.
 
-1. _{ more test cases …​ }_
+### Scenario-based end-to-end testing
 
-### Deleting a person
+Use the following extended scenarios to exercise multiple features together. They are written so that the cases, when executed
+in order, collectively cover the command set exposed in the User Guide.
 
-1. Deleting a person while all persons are being shown
+#### Onboarding new clients during a strategy meeting
 
-   1. Prerequisites: List all persons using the `list` command. Multiple persons in the list.
+1. Preparation
 
-   1. Test case: `delete 1`<br>
-      Expected: First contact is deleted from the list. Details of the deleted contact shown in the status message. Timestamp in the status bar is updated.
+   1. Run `clear` to start from an empty address book.<br>
+      Expected: The contact list becomes empty and the status bar shows an updated sync timestamp.
 
-   1. Test case: `delete 0`<br>
-      Expected: No person is deleted. Error details shown in the status message. Status bar remains the same.
+   1. Use `add` to register five new contacts (example data shown below). Repeat until five names appear in the list.
+      ```
+      add "Angeline Tan" 91234567 "1 Raffles Place" "angeline@example.com" /tag:prospect
+      add "Bernard Chua" 92345678 "20 Cecil Street" "bernard@example.com"
+      add "Clara Goh" 93456789 "8 Marina Boulevard" "clara@example.com"
+      add "Dinesh Rao" 94567890 "15 Scotts Road" "dinesh@example.com"
+      add "Evelyn Lim" 95678901 "9 Battery Road" "evelyn@example.com"
+      ```
+      Expected: After each command, the new person card appears in the list and the command result confirms the addition.
 
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
-      Expected: Similar to previous.
+   1. Enter `list` to ensure all five contacts are visible.<br>
+      Expected: The person list displays the five newly added entries in insertion order.
 
-1. _{ more test cases …​ }_
+2. Capture evolving context during the meeting
 
-### Saving data
+   1. Correct an earlier typo using `edit 2 /phone:98887776 /email:"bernard.c@example.com"`.<br>
+      Expected: Bernard's phone and email fields update; the command feedback summarises the edited fields.
 
-1. Dealing with missing/corrupted data files
+   1. Invoke `info 3` and type a short note such as "Leads regional partnerships" before saving.<br>
+      Expected: A modal text editor opens. After saving (by closing the modal text editor), re-opening `info 3` reveals the saved text.
 
-   1. _{explain how to simulate a missing/corrupted file, and the expected behavior}_
+   1. Attach structured metadata with `field 4 /specialty:"Regulatory advisory" /assistant:"Mei"`.<br>
+      Expected: Dinesh's card shows the newly added custom fields under the contact details panel.
 
-1. _{ more test cases …​ }_
+   1. Tag interested parties in bulk via `tag 1 +priority +client` and `tag 5 +interested`.<br>
+      Expected: The specified tags appear on the respective person cards without affecting other tags.
+
+   1. Highlight referral relationships with `link 1 mentor 3`.<br>
+      Expected: Angeline shows Clara as a mentee, and Clara lists Angeline as her mentor in the links section.
+
+   1. Surface everyone marked as interested stakeholders by running `find interested /tag`.<br>
+      Expected: The filtered list displays contacts tagged `interested`; removing the filter with `list` restores the full view.
+
+   1. Verify the command log using `history`.<br>
+      Expected: Recent commands (including `add`, `edit`, `field`, `tag`, `link`, `find`) appear in chronological order.
+
+3. Cleanup and persistence
+
+   1. Remove an erroneous duplicate, if any, with `delete <index>` (e.g. `delete 5`).<br>
+      Expected: The specified card disappears and the command result shows the deleted person's details.
+
+   1. Exit the app with `exit` or by closing the window.<br>
+      Expected: AssetSphere saves the latest address book, command history, and a session snapshot under `data/sessions/`.
+
+--------------------------------------------------------------------------------------------------------------------
+
+## **Appendix: Effort**
+
+Given below are the efforts put in by the team for Asset Sphere.
+
+Overall, this project was fairly difficult to implement up to its current state.
+
+Of the implemented features, we highlight the following significant achievements and their technical difficulty:
+
+**Command Assembly**
+
+The system we term 'Command Assembly' is a major reimplementation effort to significantly improve abstraction and cohesion and reduce coupling throughout the entire logic component. The system and its motivations are described in detail here[link to docs].
+
+It involves a near-complete redesign of the architecture of the logic component. Major efforts include:
+- using established and mathematically-proven techniques (FSM lexing and recursive-descent parsing) to write a common parser for all commands to avoid ad-hoc parsing and parsing errors or inconsistencies,
+- insulating command implementers from common command syntax to make newer commands easier to implement (by ridding implementers of having to worry about significant parsing), and
+- accommodating significant extensibility in the entire process from parsing and decoding an input command to creating the final executable command object, by isolating each stage as far as reasonably expectable.
+
+**Command History with Keyboard Navigation**
+
+The main challenges were defining precise pointer semantics, keeping the navigator synchronized with live history, and preserving testability for UI-driven flows.
+
+Major effort includes:
+- History Navigator pointer behavior is defined to ensure exact pointer semantics and synchronization so that the recalling is consistent when new commands are added.
+- UI integration is required to detect the UP / DOWN keystrokes in the command box. Logic is extracted from UI for unit-testing compatibility. Unit tests are subsequently used to check for navigator edge cases, command box navigation flows and storage error handling to ensure robustness.
+
+**Save mechanism with session snapshots**
+
+The key aspect for this feature is ensuring accurate dirty detection, avoiding unnecessary disk writes, and safe shutdown ordering when IO failures occur. As we implement more features like fields, and links, this feature needs to capture the new information in an adaptable yet reliable manner.
+
+Major efforts include:
+- Implementing dirty-checking and snapshot equality to compare deep copies of persisted attributes while ignoring transient values like timestamps.
+- Linking and coordinating session information between multiple aspects of the system ie Model, Logic, Ui, to a central session recorder, and integrating shutdown persistence in a lifecycle manager so that ordering and IO failure handling is safe.
+- Requires serialization of session information through serialization and ensuring compatibility between multiple session save versions.
+- Tests were tricky as many changes were originally made to the MainApp class itself, and this was refactored to the lifecycle manager so that maximum LOCs are available for testing.
+
+**New UI elements**
+
+- Info command that introduced a new textbox was tricky to implement due to the changes to be made in UiManager and other Ui components. This, alongside the saving of session logic required multiple iterations to get right.
+
+- Field command that introduced a new container-like “pill”, similar to that of the existing Tag command, just in a separate colour scheme. The spacing between each field “pill”, and spacing between each row of content represented on the CLI, was difficult to implement for a consistent UI.
+
+**Custom Field command for contacts**
+
+This feature allows users to establish their own custom fields for each contact on top of the already built-in custom fields (like name, email, address etc.). This was particularly tricky, especially in the later stages, when we realised that there were more considerations that had to be taken into account, such as banning particular keywords as custom fields (like ‘to’, ‘from’, and already built in field names) and how the user is able to edit and remove these custom fields. On top of this, differentiating between removals from empty custom field values also posed as a hindrance.
+
+**Link command between contacts**
+
+This feature allows users to establish a named link between contacts in the address book. Implementing the visuals of that link proved to be fairly difficult as to show the respective directions of the link in the UI was tough to implement. After implementing the bare functional part, the major bug that was the hardest to fix was implementing link refactoring when the user edits/deletes certain pre-linked contacts in the address book as this meant having to change both the UI side and the logic side where the entire link instance stored have to be refactored for every persons in the current address book.
+
+**Comprehensive search while allowing specified search filters**
+
+The find feature that was given was initially a very simple find that only searched on contact’s name. Given that our app was meant for wealth managers who we recognise require searching on specified filters, we wanted to improve on find by implementing a customised enhanced search system that allows users to specify specific fields to search on. Even with simple built in fields, it was a pretty large refactoring, but the hard part came when we had to implement searching on custom fields as well as the links with direction.
+
 
 

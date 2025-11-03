@@ -63,6 +63,10 @@ class MainAppLifecycleManagerTest {
         }
 
         @Override
+        public void markAddressBookDirty() {
+        }
+
+        @Override
         public CommandHistory getCommandHistorySnapshot() {
             return history;
         }
@@ -153,7 +157,7 @@ class MainAppLifecycleManagerTest {
     void initModel_withRestoredSession_usesSessionAddressBook() {
         AddressBook sessionBook = new AddressBook();
         sessionBook.addPerson(TypicalPersons.ALICE);
-        SessionData sessionData = new SessionData(Instant.now(), sessionBook, List.of(), new GuiSettings());
+        SessionData sessionData = new SessionData(Instant.now(), sessionBook, new GuiSettings());
 
         Storage storage = new StorageAvoidingReadStub();
         Model model = lifecycleManager.initModel(storage, new UserPrefs(), Optional.of(sessionData));
@@ -263,7 +267,7 @@ class MainAppLifecycleManagerTest {
     private SessionData sampleSession() {
         AddressBook addressBook = new AddressBook();
         addressBook.addPerson(TypicalPersons.CARL);
-        return new SessionData(Instant.now(), addressBook, List.of("Carl"), new GuiSettings());
+        return new SessionData(Instant.now(), addressBook, new GuiSettings());
     }
 
     private abstract static class BaseStorageStub implements Storage {
@@ -432,6 +436,10 @@ class MainAppLifecycleManagerTest {
         RecordingLogicStub(CommandHistory history, Optional<SessionData> snapshot) {
             this.history = history;
             this.snapshot = snapshot;
+        }
+
+        @Override
+        public void markAddressBookDirty() {
         }
 
         @Override
