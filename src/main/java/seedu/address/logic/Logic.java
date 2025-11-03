@@ -86,4 +86,10 @@ public interface Logic {
      * {@code getCommandHistorySnapshot().getEntries()}.
      */
     CommandHistory getCommandHistorySnapshot();
+
+    /**
+     * Marks the address book as modified so the session snapshot will be persisted.
+     * This should be called when the model is modified outside normal command execution.
+     */
+    void markAddressBookDirty();
 }
