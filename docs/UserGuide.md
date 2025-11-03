@@ -303,24 +303,25 @@ Finds persons whose fields contain any of the given keywords.
 Format: `find <keyword>+ [/<field>]*`
 
 * If no specific field is provided, all built-in fields (not including custom fields and links) will be searched.
-* The search is case-insensitive. e.g `hans` will match `Hans`.
-* The order of the keywords does not matter. e.g. `Hans Bo` will match `Bo Hans`.
-* All the built-in fields are searched.
+* The search keyword is case-insensitive. e.g `hans` will match `Hans`.
+* The order of the keywords does not matter. e.g. `Hans Bo` will be treated the same as `Bo Hans`.
 * Only full words will be matched e.g. `Han` will not match `Hans`.
 * Persons matching at least one keyword on any one field will be returned (i.e. `OR` search).
   e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
 
 **Parameters**
 
-* `<keyword>` (string): keyword to search on. Only fields containing the full word (case insensitive) will be matched.
+* `<keyword>` (word): keyword to search on. Only fields containing the full word (case insensitive) will be matched.
 
 **Options**
 
-* `/<field>` (string): specified field to search on (both built in and custom added).
-* `/from` (string): search all links where the person is the linker.
-* `/to` (string): search all links where the person is the linkee (one being linked to).
+Note that if specifying to search on built in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For eg, `/name` NOT `/NAME`.
+* `/field` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+* `/from` (word): search all links where the person is the linker.
+* `/to` (word): search all links where the person is the linkee (one being linked to).
+* `/<custom-field>` (word): specified to search on persons' custom added fields. (does not match if field provided is not existent)
 
-Examples:
+Examples: (no specified fields to search on, default all built in)
 * `find 99999999` returns all persons whose built-in fields contain `99999999`.
 * `find test.dummy@gmail.com` returns all persons whose built-in fields contain `test.dummy@gmail.com`.
 * `find friend` returns all persons whose built-in fields contain `"friend"`.
@@ -342,24 +343,24 @@ Examples:
 
 Creates a relationship link between two persons in the address book.
 
-Format: `link <index1> <linkName> <index2>`
+Format: `link <index-from> <link-name> <index-to>`
 
-* Establishes a directed relationship where the person at <index1> is the <linkName> of the person at <index2>.
-* Both persons will display the link in their contact cards.
+* Establishes a directed relationship where the person at `<index-from>` is the `<link-name>` of the person at `<index-to>`.
+* Both persons will display the link in their contact cards with the specified directions.
 * Self-links (e.g. linking a person to themselves) are not allowed.
 * If the same link already exists, the command will have no effect.
+* Editing/deleting a person with a link to someone will make the necessary changes.
 
 **Parameters**
 
-* `<index1>` (index): index of the linker (the person initiating the link)
-* `<linkName>` (string): name of the relationship (eg., lawyer, client)
-* `<index2>` (index): index of the linkee (the person being linked to)
+* `<index-from>` (index): index of the linker (the person initiating the link)
+* `<link-name>` (string): name of the relationship (eg., lawyer, client)
+* `<index-to>` (index): index of the linkee (the person being linked to)
 
 Examples:
 
-* list followed by link 1 lawyer 2 — person 1 becomes the lawyer of person 2.
-* list followed by link 2 "best-friend" 3 — person 2 becomes the best-friend of person 3 (note that quotes allow link names with special characters).
-* list followed by link 2 client 1 — person 2 becomes the client of person 1.
+* list followed by link 1 lawyer 2 will result in person 1 becoming the lawyer of person 2.
+* list followed by link 2 "best-friend" 3 will result in person 2 becoming the best-friend of person 3 (note that quotes allow link names with special characters).
 
 ### Deleting a person : `delete`
 
@@ -498,7 +499,8 @@ Action     | Format, Examples
 **Modify Tag**    | `tag <index> [(+\|-)<tag>]+` <br> e.g., `tag 2 +friend -villain +cool -enemy`                                                                                                                          
 **View/Edit Info** | `info <index>` <br> e.g., `info 2`                                                                                                                                                                     
 **Field**  | `field <index> [/<key>[:<value>]*]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
-**Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`                                                                                                                                             
+**Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`   
+**Link**   | `link <index-from> <link-name> <index-to>` <br> e.g., `link 1 lawyer 2`
 **History** | `history`                                                                                                                                                                                              
 **Delete** | `delete <index>`<br> e.g., `delete 3`                                                                                                                                                                  
 **Clear**  | `clear`                                                                                                                                                                                                
