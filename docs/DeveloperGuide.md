@@ -504,7 +504,7 @@ _{Explain here how the data archiving feature will be implemented}_
 
 ### Product Scope
 
-**Target User Profile**: This is primarily for **technologically-inclined asset managers for high-net-worth individuals (HWNIs)** that require managing **complex** relationships and hierarchies between large groups of people.
+**Target User Profile**: This is primarily for **technologically-inclined asset managers for high-net-worth individuals (HNWIs)** that require managing **complex** relationships and hierarchies between large groups of people.
 
 In addition, they:
 - prefer desktop apps over other types

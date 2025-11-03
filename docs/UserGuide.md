@@ -120,11 +120,11 @@ By default:
 <box type="important" seamless header="Built-in and Custom Fields">
 
 The following are **built-in simple fields**. There are additional restrictions on each of them:
-- `name`s must only contain letters, numbers, or spaces, and it should not be blank
-- `phone`s must only contain numbers, and it should be at least 3 digits long
-- `address`s must not be blank
-- `email`s must be of a valid email address form
-- `tag`s must only contain letters and numbers
+- `name` must only contain letters, numbers, or spaces, and it should not be blank
+- `phone` must only contain numbers, and it should be at least 3 digits long
+- `address` must not be blank
+- `email` must be of a valid email address form
+- `tag` must only contain letters and numbers
 
 For **custom fields** (those added with the `field` command):
 - Custom field names must only contain letters and numbers
@@ -139,6 +139,10 @@ Shows a message explaining how to access the help page.
 ![help message](images/helpMessage.png)
 
 Format: `help`
+
+_Additional notes:_
+
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `help 123` are treated the same as `help` and open the help window without error.
 
 ### Adding a person: `add`
 
@@ -268,7 +272,7 @@ Examples:
 
 Sets, updates or removes one or more **custom field values** for the specified person in the address book.
 
-Format: `field <index> [/<key>[:<value>]*]+`
+Format: `field <index> [/<key>[:<value>]?]+`
 
 **Parameters**
 
@@ -277,15 +281,17 @@ Format: `field <index> [/<key>[:<value>]*]+`
 **Options**
 
 * #r#At least one optional field must be provided.##
-* `<key>` (word): name of custom field
+* `<key>` (word): name of custom field (strictly alphanumeric)
 * `<value>` (string): value of custom field
+  * Each `key` accepts exactly one associated `value` in a command. A command like `field 1 /brand:nike:adidas` will be **rejected**.
   * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
   * Custom field `key` is **case-sensitive**; `key` is not equivalent to `Key`.
   * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
+    * While you **can** do `field 1 /brand:nike /brand:adidas`, the person at index 1 will only be updated with the custom field `brand: nike`. `/brand: adidas` will be ignored.
   * Omitting `value` (e.g. `/nickname`) **removes** the custom field identified by `key` if it exists.
-  * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, or `field` (in any casing).
+  * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, `field` or with keywords such as `to` and `from` (in any casing).
   * `key` cannot contain spaces, even if wrapped in straight double quotes; A `key` like `"Asset Class"` will be rejected, whereas an alternative like `AssetClass` will be accepted.
-  * If a `value` contains spaces, wrap it in straight double quotes, e.g. `/notes:"Met at FinTech conf 2025"`.
+  * If a `value` contains spaces or special characters ('@', '?', '!' etc.), wrap it in straight double quotes, e.g. `/notes:"Met @ FinTech conf 2025!"`.
 
 You may mix additions/updates and removals in a single command by providing multiple key-value options.
 
@@ -379,6 +385,10 @@ Format: `delete <index>`
 * `list` followed by `delete 2` deletes the 2nd person in the address book.
 * `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
 
+_Additional notes:_
+
+* The command ignores any extra arguments that follow the index. For example, `delete 2 extra words` will delete the 2nd person exactly as if `delete 2` had been entered.
+
 ### Clearing all entries : `clear`
 
 Clears all entries from the address book.
@@ -390,6 +400,10 @@ Format: `clear`
 Exits the program.
 
 Format: `exit`
+
+_Additional notes:_
+
+* Any extra words typed after `exit` are ignored. For instance, `exit now` will still close the application.
 
 ### Saving the data
 
@@ -500,8 +514,8 @@ Action     | Format, Examples
 **Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag` 
 **Modify Tag**    | `tag <index> [(+\|-)<tag>]+` <br> e.g., `tag 2 +friend -villain +cool -enemy`                                                                                                                          
 **View/Edit Info** | `info <index>` <br> e.g., `info 2`                                                                                                                                                                     
-**Field**  | `field <index> [/<key>[:<value>]*]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
-**Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`   
+**Field**  | `field <index> [/<key>[:<value>]?]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
+**Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`                                                                                                                                             
 **Link**   | `link <index-from> <link-name> <index-to>` <br> e.g., `link 1 lawyer 2`
 **History** | `history`                                                                                                                                                                                              
 **Delete** | `delete <index>`<br> e.g., `delete 3`                                                                                                                                                                  
