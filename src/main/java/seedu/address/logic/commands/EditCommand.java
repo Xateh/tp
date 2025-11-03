@@ -17,6 +17,7 @@ import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Link;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
@@ -71,6 +72,33 @@ public class EditCommand extends Command {
         }
 
         model.setPerson(personToEdit, editedPerson);
+        // Update link for each person
+        for (Person p : model.getAddressBook().getPersonList()) {
+            // reinitialise links for current person
+            Set<Link> updatedLinks = new HashSet<>();
+
+            // flag to state if any links affected by edit
+            boolean hasChanged = false;
+
+            for (Link link : p.getLinks()) {
+                if (link.getLinker().isSamePerson(personToEdit)) {
+                    updatedLinks.add(new Link(editedPerson, link.getLinkee(), link.getLinkName()));
+                    hasChanged = true;
+                } else if (link.getLinkee().equals(personToEdit)) {
+                    updatedLinks.add(new Link(link.getLinker(), editedPerson, link.getLinkName()));
+                    hasChanged = true;
+                } else {
+                    updatedLinks.add(link);
+                }
+            }
+
+            //if no change, leave everything as is
+            if (hasChanged) {
+                Person updatedPerson = new PersonBuilder(p).withLinks(updatedLinks).build();
+                model.setPerson(p, updatedPerson);
+            }
+        }
+
         return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson)));
     }
 
