@@ -311,7 +311,7 @@ Format: `find <keyword>+ [/<field>]*`
 
 **Parameters**
 
-* `<keyword>` (string): keyword to search on. Only fields containing the full word (case insensitive) will be matched. Multi worded strings for keywords like `"alex yeoh"` is not allowed, unquote them as such, `alex yeoh`.
+* `<keyword>` (string): keyword to search on. Only fields containing the full word (case-insensitive) will be matched. Multi-worded strings for keywords like `"alex yeoh"` is not allowed, unquote them as such, `alex yeoh`.
 
 **Options**
 
@@ -349,7 +349,7 @@ Format: `link <index-from> <link-name> <index-to>`
 * Both persons will display the link in their contact cards with the specified directions.
 * Self-links (e.g. linking a person to themselves) are not allowed.
 * If the same link already exists, the command will have no effect.
-* Editing/deleting a person with a link to someone will make the necessary changes in the addressbook.
+* Editing/deleting a person with a link to someone will make the necessary changes in the address book.
 
 **Parameters**
 
