@@ -367,7 +367,7 @@ Format: `find <keyword>+ [/<field>]*`
 
 **Options**
 
-Note that if specifying to search on built in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For eg, `/name` NOT `/NAME`.
+Note that if specifying to search on built-in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For example, `/name` NOT `/NAME`.
 * `/<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
 * `/from` (word): search all links where the person matched is the linker.
 * `/to` (word): search all links where the person matched is the linkee (one being linked to).
@@ -406,7 +406,7 @@ Format: `link <index-from> <link-name> <index-to>`
 **Parameters**
 
 * `<index-from>` (index): index of the linker (the person initiating the link)
-* `<link-name>` (string): name of the relationship (eg., lawyer, client)
+* `<link-name>` (string): name of the relationship (e.g., lawyer, client)
 * `<index-to>` (index): index of the linkee (the person being linked to)
 
 Examples:
