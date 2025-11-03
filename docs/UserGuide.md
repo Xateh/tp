@@ -246,11 +246,19 @@ Format: `tag <index> [(+|-)<tag>]+`
 * `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
 * (+, -) `<tag>` (string): tags to add to or remove from a person
 
-Examples:
+**Examples**
 
 * `list` followed by `tag 2 +friend +cool` will add `friend` and `cool` to the 2nd person in the address book.
 * `list` followed by `tag 1 -villain -enemy` will remove `villain` and `enemy` from the 1st person in the address book.
 * `list` followed by `tag 2 +friend -villain +cool -enemy` will add `friend` and `cool` to and remove `villain` and `enemy` from the 2nd person in the address book.
+
+**Warnings and Errors**
+
+- #r#At least one tag change must be specified.##
+- #m#The command does not warn if:##
+    - #m#the tags to be added already exist,##
+    - #m#the tags to be removed don't already exist, or##
+    - #m#at least one tag change is specified, but the tag changes end up having no effect.##
 
 ### Adding information to a person: `info`
 
@@ -317,14 +325,14 @@ Format: `find <keyword>+ [/<field>]*`
 
 **Parameters**
 
-* `<keyword>` (word): keyword to search on. Only fields containing the full word (case insensitive) will be matched.
+* `<keyword>` (string): keyword to search on. Only fields containing the full word (case-insensitive) will be matched. Multi-worded strings for keywords like `"alex yeoh"` is not allowed, unquote them as such, `alex yeoh`.
 
 **Options**
 
 Note that if specifying to search on built in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For eg, `/name` NOT `/NAME`.
-* `/field` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
-* `/from` (word): search all links where the person is the linker.
-* `/to` (word): search all links where the person is the linkee (one being linked to).
+* `/<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+* `/from` (word): search all links where the person matched is the linker.
+* `/to` (word): search all links where the person matched is the linkee (one being linked to).
 * `/<custom-field>` (word): specified to search on persons' custom added fields. (does not match if field provided is not existent)
 
 Examples: (no specified fields to search on, default all built in)
@@ -340,10 +348,10 @@ You can limit the search to specific fields by adding options after your keyword
 Examples:
 * `find John /name` returns persons whose name contains `john`.
 * `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
-* `find 99999999 /phone` returns all persons whose phone number is `99999999`.
+* `find 99999999 /phone` returns all persons whose phone number contains the word `99999999`.
 * `find test /name /email` returns all persons whose name or email contains the word `test`.
-* `find lawyer /from` returns all persons who are the linkers to other persons with linkname "lawyer".
-* `find lawyer /to` returns all persons who are the linkees to other persons with linkname "lawyer".
+* `find lawyer /from` returns all persons who are the linkers to other persons with linkname containing the word `lawyer`.
+* `find lawyer /to` returns all persons who are the linkees to other persons with linkname containing the word `lawyer`.
 
 ### Creating links between persons: `link`
 
@@ -355,7 +363,7 @@ Format: `link <index-from> <link-name> <index-to>`
 * Both persons will display the link in their contact cards with the specified directions.
 * Self-links (e.g. linking a person to themselves) are not allowed.
 * If the same link already exists, the command will have no effect.
-* Editing/deleting a person with a link to someone will make the necessary changes.
+* Editing/deleting a person with a link to someone will make the necessary changes in the address book.
 
 **Parameters**
 
@@ -365,8 +373,8 @@ Format: `link <index-from> <link-name> <index-to>`
 
 Examples:
 
-* list followed by link 1 lawyer 2 will result in person 1 becoming the lawyer of person 2.
-* list followed by link 2 "best-friend" 3 will result in person 2 becoming the best-friend of person 3 (note that quotes allow link names with special characters).
+* `list` followed by `link 1 lawyer 2` will result in person 1 becoming the lawyer of person 2.
+* `list` followed by `link 2 "best-friend" 3` will result in person 2 becoming the best-friend of person 3 (note that quotes allow link names with special characters).
 
 ### Deleting a person : `delete`
 
