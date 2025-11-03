@@ -1,6 +1,7 @@
 package seedu.address.logic.commands.extractors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.List;
@@ -148,7 +149,7 @@ public class FindCommandExtractorTest {
     }
 
     @Test
-    public void parse_validArgs_customCaseInsensitive() throws LexerException, ParserException, ValidationException {
+    public void parse_validArgs_customCaseSensitive() throws LexerException, ParserException, ValidationException {
         // Custom option names should be treated case-insensitively and normalized to lowercase
         FieldContainsKeywordsPredicate expectedPredicate =
                 new FieldContainsKeywordsPredicate(List.of("Growth"),
@@ -159,7 +160,7 @@ public class FindCommandExtractorTest {
         FindCommand actual = FindCommandExtractor.extract(
                 BareCommand.parse("find Growth /StrateGy"));
 
-        assertEquals(expected, actual);
+        assertNotEquals(expected, actual);
     }
 
     @Test
@@ -296,7 +297,7 @@ public class FindCommandExtractorTest {
         FindCommand actual = FindCommandExtractor.extract(
                 BareCommand.parse("find ALICE /NAME /eMaIl"));
 
-        assertEquals(expected, actual);
+        assertNotEquals(expected, actual);
     }
 
     @Test
@@ -311,7 +312,7 @@ public class FindCommandExtractorTest {
         FindCommand actual = FindCommandExtractor.extract(
                 BareCommand.parse("find bob /name /name /NaMe"));
 
-        assertEquals(expected, actual);
+        assertNotEquals(expected, actual);
     }
 
     @Test
@@ -358,7 +359,7 @@ public class FindCommandExtractorTest {
         FindCommand actual = FindCommandExtractor.extract(
                 BareCommand.parse("find asia /region /Region /REGION"));
 
-        assertEquals(expected, actual);
+        assertNotEquals(expected, actual);
     }
 
     @Test
