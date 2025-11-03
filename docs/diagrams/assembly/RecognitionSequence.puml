@@ -1,17 +1,24 @@
 @startuml
+hide footbox
 actor System
 participant "BareCommand" as Cmd <<class>>
-participant "CommandLexer" as Lexer
-participant "CommandParser" as Parser
-participant "CommandExtractor" as Extractor
-participant "BareCommandBuilder" as Builder
+participant "CommandLexer" as LexerClass <<class>>
+participant ":CommandLexer" as Lexer
+participant "CommandParser" as ParserClass <<class>>
+participant ":CommandParser" as Parser
+participant ":CommandExtractor" as Extractor
+participant ":BareCommandBuilder" as Builder
 
 System -> Cmd: parse(commandString)
 activate Cmd
 
 ' Lexing Phase
-Cmd -> Lexer: lexCommand(commandString)
-activate Lexer
+Cmd -> LexerClass: lexCommand(commandString)
+activate LexerClass
+
+create Lexer
+
+LexerClass -> Lexer: new CommandLexer(commandString)
 
 note right of Lexer
   Lexer processes the string
@@ -21,15 +28,22 @@ note right of Lexer
   - munch() to collect patterns
 end note
 
-Lexer -> Lexer: lex()
+LexerClass -> Lexer: lex()
 activate Lexer
 
-Lexer -> Lexer: return tokenisedCommand
+Lexer -> LexerClass: return tokenisedCommand
 deactivate Lexer
 
+LexerClass -> Cmd: return tokenisedCommand
+deactivate LexerClass
+destroy Lexer
+
 ' Parsing Phase
-Cmd -> Parser: parseCommand(tokenisedCommand)
-activate Parser
+Cmd -> ParserClass: parseCommand(tokenisedCommand)
+activate ParserClass
+
+create Parser
+ParserClass -> Parser: new CommandParser(tokenisedCommand)
 
 note right of Parser
   Parser uses recursive descent,
@@ -37,16 +51,20 @@ note right of Parser
   mirror the grammar structure
 end note
 
-Parser -> Parser: parseCommand()
+ParserClass -> Parser: parseCommand()
 activate Parser
 
-Parser --> Parser: return astNodeCommand
+Parser --> ParserClass: return astNodeCommand
 deactivate Parser
 
-Parser --> Cmd: return astNodeCommand
-deactivate Parser
+ParserClass --> Cmd: return astNodeCommand
+deactivate ParserClass
+destroy Parser
 
 ' Extraction Phase
+create Extractor
+Cmd -> Extractor: new CommandExtractor()
+
 Cmd -> Extractor: extract(astCommand)
 activate Extractor
 
@@ -75,8 +93,10 @@ deactivate Builder
 
 Extractor --> Cmd: return bareCommand
 deactivate Extractor
+destroy Builder
 
 Cmd --> System: return bareCommand
 deactivate Cmd
+destroy Extractor
 
 @enduml
