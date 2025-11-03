@@ -331,7 +331,6 @@ Format: `field <index> [/<key>[:<value>]?]+`
 * #r#At least one optional field must be provided.##
 * `<key>` (word): name of custom field (strictly alphanumeric)
 * `<value>` (string): value of custom field
-  * Each `key` accepts exactly one associated `value` in a command. A command like `field 1 /brand:nike:adidas` will be **rejected**.
   * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
   * Custom field `key` is **case-sensitive**; `key` is not equivalent to `Key`.
   * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
