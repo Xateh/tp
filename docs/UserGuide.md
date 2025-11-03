@@ -82,9 +82,9 @@ When you look at the help for a command, you'll see this notation:
 
 - **Parameter Variants:**
     - The acceptable parameter variants are placed as a prefix before the field, e.g. (+, -) `<tag>`. By default, if the variant is not specified, then the parameter must be a normal parameter and not have any prefix.
-    - (*): Normal parameter (no prefix)
-    - (+): Additive parameter (prefix `+`)
-    - (-): Subtractive parameter (prefix `-`)
+    - (*): Normal parameter (no prefix).
+    - (+): Additive parameter (prefix `+`).
+    - (-): Subtractive parameter (prefix `-`).
 - **Field Types:**
     - `(string)`: Text that can be a single `word` or `"text with spaces"`.
     - `(word)`: Text that must be a single `word` (without quotes).
