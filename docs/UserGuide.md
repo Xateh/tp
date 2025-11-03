@@ -246,11 +246,19 @@ Format: `tag <index> [(+|-)<tag>]+`
 * `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
 * (+, -) `<tag>` (string): tags to add to or remove from a person
 
-Examples:
+**Examples**
 
 * `list` followed by `tag 2 +friend +cool` will add `friend` and `cool` to the 2nd person in the address book.
 * `list` followed by `tag 1 -villain -enemy` will remove `villain` and `enemy` from the 1st person in the address book.
 * `list` followed by `tag 2 +friend -villain +cool -enemy` will add `friend` and `cool` to and remove `villain` and `enemy` from the 2nd person in the address book.
+
+**Warnings and Errors**
+
+- #r#At least one tag change must be specified.##
+- #m#The command does not warn if:##
+    - #m#the tags to be added already exist,##
+    - #m#the tags to be removed don't already exist, or##
+    - #m#at least one tag change is specified, but the tag changes end up having no effect.##
 
 ### Adding information to a person: `info`
 
