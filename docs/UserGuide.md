@@ -311,7 +311,7 @@ Format: `find <keyword>+ [/<field>]*`
 
 **Parameters**
 
-* `<keyword>` (word): keyword to search on. Only fields containing the full word (case insensitive) will be matched.
+* `<keyword>` (string): keyword to search on. Only fields containing the full word (case insensitive) will be matched. Multi worded strings for keywords like `find "alex yeoh"` is not allowed, unquote them as such, `find alex yeoh`.
 
 **Options**
 
