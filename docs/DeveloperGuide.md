@@ -891,9 +891,3 @@ in order, collectively cover the command set exposed in the User Guide.
    1. Exit the app with `exit` or by closing the window.<br>
       Expected: AssetSphere saves the latest address book, command history, and a session snapshot under `data/sessions/`.
 
- ### Saving data
-
-1. Dealing with missing/corrupted data files
-
-   1. _{explain how to simulate a missing/corrupted file, and the expected behavior}_
-
