@@ -418,103 +418,6 @@ The mechanism is split into two distinct phases: opening the editor and saving t
 The following sequence diagram illustrates the process of opening the info editor:
 <puml src="diagrams/InfoSequenceDiagram.puml" width="574" />
 
-### \[Proposed\] Undo/redo feature
-
-#### Proposed Implementation
-
-The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AssetSphere` with an undo/redo history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the following operations:
-
-* `VersionedAddressBook#commit()` — Saves the current address book state in its history.
-* `VersionedAddressBook#undo()` — Restores the previous address book state from its history.
-* `VersionedAddressBook#redo()` — Restores a previously undone address book state from its history.
-
-These operations are exposed in the `Model` interface as `Model#commitAddressBook()`, `Model#undoAddressBook()` and `Model#redoAddressBook()` respectively.
-
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
-
-Step 1. The user launches the application for the first time. The `VersionedAddressBook` will be initialized with the initial address book state, and the `currentStatePointer` pointing to that single address book state.
-
-<puml src="diagrams/UndoRedoState0.puml" alt="UndoRedoState0" />
-
-Step 2. The user executes `delete 5` command to delete the 5th person in the address book. The `delete` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete 5` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
-
-<puml src="diagrams/UndoRedoState1.puml" alt="UndoRedoState1" />
-
-Step 3. The user executes `add n/David …​` to add a new person. The `add` command also calls `Model#commitAddressBook()`, causing another modified address book state to be saved into the `addressBookStateList`.
-
-<puml src="diagrams/UndoRedoState2.puml" alt="UndoRedoState2" />
-
-<box type="info" seamless>
-
-**Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will not be saved into the `addressBookStateList`.
-
-</box>
-
-Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoAddressBook()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous address book state, and restores the address book to that state.
-
-<puml src="diagrams/UndoRedoState3.puml" alt="UndoRedoState3" />
-
-
-<box type="info" seamless>
-
-**Note:** If the `currentStatePointer` is at index 0, pointing to the initial address book state, then there are no previous address book states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the case. If so, it will return an error to the user rather
-than attempting to perform the undo.
-
-</box>
-
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
-
-<puml src="diagrams/UndoSequenceDiagram-Logic.puml" alt="UndoSequenceDiagram-Logic" />
-
-<box type="info" seamless>
-
-**Note:** The lifeline for `UndoCommand` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline reaches the end of diagram.
-
-</box>
-
-Similarly, how an undo operation goes through the `Model` component is shown below:
-
-<puml src="diagrams/UndoSequenceDiagram-Model.puml" alt="UndoSequenceDiagram-Model" />
-
-The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
-
-<box type="info" seamless>
-
-**Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address book state, then there are no undone address book states to restore. The `redo` command uses `Model#canRedoAddressBook()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
-
-</box>
-
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as `list`, will usually not call `Model#commitAddressBook()`, `Model#undoAddressBook()` or `Model#redoAddressBook()`. Thus, the `addressBookStateList` remains unchanged.
-
-<puml src="diagrams/UndoRedoState4.puml" alt="UndoRedoState4" />
-
-Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Since the `currentStatePointer` is not pointing at the end of the `addressBookStateList`, all address book states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add n/David …​` command. This is the behavior that most modern desktop applications follow.
-
-<puml src="diagrams/UndoRedoState5.puml" alt="UndoRedoState5" />
-
-The following activity diagram summarizes what happens when a user executes a new command:
-
-<puml src="diagrams/CommitActivityDiagram.puml" width="250" />
-
-#### Design considerations:
-
-**Aspect: How undo & redo executes:**
-
-* **Alternative 1 (current choice):** Saves the entire address book.
-  * Pros: Easy to implement.
-  * Cons: May have performance issues in terms of memory usage.
-
-* **Alternative 2:** Individual command knows how to undo/redo by
-  itself.
-  * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
-  * Cons: We must ensure that the implementation of each individual command are correct.
-
-_{more aspects and alternatives to be added}_
-
-### \[Proposed\] Data archiving
-
-_{Explain here how the data archiving feature will be implemented}_
-
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, configuration, dev-ops**
@@ -914,4 +817,61 @@ in order, collectively cover the command set exposed in the User Guide.
 
    1. Exit the app with `exit` or by closing the window.<br>
       Expected: AssetSphere saves the latest address book, command history, and a session snapshot under `data/sessions/`.
+
+--------------------------------------------------------------------------------------------------------------------
+
+## **Appendix: Effort**
+
+Given below are the efforts put in by the team for Asset Sphere.
+
+Overall, this project was fairly difficult to implement up to its current state.
+
+Of the implemented features, we highlight the following significant achievements and their technical difficulty:
+
+**Command Assembly**
+
+The system we term 'Command Assembly' is a major reimplementation effort to significantly improve abstraction and cohesion and reduce coupling throughout the entire logic component. The system and its motivations are described in detail here[link to docs].
+
+It involves a near-complete redesign of the architecture of the logic component. Major efforts include:
+- using established and mathematically-proven techniques (FSM lexing and recursive-descent parsing) to write a common parser for all commands to avoid ad-hoc parsing and parsing errors or inconsistencies,
+- insulating command implementers from common command syntax to make newer commands easier to implement (by ridding implementers of having to worry about significant parsing), and
+- accommodating significant extensibility in the entire process from parsing and decoding an input command to creating the final executable command object, by isolating each stage as far as reasonably expectable.
+
+**Command History with Keyboard Navigation**
+
+The main challenges were defining precise pointer semantics, keeping the navigator synchronized with live history, and preserving testability for UI-driven flows.
+
+Major effort includes:
+- History Navigator pointer behavior is defined to ensure exact pointer semantics and synchronization so that the recalling is consistent when new commands are added.
+- UI integration is required to detect the UP / DOWN keystrokes in the command box. Logic is extracted from UI for unit-testing compatibility. Unit tests are subsequently used to check for navigator edge cases, command box navigation flows and storage error handling to ensure robustness.
+
+**Save mechanism with session snapshots**
+
+The key aspect for this feature is ensuring accurate dirty detection, avoiding unnecessary disk writes, and safe shutdown ordering when IO failures occur. As we implement more features like fields, and links, this feature needs to capture the new information in an adaptable yet reliable manner.
+
+Major efforts include:
+- Implementing dirty-checking and snapshot equality to compare deep copies of persisted attributes while ignoring transient values like timestamps.
+- Linking and coordinating session information between multiple aspects of the system ie Model, Logic, Ui, to a central session recorder, and integrating shutdown persistence in a lifecycle manager so that ordering and IO failure handling is safe.
+- Requires serialization of session information through serialization and ensuring compatibility between multiple session save versions.
+- Tests were tricky as many changes were originally made to the MainApp class itself, and this was refactored to the lifecycle manager so that maximum LOCs are available for testing.
+
+**New UI elements**
+
+- Info command that introduced a new textbox was tricky to implement due to the changes to be made in UiManager and other Ui components. This, alongside the saving of session logic required multiple iterations to get right.
+
+- Field command that introduced a new container-like “pill”, similar to that of the existing Tag command, just in a separate colour scheme. The spacing between each field “pill”, and spacing between each row of content represented on the CLI, was difficult to implement for a consistent UI.
+
+**Custom Field command for contacts**
+
+This feature allows users to establish their own custom fields for each contact on top of the already built-in custom fields (like name, email, address etc.). This was particularly tricky, especially in the later stages, when we realised that there were more considerations that had to be taken into account, such as banning particular keywords as custom fields (like ‘to’, ‘from’, and already built in field names) and how the user is able to edit and remove these custom fields. On top of this, differentiating between removals from empty custom field values also posed as a hindrance.
+
+**Link command between contacts**
+
+This feature allows users to establish a named link between contacts in the address book. Implementing the visuals of that link proved to be fairly difficult as to show the respective directions of the link in the UI was tough to implement. After implementing the bare functional part, the major bug that was the hardest to fix was implementing link refactoring when the user edits/deletes certain pre-linked contacts in the address book as this meant having to change both the UI side and the logic side where the entire link instance stored have to be refactored for every persons in the current address book.
+
+**Comprehensive search while allowing specified search filters**
+
+The find feature that was given was initially a very simple find that only searched on contact’s name. Given that our app was meant for wealth managers who we recognise require searching on specified filters, we wanted to improve on find by implementing a customised enhanced search system that allows users to specify specific fields to search on. Even with simple built in fields, it was a pretty large refactoring, but the hard part came when we had to implement searching on custom fields as well as the links with direction.
+
+
 
