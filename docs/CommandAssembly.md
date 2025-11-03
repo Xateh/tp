@@ -103,14 +103,7 @@ This interface declares one `visit` method for each AST node type in the command
 
 **Visitor Methods**
 
-Each method corresponds to one AST node type and follows the naming convention `visit[NodeType]`:
-
-- **visitCommand**: Processes the root command structure (imperative + parameters + options)
-- **visitImperative**: Processes the command verb
-- **visitParameterList** / **visitParameter**: Processes positional arguments
-- **visitOptionList** / **visitOption**: Processes named options
-- **visitOptionName** / **visitOptionValue**: Processes option components
-- **visitText** / **visitWord**: Processes terminal (leaf) nodes containing actual token data
+Each method corresponds to one AST node type and follows the naming convention `visit[NodeType]`.
 
 The complete set of methods ensures visitors can handle every node type in the grammar, providing exhaustive coverage of the AST structure.
 
