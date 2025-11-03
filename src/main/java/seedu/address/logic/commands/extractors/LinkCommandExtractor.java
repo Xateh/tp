@@ -13,17 +13,12 @@ import seedu.address.model.person.Link;
  */
 public class LinkCommandExtractor {
     // Messages for extraction
-    public static final String MESSAGE_USAGE =
-            "link: Creates a directed link between two persons.\n"
-                    + "Parameters: INDEX1 LINK_NAME INDEX2\n"
-                    + "Example: link 1 lawyer 2";
+    public static final String MESSAGE_USAGE = LinkCommand.MESSAGE_USAGE;
     public static final String MESSAGE_EXPECTED_3_PARAMS =
-            "Expected exactly 3 positional parameters: INDEX1 LINK_NAME INDEX2.";
+            "Expected 3 positional parameters: INDEX-FROM LINK-NAME INDEX-TO.";
     public static final String MESSAGE_LINK_NAME_REQUIRED =
             "Link name must be provided as the second positional parameter.";
     public static final String MESSAGE_LINK_NAME_INVALID = Link.MESSAGE_CONSTRAINTS;
-    public static final String MESSAGE_PARAM_KIND =
-            "Only normal positional parameters are allowed for 'link' (no + / - kinds).";
     public static final String MESSAGE_SAME_PERSON = "Cannot link a person to themselves.";
 
     private LinkCommandExtractor() {
