@@ -371,21 +371,38 @@ The `info` command provides a way to add or edit a multi-line, free-text note fo
 
 The mechanism is split into two distinct phases: opening the editor and saving the changes.
 
-1.  **Opening the Editor**:
+1.  **Opening the Editor (Command Execution Phase)**:
     *   The user executes `info <index>`, for example, `info 1`.
-    *   The `LogicManager` parses this and creates an `InfoCommand` with a `targetIndex`.
-    *   When `InfoCommand#execute(model)` is called, it does **not** modify the model. Instead, it calls `UiManager#showInfoEditor(person, index)`.
-    *   The `UiManager` is responsible for creating and displaying a separate dialog window containing a text area, pre-filled with the person's existing info.
+    *   The `LogicManager` parses this via `Decoder` and creates an `InfoCommand` with a `targetIndex`.
+    *   When `InfoCommand#execute(model)` is called, it validates the index and retrieves the person, but does **not** immediately modify the model. Instead, it:
+        *   Validates the index against the filtered person list
+        *   Retrieves the person at that index
+        *   Calls `UiManager#showInfoEditor(person, index)` to display the editor
+        *   Returns a `CommandResult` indicating the editor was opened
+    *   The `UiManager` wraps the dialog creation in `Platform.runLater()` to ensure it executes on the JavaFX Application Thread.
+    *   A JavaFX `Dialog` is created containing:
+        *   A `TextArea` pre-filled with the person's existing info
+        *   A `VBox` container for layout
+        *   OK and CANCEL buttons
+        *   A result converter that captures the edited text when OK is clicked
 
-2.  **Saving the Changes**:
+2.  **Saving the Changes (UI Callback Phase)**:
     *   The user edits the text in the dialog and clicks the "OK" button.
-    *   The `UiManager` captures the new text and calls the static method `InfoCommand.saveInfo(model, index, newInfo)`.
-    *   This static method creates a *new* `InfoCommand` instance, this time containing both the `targetIndex` and the `updatedInfo`.
-    *   This new command is executed immediately. It creates a new `Person` object with the updated `Info` and uses `model.setPerson(...)` to replace the old person object in the address book.
-    *   This change to the model triggers the undo/redo mechanism via `Model#commitAddressBook()` and updates the UI to reflect the new data.
+    *   The dialog's result converter captures the edited text.
+    *   The `UiManager#savePersonInfo(personIndex, infoText)` method is invoked, which:
+        *   Creates an `Info` object from the text
+        *   Calls the static method `InfoCommand.saveInfo(model, logic, index, newInfo)`
+    *   This static method:
+        *   Validates the index again against the current filtered list
+        *   Creates a new `Person` object with the updated `Info` using `PersonBuilder`
+        *   Uses `model.setPerson(...)` to replace the old person in the address book
+        *   Calls `logic.markAddressBookDirty()` to ensure the session snapshot will be persisted
+        *   Returns a `CommandResult` with success feedback
+    *   The change triggers the model's change listeners, updating the UI.
+    *   The `UiManager` calls `mainWindow.showFeedback()` to display the success message in the result display.
 
 The following sequence diagram illustrates the process of opening the info editor:
-<puml src="diagrams/InfoSequenceDiagram.puml" width="550" />
+<puml src="diagrams/InfoSequenceDiagram.puml" width="574" />
 
 ### \[Proposed\] Undo/redo feature
 
