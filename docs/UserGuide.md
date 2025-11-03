@@ -504,7 +504,7 @@ Note: This release no longer saves or restores the active `find` keywords or fil
 
 ### Editing the data file
 
-The main address book data file is saved as JSON at
+The main address book data file is saved as JSON at:
 
 ```
 [JAR file location]/data/addressbook.json
