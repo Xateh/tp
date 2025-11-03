@@ -63,7 +63,7 @@ public final class FindCommandExtractor {
         List<String> keysToRemove = List.of("name", "phone", "email", "address", "tag", "from", "to");
         Map<String, List<String>> map = bareCommand.getAllOptions();
         Set<String> customKeys = map.keySet().stream()
-                .map(k -> k != null ? k.trim().toLowerCase() : "")
+                .map(k -> k != null ? k.trim() : "")
                 .filter(k -> !keysToRemove.contains(k))
                 .collect(Collectors.toSet());
 
