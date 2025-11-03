@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -250,6 +253,47 @@ public class SessionRecorderTest {
         // Mutating the original address book after snapshot creation should not affect the snapshot
         addressBook.addPerson(new PersonBuilder().withName("Charlie").build());
         assertEquals(1, snapshot.getAddressBook().getPersonList().size());
+    }
+
+    @Test
+    public void sessionSignature_matchesAddressBook_andMetadata() throws Exception {
+        AddressBook addressBook = createSampleAddressBook();
+        AddressBook other = new AddressBook();
+        other.addPerson(new PersonBuilder().withName("Different").build());
+
+        // Access the private SessionSignature inner class via reflection
+        Class<?> sigClass = Class.forName("seedu.address.logic.session.SessionRecorder$SessionSignature");
+        Class<?> readOnlyAddressBookClass = Class.forName("seedu.address.model.ReadOnlyAddressBook");
+
+        Constructor<?> ctor = sigClass.getDeclaredConstructor(readOnlyAddressBookClass, GuiSettings.class);
+        ctor.setAccessible(true);
+        Object signature = ctor.newInstance(addressBook, DEFAULT_GUI_SETTINGS);
+
+        Method hasSameAddressBook = sigClass.getDeclaredMethod("hasSameAddressBook", readOnlyAddressBookClass);
+        hasSameAddressBook.setAccessible(true);
+        assertTrue((Boolean) hasSameAddressBook.invoke(signature, addressBook));
+        assertFalse((Boolean) hasSameAddressBook.invoke(signature, other));
+
+        Method hasSameMetadata = sigClass.getDeclaredMethod("hasSameMetadata", GuiSettings.class);
+        hasSameMetadata.setAccessible(true);
+        assertTrue((Boolean) hasSameMetadata.invoke(signature, DEFAULT_GUI_SETTINGS));
+        assertFalse((Boolean) hasSameMetadata.invoke(signature, new GuiSettings(1, 1, 0, 0)));
+    }
+
+    @Test
+    public void noPersistedSignature_setsSessionMetadataDirty() throws Exception {
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
+
+        // Force lastPersistedSignature to null to hit the recomputeSessionMetadataDirty branch
+        Field persisted = SessionRecorder.class.getDeclaredField("lastPersistedSignature");
+        persisted.setAccessible(true);
+        persisted.set(recorder, null);
+
+        GuiSettings updated = new GuiSettings(123, 123, 2, 2);
+        recorder.afterGuiSettingsChanged(updated);
+
+        // Since there is no persisted signature, metadata should be considered dirty
+        assertTrue(recorder.isAnyDirty(new AddressBook(), updated));
     }
 }
 
