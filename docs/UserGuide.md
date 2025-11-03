@@ -208,7 +208,7 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
-* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `list 123` are treated the same as `list` and open the help window without error.
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `list 123` are treated the same as `list` and still lists contacts without error.
 
 ### Viewing command history : `history`
 
@@ -229,7 +229,7 @@ Examples:
 
 _Additional notes:_
 
-* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `history 123` are treated the same as `history` and open the help window without error.
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `history 123` are treated the same as `history` and still show history without error.
 
 ### Editing a person : `edit`
 
@@ -333,7 +333,6 @@ Format: `field <index> [/<key>[:<value>]?]+`
   * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
   * Custom field `key` is **case-sensitive**; `key` is not equivalent to `Key`.
   * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
-    * While you **can** do `field 1 /brand:nike /brand:adidas`, the person at index 1 will only be updated with the custom field `brand: nike`. `/brand: adidas` will be ignored.
   * Omitting `value` (e.g. `/nickname`) **removes** the custom field identified by `key` if it exists.
   * Custom field names are case-insensitive when checked against reserved keys. You cannot use the built-in field names `name`, `email`, `phone`, `address`, `tag`, `field` or with keywords such as `to` and `from` (in any casing).
   * `key` cannot contain spaces, even if wrapped in straight double quotes; A `key` like `"Asset Class"` will be rejected, whereas an alternative like `AssetClass` will be accepted.
@@ -367,7 +366,7 @@ Format: `find <keyword>+ [/<field>]*`
 
 **Options**
 
-Note that if specifying to search on built in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For eg, `/name` NOT `/NAME`.
+Note that if specifying to search on built-in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For example, `/name` NOT `/NAME`.
 * `/<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
 * `/from` (word): search all links where the person matched is the linker.
 * `/to` (word): search all links where the person matched is the linkee (one being linked to).
@@ -406,7 +405,7 @@ Format: `link <index-from> <link-name> <index-to>`
 **Parameters**
 
 * `<index-from>` (index): index of the linker (the person initiating the link)
-* `<link-name>` (string): name of the relationship (eg., lawyer, client)
+* `<link-name>` (string): name of the relationship (e.g., lawyer, client)
 * `<index-to>` (index): index of the linkee (the person being linked to)
 
 Examples:
