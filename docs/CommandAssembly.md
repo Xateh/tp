@@ -256,10 +256,13 @@ try {
 The following regular grammar is recognised by the lexer.
 
 ```
-WORD   ::= [A-z0-9]+
-TEXT   ::= "[^"/:]*"
-SLASH  ::= /
-COLON  ::= :
+WORD            ::= [A-z0-9]+
+TEXT            ::= "[^"\/:]*"
+SLASH           ::= /
+COLON           ::= :
+PLUS            ::= +
+MINUS           ::= -
+TERMINAL        ::= $
 ```
 
 The `TERMINAL` token denotes the end of input.
@@ -269,16 +272,23 @@ The `TERMINAL` token denotes the end of input.
 The following command grammar is recognised by the parser, in EBNF notation.
 
 ```
-command          → imperative parameter_list option_list TERMINAL
-imperative       → word
-parameter_list   → ( parameter )+
-parameter        → text
-option_list      → ( option )+
-option           → SLASH option_name ( COLON option_value )*
-option_name      → word
-option_value     → text
-text             → TEXT | WORD
-word             → WORD
+command                  → imperative parameter_list option_list TERMINAL
+imperative               → word
+parameter_list           → ( parameter )+
+parameter                → normal_parameter
+                         | additive_parameter
+                         | subtractive_parameter
+normal_parameter         → text
+additive_parameter       → PLUS text
+subtractive_parameter    → MINUS text
+option_list              → ( option )+
+option                   → SLASH option_name ( COLON option_value )*
+option_name              → word
+option_value             → text
+text                     → TEXT
+                         | WORD
+word                     → WORD
+
 ```
 
 ### Resolution Architecture
