@@ -457,7 +457,7 @@ After recalling a command, press Enter to execute it. This is useful for quickly
 
 _Additional notes:_
 
-* Like the `history` command, only valid commands will be saved and cycled. Invalid commands will ignored.
+* The command recall feature will only cycle saved commands. That is, if the command is invalid and thus not saved in command history, the invalid command will not be recalled.
 
 ### Saving the data
 
