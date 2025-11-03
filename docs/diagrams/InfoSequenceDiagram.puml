@@ -5,36 +5,67 @@ skinparam ArrowFontStyle plain
 actor User
 participant ":UI" as UI UI_COLOR
 participant ":Logic" as Logic LOGIC_COLOR
+participant ":Decoder" as Decoder LOGIC_COLOR
 participant "info:InfoCommand" as InfoCommand LOGIC_COLOR
+participant ":Model" as Model MODEL_COLOR
 participant "uiManager:UiManager" as UiManager UI_COLOR
 participant "dialog:Dialog" as Dialog UI_COLOR
 
 User -> UI : info 1
 activate UI
+
 UI -> Logic : execute("info 1")
 activate Logic
-Logic -> InfoCommand : extract("info 1")
-activate InfoCommand
-InfoCommand --> Logic : info
-deactivate InfoCommand
+
+Logic -> Decoder : decode("info 1")
+activate Decoder
+Decoder --> Logic : info
+deactivate Decoder
+
 Logic -> InfoCommand : execute(model)
 activate InfoCommand
+
 InfoCommand -> UiManager : showInfoEditor(person, index)
 activate UiManager
-UiManager -> Dialog : create
+
+UiManager -> Dialog : create and show
 activate Dialog
-Dialog --> UiManager
-deactivate Dialog
-UiManager -> Dialog : showAndWait()
-activate Dialog
-Dialog --> User : shows editor
-deactivate Dialog
-UiManager --> InfoCommand
+
+Dialog --> User : display info editor
 deactivate UiManager
-InfoCommand --> Logic : result
-deactivate InfoCommand
-Logic --> UI : result
+
+User -> Dialog : edits info and clicks OK
+activate UiManager
+
+Dialog -> UiManager : return edited text
+deactivate Dialog
+
+UiManager -> InfoCommand : saveInfo(model, logic, index, info)
+activate InfoCommand
+
+InfoCommand -> Model : setPerson(oldPerson, editedPerson)
+activate Model
+Model --> InfoCommand
+deactivate Model
+
+InfoCommand -> Logic : markAddressBookDirty()
+activate Logic
+Logic --> InfoCommand
 deactivate Logic
-UI --> User : "Opened info editor..."
+
+InfoCommand --> UiManager : result
+deactivate InfoCommand
+
+UiManager --> InfoCommand : (initial result)
+deactivate UiManager
+
+InfoCommand --> Logic : CommandResult("Opened info editor...")
+deactivate InfoCommand
+
+Logic --> UI : CommandResult
+deactivate Logic
+
+UI --> User : "Opened info editor for Person: Alice"
 deactivate UI
+
 @enduml
