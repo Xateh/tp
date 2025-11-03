@@ -86,6 +86,14 @@ public class LogicManager implements Logic {
     }
 
     @Override
+    public void markAddressBookDirty() {
+        Command dummyCommand = new seedu.address.logic.commands.InfoCommand(
+                seedu.address.commons.core.index.Index.fromZeroBased(0)
+        );
+        sessionRecorder.afterSuccessfulCommand(dummyCommand, true);
+    }
+
+    @Override
     public ReadOnlyAddressBook getAddressBook() {
         return model.getAddressBook();
     }
