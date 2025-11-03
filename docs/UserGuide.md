@@ -362,7 +362,7 @@ Format: `find <keyword>+ [/<field>]*`
 * The order of the keywords does not matter. e.g. `Hans Bo` will be treated the same as `Bo Hans`.
 * Only full words will be matched e.g. `Han` will not match `Hans`.
 * Persons matching at least one keyword on any one field will be returned (i.e. `OR` search).
-  e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
+  e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`.
 
 **Parameters**
 
@@ -371,7 +371,7 @@ Format: `find <keyword>+ [/<field>]*`
 **Options**
 
 Note that if specifying to search on built in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For eg, `/name` NOT `/NAME`.
-* `/<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+* `/<field>` (word): one of any of the available simple fields on a person. (one of `name`, `phone`, `address`, `email`, `tag`)
 * `/from` (word): search all links where the person matched is the linker.
 * `/to` (word): search all links where the person matched is the linkee (one being linked to).
 * `/<custom-field>` (word): specified to search on persons' custom added fields. (does not match if field provided is not existent)
@@ -384,7 +384,7 @@ Note that if specifying to search on built in fields (name, address, phone, emai
 
 You can limit the search to specific fields by adding options after your keywords (see above under **Options**).
 * Each field option starts with / followed by the field name.
-* The same rules for searching applies as per the case of searching all built in fields. (see above)
+* The same rules for searching applies as per the case of searching all built in fields (see above).
 * Now, only those persons matching at least one keyword on any one specified field will be returned.
 
 **Examples**
