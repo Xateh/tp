@@ -872,3 +872,22 @@ This feature allows users to establish a named link between contacts in the addr
 **Comprehensive search while allowing specified search filters**
 
 The find feature that was given was initially a very simple find that only searched on contact’s name. Given that the app was meant for wealth managers who we recognise require searching on specified filters, we wanted to improve on find by implementing a customised enhanced search system that allows users to specify specific fields to search on. Even with simple built in fields, it was a pretty large refactoring, but the hard part came during implementing search on custom fields as well as the links with direction.
+
+--------------------------------------------------------------------------------------------------------------------
+
+## **Appendix: Planned Enhancements**
+
+Team size: 5
+
+* **Overly-restrictive `name` validation**: Currently, names do not accept special characters like `@` and `/` (which are used in some names). We plan on relaxing this restriction by allowing these (and other) special characters in names accordingly.
+* **Overly-restrictive `tag` validation**: Currently, tags do not accept spaces or special characters. We plan on relaxing this restriction by allowing spaces and special characters in tags accordingly.
+* **Search keyword is case-insensitive**: Currently, the keyword to search for is treated as case-insensitive. For example, if a person has a name of `Alex`, find `alex` /name will return that person. We plan to make keywords to search in a case-sensitive manner.
+* **Unable to unlink person**: Currently, there is no way for a user to delete a wrongly made link from a person without deleting the entire person and re adding them back without adding the link to be deleted. We plan to add in an unlink command to allow users to remove poorly added links
+* **Add an intuitive keyboard shortcut to close the `info` box:** The current `info` box requires `SHIFT-TAB` + `ENTER` to save the edits using only the keyboard. We plan to add a more intuitive shortcut for saving the new edits made.
+* **Find does not allow string parameters with spaces**: Currently, keywords with quotes must be a single word parameter. For eg, find "Alex yeoh" wont work, it has to be `find Alex yeoh`. We plan to allow quoted strings to be multi-worded.
+* **Unintuitive link representation**: Current link representation in the UI is difficult to read and decipher. We plan to make changes as to how the link is represented in the UI using text instead of arrows. For example when a user keys in `link <index-from> <link-name> <index-to>`:
+    * the person represented by `<index-from>` will have the text "has `<index-to>` as `<link-name>`" listed
+    * the person represented by `<index-to>` will have  the text "is `<link-name>` of `<index-from>`" listed
+* **Duplicate persons will be better handled**: Currently, duplicate persons are handled inconsistently throughout the entire DG and thus will not correctly identify/deduplicate persons in certain specific cases. We plan to make duplicate person handling more consistent throughout; this will affect all commands that modify AssetSphere data simultaneously.
+* **Display does not wrap text**: Currently, the text for an extraneous long value input for `tag` and custom `field` will not be wrapped. This would result in parts of the value being possibly under-represented if the input is too long. We plan on fixing this by allowed text to be wrapped accordingly.
+* **Incorrectly edited tag not correctly verified when loading application**: Currently, when tags are edited in the save file to an invalid state (i.e. "hello world"), the application accepts the change and uses it as a tag. We plan on adding further validation checks to loading save files.
