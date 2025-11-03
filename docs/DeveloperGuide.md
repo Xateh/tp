@@ -863,7 +863,7 @@ Major efforts include:
 
 **Custom Field command for contacts**
 
-This feature allows users to establish their own custom fields for each contact on top of the already built-in custom fields (like name, email, address etc.). This was particularly tricky, especially in the later stages, when we realised that there were more considerations that had to be taken into account, such as banning particular keywords as custom fields (like ‘to’, ‘from’, and already built in field names) and how the user is able to edit and remove these custom fields. On top of this, differentiating between removals from empty custom field values also posed as a hindrance.
+This feature allows users to establish their own custom fields for each contact on top of the already built-in custom fields (like name, email, address etc.). This was particularly tricky, especially in the later stages, when it was discovered that there were more considerations that had to be taken into account, such as banning particular keywords as custom fields (like ‘to’, ‘from’, and already built in field names) and how the user is able to edit and remove these custom fields. On top of this, differentiating between removals from empty custom field values also posed as a hindrance.
 
 **Link command between contacts**
 
@@ -871,7 +871,4 @@ This feature allows users to establish a named link between contacts in the addr
 
 **Comprehensive search while allowing specified search filters**
 
-The find feature that was given was initially a very simple find that only searched on contact’s name. Given that our app was meant for wealth managers who we recognise require searching on specified filters, we wanted to improve on find by implementing a customised enhanced search system that allows users to specify specific fields to search on. Even with simple built in fields, it was a pretty large refactoring, but the hard part came when we had to implement searching on custom fields as well as the links with direction.
-
-
-
+The find feature that was given was initially a very simple find that only searched on contact’s name. Given that the app was meant for wealth managers who we recognise require searching on specified filters, we wanted to improve on find by implementing a customised enhanced search system that allows users to specify specific fields to search on. Even with simple built in fields, it was a pretty large refactoring, but the hard part came during implementing search on custom fields as well as the links with direction.
