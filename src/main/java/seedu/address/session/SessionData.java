@@ -3,7 +3,6 @@ package seedu.address.session;
 import static java.util.Objects.requireNonNull;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
 
 import seedu.address.commons.core.GuiSettings;
@@ -19,23 +18,19 @@ public class SessionData {
 
     private final Instant savedAt;
     private final AddressBook addressBook;
-    private final List<String> searchKeywords;
     private final GuiSettings guiSettings;
 
     /**
-     * Constructs a {@code SessionData} snapshot with all persisted session attributes.
+     * Constructs a {@code SessionData} snapshot with persisted session attributes.
      *
      * @param savedAt time the snapshot was captured
      * @param addressBook the address book state associated with this session
-     * @param searchKeywords active search keywords when the snapshot was taken
      * @param guiSettings GUI settings to restore on the next launch
      */
-    public SessionData(Instant savedAt, ReadOnlyAddressBook addressBook,
-            List<String> searchKeywords, GuiSettings guiSettings) {
+    public SessionData(Instant savedAt, ReadOnlyAddressBook addressBook, GuiSettings guiSettings) {
         this.savedAt = requireNonNull(savedAt);
         requireNonNull(addressBook);
         this.addressBook = new AddressBook(addressBook);
-        this.searchKeywords = List.copyOf(requireNonNull(searchKeywords));
         this.guiSettings = requireNonNull(guiSettings);
     }
 
@@ -49,10 +44,6 @@ public class SessionData {
 
     public ReadOnlyAddressBook getAddressBook() {
         return addressBook;
-    }
-
-    public List<String> getSearchKeywords() {
-        return searchKeywords;
     }
 
     public GuiSettings getGuiSettings() {
@@ -72,13 +63,12 @@ public class SessionData {
         SessionData otherData = (SessionData) other;
         return savedAt.equals(otherData.savedAt)
             && addressBook.equals(otherData.addressBook)
-            && searchKeywords.equals(otherData.searchKeywords)
             && guiSettings.equals(otherData.guiSettings);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(savedAt, addressBook, searchKeywords, guiSettings);
+        return Objects.hash(savedAt, addressBook, guiSettings);
     }
 
     @Override
@@ -87,7 +77,6 @@ public class SessionData {
                 + "formatVersion='" + FORMAT_VERSION + '\''
                 + ", savedAt=" + savedAt
                 + ", addressBookPersons=" + addressBook.getPersonList().size()
-                + ", searchKeywords=" + searchKeywords
                 + ", guiSettings=" + guiSettings
                 + '}';
     }
