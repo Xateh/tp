@@ -119,7 +119,7 @@ By default:
 
 <box type="important" seamless header="Built-in and Custom Fields">
 
-The following are **built-in fields**. There are additional restrictions on each of them:
+The following are **built-in simple fields**. There are additional restrictions on each of them:
 - `name` must only contain letters, numbers, or spaces, and it should not be blank
 - `phone` must only contain numbers, and it should be at least 3 digits long
 - `address` must not be blank
@@ -272,7 +272,7 @@ Examples:
 
 Sets, updates or removes one or more **custom field values** for the specified person in the address book.
 
-Format: `field <index> [/<key>[:<value>]]+`
+Format: `field <index> [/<key>[:<value>]?]+`
 
 **Parameters**
 
@@ -512,7 +512,7 @@ Action     | Format, Examples
 **Edit**   | `edit <index> [/<field>:<new-value>]+`<br> e.g., `edit 2 /name:"James Lee" /email:"jameslee@example.com"`<br>`edit <index> [/<field>:<new-value>]+ [/tag]`<br>e.g., `edit 2 /name:"Betsy Crower" /tag` 
 **Modify Tag**    | `tag <index> [(+\|-)<tag>]+` <br> e.g., `tag 2 +friend -villain +cool -enemy`                                                                                                                          
 **View/Edit Info** | `info <index>` <br> e.g., `info 2`                                                                                                                                                                     
-**Field**  | `field <index> [/<key>[:<value>]]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
+**Field**  | `field <index> [/<key>[:<value>]?]+` <br> e.g., `field 5 /linkedInUsername:alextan /rate:120 /socialMedia`
 **Find**   | `find <keyword>+ [/<field>]*` <br> e.g., `find James Jake /name`                                                                                                                                             
 **Link**   | `link <index-from> <link-name> <index-to>` <br> e.g., `link 1 lawyer 2`
 **History** | `history`                                                                                                                                                                                              
