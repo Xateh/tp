@@ -16,6 +16,8 @@ import seedu.address.model.person.Person;
 import seedu.address.model.person.builder.PersonBuilder;
 import seedu.address.ui.UiManager;
 
+// Acknowledgement: Certain aspects of this feature has been made with the assistance of AI tools.
+
 /**
  * Edits the info of an existing person in the address book.
  */
