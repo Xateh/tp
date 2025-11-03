@@ -47,8 +47,6 @@ AssetSphere is a **desktop app for managing contacts, optimized for use via a Co
 
 <box type="info" seamless header="Basic Command Structure">
 
-**NOTE TO REVIEWERS**: This part of the UG contains the updated command syntax that the app will eventually use. However, not all of the rest of the UG has been updated to be aligned with this new syntax. This **will be fixed** in a later version.
-
 All commands follow the same simple format:
 
 `command <parameters...> <options...>`
