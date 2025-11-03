@@ -208,6 +208,8 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
+_Additional notes:_
+
 * Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `list 123` are treated the same as `list` and open the help window without error.
 
 ### Viewing command history : `history`
