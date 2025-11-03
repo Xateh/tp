@@ -6,7 +6,25 @@
 
 # AssetSphere User Guide
 
-AssetSphere is a **desktop app for managing contacts, optimized for use via a Command Line Interface** (CLI) while still having the benefits of a Graphical User Interface (GUI). If you can type fast, AssetSphere can get your contact management tasks done faster than traditional GUI apps.
+AssetSphere is a desktop contact management application purpose-built for professional asset managers and wealth management teams. It combines a command-line, scriptable interface for high-throughput operations with a graphical UI for focused review and editing. The application supports modeling of complex client hierarchies and directional relationships, enabling teams to maintain structured, auditable records for high-net-worth individuals (HNWIs), counterparties, and institutional stakeholders.
+
+## Target user profile
+
+AssetSphere is intended for:
+
+- Asset managers and portfolio managers responsible for client relationship management, reporting, and operational workflows that require structured metadata and relationship modeling.
+- Client onboarding, operations, and compliance teams that require traceable change history, reproducible session snapshots, and the ability to audit and revert modifications.
+
+## Value proposition
+
+AssetSphere provides:
+
+- Improve operational throughput: CLI-first design enables batch operations and scripted workflows to reduce manual maintenance time.
+- Model real-world relationships: Custom fields and directional relationship links let teams represent roles, accounts, mandates and hierarchical links without schema migrations.
+- Improve discoverability and context: Field-aware keyword search (including custom fields and link names) enables rapid location of contacts and relationships; persistent, freeform notes attached to records preserve meeting details, onboarding context, and compliance annotations for reliable handover and auditability.
+- Support audit and recovery: Command history, session snapshots, and undo/redo provide an auditable trail and enable safe recovery from accidental changes.
+- Maintain local control and reliability: Desktop-first persistence (JSON-based) keeps data on the user's machine, facilitating local backup strategies and operational resilience.
+
 
 <!-- * Table of Contents -->
 <page-nav-print />
