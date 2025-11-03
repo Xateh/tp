@@ -434,6 +434,10 @@ Press Up to recall the most recent command (and keep pressing Up to move to olde
 
 After recalling a command, press Enter to execute it. This is useful for quickly re-running or editing recent commands without retyping them.
 
+_Additional notes:_
+
+* Like the `history` command, only valid commands will be saved and cycled. Invalid commands will ignored.
+
 ### Saving the data
 
 AssetSphere data are saved in the hard disk automatically after any command that changes the data. There is no need to save manually.
