@@ -206,5 +206,50 @@ public class SessionRecorderTest {
         SessionData snapshot = recorder.buildSnapshot(ab, DEFAULT_GUI_SETTINGS);
         assertEquals(DEFAULT_GUI_SETTINGS, snapshot.getGuiSettings());
     }
+
+    @Test
+    public void defaultConstructor_initialisesCleanState() {
+        SessionRecorder recorder = new SessionRecorder();
+        AddressBook addressBook = createSampleAddressBook();
+
+        SessionData snapshot = recorder.buildSnapshot(addressBook, DEFAULT_GUI_SETTINGS);
+
+        // buildSnapshot should reflect provided GUI settings and not mark anything dirty
+        assertEquals(DEFAULT_GUI_SETTINGS, snapshot.getGuiSettings());
+        assertFalse(recorder.isAnyDirty(addressBook, DEFAULT_GUI_SETTINGS));
+    }
+
+    @Test
+    public void optionalConstructor_initialisesFromSession() {
+        AddressBook addressBook = createSampleAddressBook();
+        GuiSettings restoredGui = new GuiSettings(640, 480, 1, 1);
+        SessionData previous = new SessionData(Instant.parse("2024-02-02T12:00:00Z"), addressBook, restoredGui);
+
+        SessionRecorder recorder = new SessionRecorder(Optional.of(previous));
+
+        // Recorder seeded from previous session should consider identical state as not dirty
+        assertFalse(recorder.isAnyDirty(addressBook, restoredGui));
+
+        SessionData snapshot = recorder.buildSnapshot(addressBook, restoredGui);
+        assertEquals(restoredGui, snapshot.getGuiSettings());
+    }
+
+    @Test
+    public void buildSnapshot_generatesTimestamp_isImmutable() {
+        SessionRecorder recorder = new SessionRecorder(new AddressBook(), DEFAULT_GUI_SETTINGS);
+        AddressBook addressBook = createSampleAddressBook();
+
+        Instant before = Instant.now();
+        SessionData snapshot = recorder.buildSnapshot(addressBook, DEFAULT_GUI_SETTINGS);
+        Instant after = Instant.now();
+
+        // savedAt should be within the buildSnapshot call window
+        assertFalse(snapshot.getSavedAt().isBefore(before));
+        assertFalse(snapshot.getSavedAt().isAfter(after));
+
+        // Mutating the original address book after snapshot creation should not affect the snapshot
+        addressBook.addPerson(new PersonBuilder().withName("Charlie").build());
+        assertEquals(1, snapshot.getAddressBook().getPersonList().size());
+    }
 }
 
