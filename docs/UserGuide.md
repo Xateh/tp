@@ -314,6 +314,7 @@ Format: `info <index>`
 * `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
 
 **Examples**
+
 * `list` followed by `info 2` will bring up an editable text box for the 2nd person in the address book.
 
 ### Setting and removing a custom field on a person : `field`
@@ -343,6 +344,7 @@ Format: `field <index> [/<key>[:<value>]?]+`
 You may mix additions/updates and removals in a single command by providing multiple key-value options.
 
 **Examples**
+
 * `field 5 /linkedInUsername:alextan /rate:120`: Sets two fields on the 5th person in one command.
 * `field 3 /notes:"Met at FinTech conf 2025"`: Adds a note with spaces to the 3rd person.
 * `field 4 /nickname`: Removes the `nickname` custom field from the 4th person.
@@ -375,6 +377,7 @@ Note that if specifying to search on built in fields (name, address, phone, emai
 * `/<custom-field>` (word): specified to search on persons' custom added fields. (does not match if field provided is not existent)
 
 **Examples** (no specified fields to search on, default all built in)
+
 * `find 99999999` returns all persons whose built-in fields contain `99999999`.
 * `find test.dummy@gmail.com` returns all persons whose built-in fields contain `test.dummy@gmail.com`.
 * `find friend` returns all persons whose built-in fields contain `"friend"`.
@@ -385,6 +388,7 @@ You can limit the search to specific fields by adding options after your keyword
 * Now, only those persons matching at least one keyword on any one specified field will be returned.
 
 **Examples**
+
 * `find John /name` returns persons whose name contains `john`.
 * `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
 * `find 99999999 /phone` returns all persons whose phone number contains the word `99999999`.
