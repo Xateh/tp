@@ -63,6 +63,10 @@ class MainAppLifecycleManagerTest {
         }
 
         @Override
+        public void markAddressBookDirty() {
+        }
+
+        @Override
         public CommandHistory getCommandHistorySnapshot() {
             return history;
         }
@@ -432,6 +436,10 @@ class MainAppLifecycleManagerTest {
         RecordingLogicStub(CommandHistory history, Optional<SessionData> snapshot) {
             this.history = history;
             this.snapshot = snapshot;
+        }
+
+        @Override
+        public void markAddressBookDirty() {
         }
 
         @Override

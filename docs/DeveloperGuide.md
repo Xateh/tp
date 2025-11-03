@@ -87,6 +87,16 @@ The `UI` component,
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component, as it displays `Person` object residing in the `Model`.
 
+### Command recall (Up/Down arrow keys)
+
+The command box supports keyboard-based command recall: when the command box is focused the user can press the Up and Down arrow keys to navigate previously entered commands. This behaviour is implemented in `CommandBox` (see `src/main/java/seedu/address/ui/CommandBox.java`) which registers a key event filter for `KeyCode.UP` and `KeyCode.DOWN` and uses `HistoryNavigator` (`src/main/java/seedu/address/ui/HistoryNavigator.java`) to walk the history entries supplied by a `HistorySupplier` (typically `logic::getCommandHistorySnapshot`).
+
+Implementation notes for developers:
+
+- `HistoryNavigator` keeps a pointer that is reset to the end of the entries snapshot; `previous()` returns the most recent entry and moves the pointer backwards; `next()` moves the pointer forward and returns the newer entry or empty if the navigator reaches the end (the command box should be cleared in that case).
+- Tests covering this behaviour can be found in `src/test/java/seedu/address/ui/CommandBoxTest.java`.
+
+
 ### Logic component
 
 Here's a (partial) class diagram of the `Logic` component:
@@ -255,8 +265,8 @@ Options are optional, named inputs that modify command behavior.
 - **Default Behaviour:** Because all options are by definition optional, your command implementation **must provide a default behaviour** for every option it supports.
 - **Minimum Multiplicity:** Even though all options are optional as described above, it is valid to require a **minimum multiplicity**; that is, require at least a certain number of options to be supplied for the command to work.
 - **Formats:** The parser supports two formats and delivers them as such:
-    1. **Name-only (Flag):** `/force`. Your code should check for the _presence_ of the "force" key.
-    2. **Name-Value Pair:** `/priority:high`. Your code should retrieve the "priority" key and its associated _value_ ("high").
+    1. **Name-only (Flag):** e.g. `/force`. Your code should check for the _presence_ of the "force" key.
+    2. **Name-Value Pair:** e.g. `/priority:high`. Your code should retrieve the "priority" key and its associated _value_ ("high").
 
 **Error Handling**
 
@@ -375,21 +385,38 @@ The `info` command provides a way to add or edit a multi-line, free-text note fo
 
 The mechanism is split into two distinct phases: opening the editor and saving the changes.
 
-1.  **Opening the Editor**:
+1.  **Opening the Editor (Command Execution Phase)**:
     *   The user executes `info <index>`, for example, `info 1`.
-    *   The `LogicManager` parses this and creates an `InfoCommand` with a `targetIndex`.
-    *   When `InfoCommand#execute(model)` is called, it does **not** modify the model. Instead, it calls `UiManager#showInfoEditor(person, index)`.
-    *   The `UiManager` is responsible for creating and displaying a separate dialog window containing a text area, pre-filled with the person's existing info.
+    *   The `LogicManager` parses this via `Decoder` and creates an `InfoCommand` with a `targetIndex`.
+    *   When `InfoCommand#execute(model)` is called, it validates the index and retrieves the person, but does **not** immediately modify the model. Instead, it:
+        *   Validates the index against the filtered person list
+        *   Retrieves the person at that index
+        *   Calls `UiManager#showInfoEditor(person, index)` to display the editor
+        *   Returns a `CommandResult` indicating the editor was opened
+    *   The `UiManager` wraps the dialog creation in `Platform.runLater()` to ensure it executes on the JavaFX Application Thread.
+    *   A JavaFX `Dialog` is created containing:
+        *   A `TextArea` pre-filled with the person's existing info
+        *   A `VBox` container for layout
+        *   OK and CANCEL buttons
+        *   A result converter that captures the edited text when OK is clicked
 
-2.  **Saving the Changes**:
+2.  **Saving the Changes (UI Callback Phase)**:
     *   The user edits the text in the dialog and clicks the "OK" button.
-    *   The `UiManager` captures the new text and calls the static method `InfoCommand.saveInfo(model, index, newInfo)`.
-    *   This static method creates a *new* `InfoCommand` instance, this time containing both the `targetIndex` and the `updatedInfo`.
-    *   This new command is executed immediately. It creates a new `Person` object with the updated `Info` and uses `model.setPerson(...)` to replace the old person object in the address book.
-    *   This change to the model triggers the undo/redo mechanism via `Model#commitAddressBook()` and updates the UI to reflect the new data.
+    *   The dialog's result converter captures the edited text.
+    *   The `UiManager#savePersonInfo(personIndex, infoText)` method is invoked, which:
+        *   Creates an `Info` object from the text
+        *   Calls the static method `InfoCommand.saveInfo(model, logic, index, newInfo)`
+    *   This static method:
+        *   Validates the index again against the current filtered list
+        *   Creates a new `Person` object with the updated `Info` using `PersonBuilder`
+        *   Uses `model.setPerson(...)` to replace the old person in the address book
+        *   Calls `logic.markAddressBookDirty()` to ensure the session snapshot will be persisted
+        *   Returns a `CommandResult` with success feedback
+    *   The change triggers the model's change listeners, updating the UI.
+    *   The `UiManager` calls `mainWindow.showFeedback()` to display the success message in the result display.
 
 The following sequence diagram illustrates the process of opening the info editor:
-<puml src="diagrams/InfoSequenceDiagram.puml" width="550" />
+<puml src="diagrams/InfoSequenceDiagram.puml" width="574" />
 
 ### \[Proposed\] Undo/redo feature
 
@@ -779,11 +806,25 @@ added.
 * **Mainstream OS**: Windows, Linux, Unix, MacOS
 * **Private contact detail**: A contact detail that is not meant to be shared with others
 
+* **Refactor**: Changing the internal structure of the code (how it's written) to make it clearer, simpler, or easier to maintain — without changing what the application does for users.
+* **Session snapshot**: A saved copy of the app’s current working state used to restore window view and settings after closing and reopening the app (for example: address book contents, and window size/position).
+* **Stop-time persistence**: The process that runs when the application is closing which saves the session snapshot and related data (for example: command history, and window size/position) to disk so the app can restore the same state when reopened.
+* **API**: Short for Application Programming Interface — a set of rules and named operations that lets different parts of the program (or other programs) ask for data or request actions from a component.
+* **GUI (Graphical User Interface)**: The visual parts of the app you interact with — windows, buttons, lists and menus — as opposed to typing commands in a text console.
+* **JavaFX**: A Java toolkit used to build the app's graphical interface (windows, controls, and layouts). The app's UI is implemented using JavaFX.
+* **PlantUML**: A text-based tool that generates diagrams (architecture, sequence, etc.) from simple textual descriptions; used to produce the diagrams in this guide.
+* **JSON**: A lightweight, human-readable text format used to store structured data (for example, the address book and user preferences are saved in JSON files).
+* **ObservableList**: A list type that notifies the user interface when items are added, removed or changed so the display updates automatically (e.g., the person list refreshes when you add a contact).
+* **Undo/redo**: The ability to revert the most recent change (undo) or reapply a reverted change (redo), usually implemented by keeping past copies of the data so you can move backward or forward through them.
+* **CLI (Command-Line Interface)**: An alternative to the GUI where you control the app by typing commands into a console or terminal.
+
 **Assembly-Related**
 
 * **Command Assembly**: The logic subsystem that manages the full process from parsing a user command to constructing the executable command object.
 * **AST**: Abstract syntax tree; this is the tree-like structure generated after parsing a string that conforms to a formal grammar defined in terms of production rules.
 * **Lexing**: The process of converting text into meaningful lexical tokens belong to specific categories. As an analogy, English sentences can be lexed into nouns, verbs, adjectives, etc. The list of lexical tokens used by the command grammar can be found [here](CommandAssembly.md).
+* **Token**: A small, meaningful piece of input produced by the lexer (for example, a single word, a number, or a quoted phrase); tokens are the basic units the parser uses to understand a command.
+* **Parser**: The component that analyses a sequence of tokens and determines their grammatical structure (often producing an AST) so the application can decide what action to perform.
 
 --------------------------------------------------------------------------------------------------------------------
 

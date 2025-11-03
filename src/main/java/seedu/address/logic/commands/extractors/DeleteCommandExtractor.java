@@ -20,7 +20,13 @@ public final class DeleteCommandExtractor {
      * @throws ValidationException When the command parameters fail to validate.
      */
     public static DeleteCommand extract(BareCommand bareCommand) throws ValidationException {
-        Index index = Validation.validateIndex(bareCommand, 0);
+
+        Index index;
+        try {
+            index = Validation.validateIndex(bareCommand, 0);
+        } catch (ValidationException e) {
+            throw new ValidationException(e.getMessage() + "\n" + "Expected an index (must be a positive integer).");
+        }
 
         return new DeleteCommand(index);
     }
