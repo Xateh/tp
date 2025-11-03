@@ -21,8 +21,10 @@ AssetSphere provides:
 
 - Improve operational throughput: CLI-first design enables batch operations and scripted workflows to reduce manual maintenance time.
 - Model real-world relationships: Custom fields and directional relationship links let teams represent roles, accounts, mandates and hierarchical links without schema migrations.
+- Improve discoverability and context: Field-aware keyword search (including custom fields and link names) enables rapid location of contacts and relationships; persistent, freeform notes attached to records preserve meeting details, onboarding context, and compliance annotations for reliable handover and auditability.
 - Support audit and recovery: Command history, session snapshots, and undo/redo provide an auditable trail and enable safe recovery from accidental changes.
 - Maintain local control and reliability: Desktop-first persistence (JSON-based) keeps data on the user's machine, facilitating local backup strategies and operational resilience.
+
 
 <!-- * Table of Contents -->
 <page-nav-print />
