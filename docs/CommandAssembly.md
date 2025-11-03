@@ -103,14 +103,7 @@ This interface declares one `visit` method for each AST node type in the command
 
 **Visitor Methods**
 
-Each method corresponds to one AST node type and follows the naming convention `visit[NodeType]`:
-
-- **visitCommand**: Processes the root command structure (imperative + parameters + options)
-- **visitImperative**: Processes the command verb
-- **visitParameterList** / **visitParameter**: Processes positional arguments
-- **visitOptionList** / **visitOption**: Processes named options
-- **visitOptionName** / **visitOptionValue**: Processes option components
-- **visitText** / **visitWord**: Processes terminal (leaf) nodes containing actual token data
+Each method corresponds to one AST node type and follows the naming convention `visit[NodeType]`.
 
 The complete set of methods ensures visitors can handle every node type in the grammar, providing exhaustive coverage of the AST structure.
 
@@ -263,10 +256,13 @@ try {
 The following regular grammar is recognised by the lexer.
 
 ```
-WORD   ::= [A-z0-9]+
-TEXT   ::= "[^"/:]*"
-SLASH  ::= /
-COLON  ::= :
+WORD            ::= [A-z0-9]+
+TEXT            ::= "[^"\/:]*"
+SLASH           ::= /
+COLON           ::= :
+PLUS            ::= +
+MINUS           ::= -
+TERMINAL        ::= $
 ```
 
 The `TERMINAL` token denotes the end of input.
@@ -276,16 +272,23 @@ The `TERMINAL` token denotes the end of input.
 The following command grammar is recognised by the parser, in EBNF notation.
 
 ```
-command          → imperative parameter_list option_list TERMINAL
-imperative       → word
-parameter_list   → ( parameter )+
-parameter        → text
-option_list      → ( option )+
-option           → SLASH option_name ( COLON option_value )*
-option_name      → word
-option_value     → text
-text             → TEXT | WORD
-word             → WORD
+command                  → imperative parameter_list option_list TERMINAL
+imperative               → word
+parameter_list           → ( parameter )+
+parameter                → normal_parameter
+                         | additive_parameter
+                         | subtractive_parameter
+normal_parameter         → text
+additive_parameter       → PLUS text
+subtractive_parameter    → MINUS text
+option_list              → ( option )+
+option                   → SLASH option_name ( COLON option_value )*
+option_name              → word
+option_value             → text
+text                     → TEXT
+                         | WORD
+word                     → WORD
+
 ```
 
 ### Resolution Architecture
