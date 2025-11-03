@@ -12,13 +12,17 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.commons.core.index.Index;
+import seedu.address.logic.Logic;
+import seedu.address.logic.LogicManager;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
@@ -26,19 +30,44 @@ import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Info;
 import seedu.address.model.person.Person;
+import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonCommandHistoryStorage;
+import seedu.address.storage.JsonSessionStorage;
+import seedu.address.storage.JsonUserPrefsStorage;
+import seedu.address.storage.Storage;
+import seedu.address.storage.StorageManager;
 import seedu.address.testutil.PersonBuilder;
 import seedu.address.ui.UiManager;
 
 public class InfoCommandTest {
 
+    @TempDir
+    public Path temporaryFolder;
+
     private Model model;
+    private Logic logic;
+    private Storage storage;
     private TestUiManager testUiManager;
 
     @BeforeEach
     public void setUp() {
         model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+
+        // Create a proper Storage instance for testing
+        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(getTempFilePath("ab.json"));
+        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(getTempFilePath("prefs.json"));
+        JsonCommandHistoryStorage commandHistoryStorage =
+                new JsonCommandHistoryStorage(getTempFilePath("commandHistory.json"));
+        JsonSessionStorage sessionStorage = new JsonSessionStorage(getTempFilePath("session.json"));
+        storage = new StorageManager(addressBookStorage, userPrefsStorage, commandHistoryStorage, sessionStorage);
+
+        logic = new LogicManager(model, storage);
         testUiManager = new TestUiManager();
         InfoCommand.setUiManager(testUiManager);
+    }
+
+    private Path getTempFilePath(String fileName) {
+        return temporaryFolder.resolve(fileName);
     }
 
     @Test
@@ -132,7 +161,7 @@ public class InfoCommandTest {
                 newInfo);
         expectedModel.setPerson(personToEdit, editedPerson);
 
-        CommandResult result = InfoCommand.saveInfo(model, INDEX_FIRST_PERSON, newInfo);
+        CommandResult result = InfoCommand.saveInfo(model, logic, INDEX_FIRST_PERSON, newInfo);
 
         String expectedMessage = String.format(InfoCommand.MESSAGE_SUCCESS, Messages.format(editedPerson));
         assertEquals(expectedMessage, result.getFeedbackToUser());
@@ -148,7 +177,7 @@ public class InfoCommandTest {
         Info info = new Info("Test info");
         Index invalidIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
 
-        assertThrows(CommandException.class, () -> InfoCommand.saveInfo(model, invalidIndex, info));
+        assertThrows(CommandException.class, () -> InfoCommand.saveInfo(model, logic, invalidIndex, info));
     }
 
     @Test
@@ -156,7 +185,7 @@ public class InfoCommandTest {
         Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Info emptyInfo = new Info("");
 
-        CommandResult result = InfoCommand.saveInfo(model, INDEX_FIRST_PERSON, emptyInfo);
+        CommandResult result = InfoCommand.saveInfo(model, logic, INDEX_FIRST_PERSON, emptyInfo);
 
         Person editedPerson = new Person(
                 personToEdit.getName(),
@@ -180,7 +209,7 @@ public class InfoCommandTest {
         Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Info multilineInfo = new Info("Line 1\nLine 2\nLine 3");
 
-        CommandResult result = InfoCommand.saveInfo(model, INDEX_FIRST_PERSON, multilineInfo);
+        CommandResult result = InfoCommand.saveInfo(model, logic, INDEX_FIRST_PERSON, multilineInfo);
 
         Person editedPerson = new Person(
                 personToEdit.getName(),
@@ -201,7 +230,7 @@ public class InfoCommandTest {
         Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Info specialInfo = new Info("Special chars: !@#$%^&*()_+-={}[]|\\:;\"'<>?,./ \n\t");
 
-        CommandResult result = InfoCommand.saveInfo(model, INDEX_FIRST_PERSON, specialInfo);
+        CommandResult result = InfoCommand.saveInfo(model, logic, INDEX_FIRST_PERSON, specialInfo);
 
         String expectedMessage = String.format(InfoCommand.MESSAGE_SUCCESS,
                 Messages.format(new Person(
@@ -364,7 +393,7 @@ public class InfoCommandTest {
         }
         Info veryLongInfo = new Info(longText.toString());
 
-        CommandResult result = InfoCommand.saveInfo(model, INDEX_FIRST_PERSON, veryLongInfo);
+        CommandResult result = InfoCommand.saveInfo(model, logic, INDEX_FIRST_PERSON, veryLongInfo);
 
         Person editedPerson = new Person(
                 personToEdit.getName(),
@@ -399,11 +428,11 @@ public class InfoCommandTest {
         // First save some info
         Person personToEdit = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Info initialInfo = new Info("Initial info");
-        InfoCommand.saveInfo(model, INDEX_FIRST_PERSON, initialInfo);
+        InfoCommand.saveInfo(model, logic, INDEX_FIRST_PERSON, initialInfo);
 
         // Then replace it with new info
         Info newInfo = new Info("Replaced info");
-        CommandResult result = InfoCommand.saveInfo(model, INDEX_FIRST_PERSON, newInfo);
+        CommandResult result = InfoCommand.saveInfo(model, logic, INDEX_FIRST_PERSON, newInfo);
 
         Person updatedPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         assertEquals(newInfo, updatedPerson.getInfo());
