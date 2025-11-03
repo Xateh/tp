@@ -457,7 +457,7 @@ After recalling a command, press Enter to execute it. This is useful for quickly
 
 _Additional notes:_
 
-* Like the `history` command, only valid commands will be saved and cycled. Invalid commands will ignored.
+* The command recall feature will only cycle saved commands. That is, if the command is invalid and thus not saved in command history, the invalid command will not be recalled.
 
 ### Saving the data
 
@@ -506,7 +506,7 @@ In addition, session snapshots (containing address book contacts, and GUI layout
 [JAR file location]/data/sessions/session-2025-10-18T12-34-56-789-Asia-Singapore.json
 ```
 
-Advanced users may edit these JSON files while the application is not running, but proceed with caution: malformed edits can cause the app to discard data or fail to load. Always make a backup before editing.
+Advanced users may edit these JSON files while the application is not running, but proceed with caution: malformed edits can cause the app to discard data, fail to load, function incorrectly, or lead to unpredictable behaviour. Always make a backup before editing.
 
 ### Finding the command history file
 

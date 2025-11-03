@@ -62,7 +62,7 @@ The *Sequence Diagram* below shows how the components interact with each other f
 Each of the four main components (also shown in the diagram above),
 
 * defines its *API* in an `interface` with the same name as the Component.
-* implements its functionality using a concrete `{Component Name}Manager` class (which follows the corresponding API `interface` mentioned in the previous point.
+* implements its functionality using a concrete `{Component Name}Manager` class (which follows the corresponding API `interface` mentioned in the previous point).
 
 For example, the `Logic` component defines its API in the `Logic.java` interface and implements its functionality using the `LogicManager.java` class which follows the `Logic` interface. Other components interact with a given component through its interface rather than the concrete class (reason: to prevent outside component's being coupled to the implementation of a component), as illustrated in the (partial) class diagram below.
 
@@ -190,7 +190,7 @@ The `Model` component,
 * stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
 * stores the currently 'selected' `Person` objects (e.g., results of a search query) as a separate _filtered_ list which is exposed to outsiders as an unmodifiable `ObservableList<Person>` that can be 'observed' e.g. the UI can be bound to this list so that the UI automatically updates when the data in the list change.
 * stores a `UserPref` object that represents the user’s preferences. This is exposed to the outside as a `ReadOnlyUserPref` objects.
-* does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
+* does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components).
 
 <box type="info" seamless>
 
@@ -210,7 +210,7 @@ The `Model` component,
 The `Storage` component,
 * can save both address book data and user preference data in JSON format, and read them back into corresponding objects.
 * inherits from both `AddressBookStorage`, `UserPrefStorage`, `SessionStorage`, and `CommandHistoryStorage` which means it can be treated as any one of them (if only the functionality of only one is needed).
-* depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
+* depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`).
 
 ### Common classes
 
@@ -303,7 +303,7 @@ To add a new command to the system,
 
 1. **Create the Command class** (e.g., `DeleteCommand extends Command`)
 2. **Implement a CommandExtractor** (e.g., `DeleteCommandExtractor` with static `extract()` method)
-3. **Register in Bindings enum**: Add one line like `DELETE("delete", DeleteCommandExtractor::extract)`
+3. **Register in Bindings enum**: Add one line like `DELETE("delete", DeleteCommandExtractor::extract)`.
 
 The system automatically handles routing and dispatch.
 
@@ -448,10 +448,10 @@ In addition, they:
 
 **User type/role**<br />_As a_ | **Function**<br />_I can_                                                      | **Benefit**<br />_so that_ | Priority
 -|--------------------------------------------------------------------------------| - | -
-Asset manager | find for contacts using keywords based on all fields                           | cast wider searches | Must-have (✓✓)
+Asset manager | find for contacts using keywords based on all fields                           | I can cast wider searches | Must-have (✓✓)
 Asset manager | additively add tags                                                            | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
 Asset manager | remove existing tags                                                           | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
-Asset manager | save data between sessions                                                     | I don’t have to re-enter information after relaunching | Must-have (✓✓)
+Asset manager | save data between sessions                                                     | I do not have to re-enter information after relaunching | Must-have (✓✓)
 Organised asset manager | categorise contacts based on asset classes                                     | I can quickly identify relevant people per portfolio | Must-have (✓✓)
 Detailed asset manager | customise client profiles with custom fields                                   | I can track unique client details/needs | Must-have (✓✓)
 Asset manager | define links between clients and their contacts                                | I can navigate complex relationship networks | Must-have (✓✓)
@@ -460,7 +460,7 @@ Tech-savvy asset manager | save my data in a portable, human-readable format    
 Asset manager | have tiers/priority flags in my client list                                    | I can track who the big players are | Must-have (✓✓)
 Asset manager | have custom notes for each contact                                             | I can attach longer pieces of information to contacts | Must-have (✓✓)
 Tech-savvy asset manager | make custom aliases for commands                                               | I can use shortcuts that match my preferences | Nice-to-have (✓)
-Clumsy asset manager | have my commands be inferred                                                   | I don’t have to retype or I can use shorter variants | Nice-to-have (✓)
+Clumsy asset manager | have my commands be inferred                                                   | I do not have to retype or I can use shorter variants | Nice-to-have (✓)
 Considerate asset manager | see the time zone for a contact                                                | I can schedule sensibly | Nice-to-have (✓)
 Asset manager | delete contacts                                                                | the app remains clean and easy to find things | Nice-to-have (✓)
 Asset manager | have my address book flag important dates (e.g., birthdays)                    | I can remember important dates and maintain relationships | Nice-to-have (✓)
@@ -863,7 +863,7 @@ Major efforts include:
 
 **Custom Field command for contacts**
 
-This feature allows users to establish their own custom fields for each contact on top of the already built-in custom fields (like name, email, address etc.). This was particularly tricky, especially in the later stages, when we realised that there were more considerations that had to be taken into account, such as banning particular keywords as custom fields (like ‘to’, ‘from’, and already built in field names) and how the user is able to edit and remove these custom fields. On top of this, differentiating between removals from empty custom field values also posed as a hindrance.
+This feature allows users to establish their own custom fields for each contact on top of the already built-in custom fields (like name, email, address etc.). This was particularly tricky, especially in the later stages, when it was discovered that there were more considerations that had to be taken into account, such as banning particular keywords as custom fields (like ‘to’, ‘from’, and already built in field names) and how the user is able to edit and remove these custom fields. On top of this, differentiating between removals from empty custom field values also posed as a hindrance.
 
 **Link command between contacts**
 
@@ -871,7 +871,4 @@ This feature allows users to establish a named link between contacts in the addr
 
 **Comprehensive search while allowing specified search filters**
 
-The find feature that was given was initially a very simple find that only searched on contact’s name. Given that our app was meant for wealth managers who we recognise require searching on specified filters, we wanted to improve on find by implementing a customised enhanced search system that allows users to specify specific fields to search on. Even with simple built in fields, it was a pretty large refactoring, but the hard part came when we had to implement searching on custom fields as well as the links with direction.
-
-
-
+The find feature that was given was initially a very simple find that only searched on contact’s name. Given that the app was meant for wealth managers who we recognise require searching on specified filters, we wanted to improve on find by implementing a customised enhanced search system that allows users to specify specific fields to search on. Even with simple built in fields, it was a pretty large refactoring, but the hard part came during implementing search on custom fields as well as the links with direction.
