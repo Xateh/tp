@@ -87,6 +87,16 @@ The `UI` component,
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component, as it displays `Person` object residing in the `Model`.
 
+### Command recall (Up/Down arrow keys)
+
+The command box supports keyboard-based command recall: when the command box is focused the user can press the Up and Down arrow keys to navigate previously entered commands. This behaviour is implemented in `CommandBox` (see `src/main/java/seedu/address/ui/CommandBox.java`) which registers a key event filter for `KeyCode.UP` and `KeyCode.DOWN` and uses `HistoryNavigator` (`src/main/java/seedu/address/ui/HistoryNavigator.java`) to walk the history entries supplied by a `HistorySupplier` (typically `logic::getCommandHistorySnapshot`).
+
+Implementation notes for developers:
+
+- `HistoryNavigator` keeps a pointer that is reset to the end of the entries snapshot; `previous()` returns the most recent entry and moves the pointer backwards; `next()` moves the pointer forward and returns the newer entry or empty if the navigator reaches the end (the command box should be cleared in that case).
+- Tests covering this behaviour can be found in `src/test/java/seedu/address/ui/CommandBoxTest.java`.
+
+
 ### Logic component
 
 Here's a (partial) class diagram of the `Logic` component:

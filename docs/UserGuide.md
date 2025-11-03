@@ -413,6 +413,13 @@ _Additional notes:_
 
 * Any extra words typed after `exit` are ignored. For instance, `exit now` will still close the application.
 
+### Recalling previous commands (Up / Down arrow keys)
+
+While the command box is focused you can press the Up and Down arrow keys to cycle through previously entered commands.
+Press Up to recall the most recent command (and keep pressing Up to move to older commands). Press Down to move forward in the history; pressing Down when there is no newer command will clear the command box.
+
+After recalling a command, press Enter to execute it. This is useful for quickly re-running or editing recent commands without retyping them.
+
 ### Saving the data
 
 AssetSphere data are saved in the hard disk automatically after any command that changes the data. There is no need to save manually.
