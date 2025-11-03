@@ -370,7 +370,7 @@ Note that if specifying to search on built-in fields (name, address, phone, emai
 * `/<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
 * `/from` (word): search all links where the person matched is the linker.
 * `/to` (word): search all links where the person matched is the linkee (one being linked to).
-* `/<custom-field>` (word): specified to search on persons' custom added fields. (does not match if field provided is not existent)
+* `/<custom-field>` (word): specified to search on persons' custom added fields. (case-sensitive) (does not match if field provided is not existent)
 
 Examples: (no specified fields to search on, default all built in)
 * `find 99999999` returns all persons whose built-in fields contain `99999999`.

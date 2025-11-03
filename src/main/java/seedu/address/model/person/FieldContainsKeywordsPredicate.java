@@ -148,7 +148,7 @@ public class FieldContainsKeywordsPredicate implements Predicate<Person> {
                     }
 
                     // checks if the current key matches customKeys passed in to search on
-                    boolean selected = customKeys.contains(key.toLowerCase());
+                    boolean selected = customKeys.contains(key);
                     if (!selected) {
                         continue;
                     }
