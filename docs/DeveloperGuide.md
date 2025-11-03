@@ -16,6 +16,10 @@
 AssetSphere builds upon the AddressBook-Level3 project maintained by the CS2103T teaching team and community contributors.
 We also acknowledge the JavaFX and PlantUML projects for providing the UI framework and diagram tooling used throughout this guide.
 
+AI was used for the following purposes:
+- Generating test cases
+- Debugging errors / issues
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Setting up, getting started**
@@ -82,6 +86,16 @@ The `UI` component,
 * listens for changes to `Model` data so that the UI can be updated with the modified data.
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component, as it displays `Person` object residing in the `Model`.
+
+### Command recall (Up/Down arrow keys)
+
+The command box supports keyboard-based command recall: when the command box is focused the user can press the Up and Down arrow keys to navigate previously entered commands. This behaviour is implemented in `CommandBox` (see `src/main/java/seedu/address/ui/CommandBox.java`) which registers a key event filter for `KeyCode.UP` and `KeyCode.DOWN` and uses `HistoryNavigator` (`src/main/java/seedu/address/ui/HistoryNavigator.java`) to walk the history entries supplied by a `HistorySupplier` (typically `logic::getCommandHistorySnapshot`).
+
+Implementation notes for developers:
+
+- `HistoryNavigator` keeps a pointer that is reset to the end of the entries snapshot; `previous()` returns the most recent entry and moves the pointer backwards; `next()` moves the pointer forward and returns the newer entry or empty if the navigator reaches the end (the command box should be cleared in that case).
+- Tests covering this behaviour can be found in `src/test/java/seedu/address/ui/CommandBoxTest.java`.
+
 
 ### Logic component
 
@@ -251,8 +265,8 @@ Options are optional, named inputs that modify command behavior.
 - **Default Behaviour:** Because all options are by definition optional, your command implementation **must provide a default behaviour** for every option it supports.
 - **Minimum Multiplicity:** Even though all options are optional as described above, it is valid to require a **minimum multiplicity**; that is, require at least a certain number of options to be supplied for the command to work.
 - **Formats:** The parser supports two formats and delivers them as such:
-    1. **Name-only (Flag):** `/force`. Your code should check for the _presence_ of the "force" key.
-    2. **Name-Value Pair:** `/priority:high`. Your code should retrieve the "priority" key and its associated _value_ ("high").
+    1. **Name-only (Flag):** e.g. `/force`. Your code should check for the _presence_ of the "force" key.
+    2. **Name-Value Pair:** e.g. `/priority:high`. Your code should retrieve the "priority" key and its associated _value_ ("high").
 
 **Error Handling**
 
@@ -371,21 +385,38 @@ The `info` command provides a way to add or edit a multi-line, free-text note fo
 
 The mechanism is split into two distinct phases: opening the editor and saving the changes.
 
-1.  **Opening the Editor**:
+1.  **Opening the Editor (Command Execution Phase)**:
     *   The user executes `info <index>`, for example, `info 1`.
-    *   The `LogicManager` parses this and creates an `InfoCommand` with a `targetIndex`.
-    *   When `InfoCommand#execute(model)` is called, it does **not** modify the model. Instead, it calls `UiManager#showInfoEditor(person, index)`.
-    *   The `UiManager` is responsible for creating and displaying a separate dialog window containing a text area, pre-filled with the person's existing info.
+    *   The `LogicManager` parses this via `Decoder` and creates an `InfoCommand` with a `targetIndex`.
+    *   When `InfoCommand#execute(model)` is called, it validates the index and retrieves the person, but does **not** immediately modify the model. Instead, it:
+        *   Validates the index against the filtered person list
+        *   Retrieves the person at that index
+        *   Calls `UiManager#showInfoEditor(person, index)` to display the editor
+        *   Returns a `CommandResult` indicating the editor was opened
+    *   The `UiManager` wraps the dialog creation in `Platform.runLater()` to ensure it executes on the JavaFX Application Thread.
+    *   A JavaFX `Dialog` is created containing:
+        *   A `TextArea` pre-filled with the person's existing info
+        *   A `VBox` container for layout
+        *   OK and CANCEL buttons
+        *   A result converter that captures the edited text when OK is clicked
 
-2.  **Saving the Changes**:
+2.  **Saving the Changes (UI Callback Phase)**:
     *   The user edits the text in the dialog and clicks the "OK" button.
-    *   The `UiManager` captures the new text and calls the static method `InfoCommand.saveInfo(model, index, newInfo)`.
-    *   This static method creates a *new* `InfoCommand` instance, this time containing both the `targetIndex` and the `updatedInfo`.
-    *   This new command is executed immediately. It creates a new `Person` object with the updated `Info` and uses `model.setPerson(...)` to replace the old person object in the address book.
-    *   This change to the model triggers the undo/redo mechanism via `Model#commitAddressBook()` and updates the UI to reflect the new data.
+    *   The dialog's result converter captures the edited text.
+    *   The `UiManager#savePersonInfo(personIndex, infoText)` method is invoked, which:
+        *   Creates an `Info` object from the text
+        *   Calls the static method `InfoCommand.saveInfo(model, logic, index, newInfo)`
+    *   This static method:
+        *   Validates the index again against the current filtered list
+        *   Creates a new `Person` object with the updated `Info` using `PersonBuilder`
+        *   Uses `model.setPerson(...)` to replace the old person in the address book
+        *   Calls `logic.markAddressBookDirty()` to ensure the session snapshot will be persisted
+        *   Returns a `CommandResult` with success feedback
+    *   The change triggers the model's change listeners, updating the UI.
+    *   The `UiManager` calls `mainWindow.showFeedback()` to display the success message in the result display.
 
 The following sequence diagram illustrates the process of opening the info editor:
-<puml src="diagrams/InfoSequenceDiagram.puml" width="550" />
+<puml src="diagrams/InfoSequenceDiagram.puml" width="574" />
 
 ### \[Proposed\] Undo/redo feature
 
@@ -500,7 +531,7 @@ _{Explain here how the data archiving feature will be implemented}_
 
 ### Product Scope
 
-**Target User Profile**: This is primarily for **technologically-inclined asset managers for high-net-worth individuals (HWNIs)** that require managing **complex** relationships and hierarchies between large groups of people.
+**Target User Profile**: This is primarily for **technologically-inclined asset managers for high-net-worth individuals (HNWIs)** that require managing **complex** relationships and hierarchies between large groups of people.
 
 In addition, they:
 - prefer desktop apps over other types
@@ -512,42 +543,42 @@ In addition, they:
 
 ### User Stories
 
-**User type/role**<br />_As a_ | **Function**<br />_I can_                                               | **Benefit**<br />_so that_ | Priority
--|-------------------------------------------------------------------------| - | -
-Asset manager | find for contacts using keywords based on all fields | cast wider searches | Must-have (✓✓)
-Asset manager | additively add tags | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
-Asset manager | remove existing tags | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
-Asset manager | save data between sessions                                              | I don’t have to re-enter information after relaunching | Must-have (✓✓)
-Organised asset manager | categorise contacts based on asset classes                              | I can quickly identify relevant people per portfolio | Must-have (✓✓)
-Detailed asset manager | customise client profiles with custom fields                            | I can track unique client details/needs | Must-have (✓✓)
-Asset manager | define links between clients and their contacts                         | I can navigate complex relationship networks | Must-have (✓✓)
-Asset manager | view all clients linked to a specific asset class                       | I can understand dependencies within each asset | Must-have (✓✓)
-Tech-savvy asset manager | save my data in a portable, human-readable format                       | I can edit/process data in other apps and move between devices | Must-have (✓✓)
-Asset manager | have tiers/priority flags in my client list                             | I can track who the big players are | Must-have (✓✓)
-Asset manager | have custom notes for each contact                                      | I can attach longer pieces of information to contacts | Must-have (✓✓)
-Tech-savvy asset manager | make custom aliases for commands                                        | I can use shortcuts that match my preferences | Nice-to-have (✓)
-Clumsy asset manager | have my commands be inferred (string matching, autocorrect, fuzzy find) | I don’t have to retype or I can use shorter variants | Nice-to-have (✓)
-Considerate asset manager | see the time zone for a contact                                         | I can schedule sensibly | Nice-to-have (✓)
-Asset manager | delete contacts                                                         | the app remains clean and easy to find things | Nice-to-have (✓)
-Asset manager | have my address book flag important dates (e.g., birthdays)             | I can remember important dates and maintain relationships | Nice-to-have (✓)
-Clumsy asset manager | merge/handle duplicate records                                          | the network remains clean and accurate | Nice-to-have (✓)
-Asset manager | view my command history                                                 | I can redo regularly used commands | Nice-to-have (✓)
-Tech-savvy asset manager | save custom workflows (sequences of commands)                           | I can quickly execute common workflows | Nice-to-have (✓)
-Tech-savvy asset manager | have my commands be tab-completable                                     | I can quickly fill in command information | Nice-to-have (✓)
-Asset manager | have syntax highlighting and diagnostics for commands                   | I can more easily spot mistakes as I type | Nice-to-have (✓)
-Asset manager | see detailed, decorated error messages                                  | I can quickly understand and fix mistyped commands | Nice-to-have (✓)
-Asset manager | have command syntax hints show up as I type                             | I can see what I need to fill in | Nice-to-have (✓)
-Busy asset manager | segment users via predefined metrics (e.g., geography, sector)          | I can find useful contacts faster for different scenarios | Nice-to-have (✓)
-Tech-savvy asset manager | use shell-like expansion for commands                                   | I can batch-run commands | Nice-to-have (✓)
-Tech-savvy asset manager | use command pipes (\|) to chain commands                                | I can create complex workflows | Nice-to-have (✓)
-Asset manager | recursively delete contacts                                             | related links/notes are cleaned up safely | Nice-to-have (✓)
-Asset manager | set (scoped) default values for common command flags/inputs             | I can type shorter commands by omitting defaults | Nice-to-have (✓)
-Asset manager | have the system flag potential conflicts                                | I can proactively see clashes in notes/tags/tiers | Rejected (✗)
-Asset manager | navigate past commands quickly                                          | I can scroll through previous commands | Rejected (✗)
-Asset manager | hide or expire old contacts automatically                               | I can keep my list tidy without manual effort | Rejected (✗)
-Tech-savvy asset manager | use a custom search syntax                                              | I can craft advanced queries beyond basic filters | Rejected (✗)
-Asset manager | store key files (e.g., NDAs, letters) with contacts                     | I can keep documents alongside records | Rejected (✗)
-Asset manager | assign follow-ups to team members                                       | I can distribute work across the team from the app | Rejected (✗)
+**User type/role**<br />_As a_ | **Function**<br />_I can_                                                      | **Benefit**<br />_so that_ | Priority
+-|--------------------------------------------------------------------------------| - | -
+Asset manager | find for contacts using keywords based on all fields                           | cast wider searches | Must-have (✓✓)
+Asset manager | additively add tags                                                            | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
+Asset manager | remove existing tags                                                           | I do not have to waste time retyping a full list of tags whenever I wish to update a user's tags | Must-have (✓✓)
+Asset manager | save data between sessions                                                     | I don’t have to re-enter information after relaunching | Must-have (✓✓)
+Organised asset manager | categorise contacts based on asset classes                                     | I can quickly identify relevant people per portfolio | Must-have (✓✓)
+Detailed asset manager | customise client profiles with custom fields                                   | I can track unique client details/needs | Must-have (✓✓)
+Asset manager | define links between clients and their contacts                                | I can navigate complex relationship networks | Must-have (✓✓)
+Asset manager | view all clients linked to a specific asset class                              | I can understand dependencies within each asset | Must-have (✓✓)
+Tech-savvy asset manager | save my data in a portable, human-readable format                              | I can edit/process data in other apps and move between devices | Must-have (✓✓)
+Asset manager | have tiers/priority flags in my client list                                    | I can track who the big players are | Must-have (✓✓)
+Asset manager | have custom notes for each contact                                             | I can attach longer pieces of information to contacts | Must-have (✓✓)
+Tech-savvy asset manager | make custom aliases for commands                                               | I can use shortcuts that match my preferences | Nice-to-have (✓)
+Clumsy asset manager | have my commands be inferred                                                   | I don’t have to retype or I can use shorter variants | Nice-to-have (✓)
+Considerate asset manager | see the time zone for a contact                                                | I can schedule sensibly | Nice-to-have (✓)
+Asset manager | delete contacts                                                                | the app remains clean and easy to find things | Nice-to-have (✓)
+Asset manager | have my address book flag important dates (e.g., birthdays)                    | I can remember important dates and maintain relationships | Nice-to-have (✓)
+Clumsy asset manager | merge/handle duplicate records                                                 | the network remains clean and accurate | Nice-to-have (✓)
+Asset manager | view my command history                                                        | I can redo regularly used commands | Nice-to-have (✓)
+Tech-savvy asset manager | save custom workflows (sequences of commands)                                  | I can quickly execute common workflows | Nice-to-have (✓)
+Tech-savvy asset manager | have my commands be tab-completable                                            | I can quickly fill in command information | Nice-to-have (✓)
+Asset manager | have syntax highlighting and diagnostics for commands                          | I can more easily spot mistakes as I type | Nice-to-have (✓)
+Asset manager | see detailed, decorated error messages                                         | I can quickly understand and fix mistyped commands | Nice-to-have (✓)
+Asset manager | have command syntax hints show up as I type                                    | I can see what I need to fill in | Nice-to-have (✓)
+Busy asset manager | segment users via predefined metrics (e.g., geography, sector)                 | I can find useful contacts faster for different scenarios | Nice-to-have (✓)
+Tech-savvy asset manager | use shell-like expansion for commands                                          | I can batch-run commands | Nice-to-have (✓)
+Tech-savvy asset manager | chain commands by passing outputs from previous commands as inputs to the next | I can create complex workflows | Nice-to-have (✓)
+Asset manager | recursively delete contacts                                                    | related links/notes are cleaned up safely | Nice-to-have (✓)
+Asset manager | set (scoped) default values for common command flags/inputs                    | I can type shorter commands by omitting defaults | Nice-to-have (✓)
+Asset manager | have the system flag potential conflicts                                       | I can proactively see clashes in notes/tags/tiers | Rejected (✗)
+Asset manager | navigate past commands quickly                                                 | I can scroll through previous commands | Rejected (✗)
+Asset manager | hide or expire old contacts automatically                                      | I can keep my list tidy without manual effort | Rejected (✗)
+Tech-savvy asset manager | use a custom search syntax                                                     | I can craft advanced queries beyond basic filters | Rejected (✗)
+Asset manager | store key files (e.g., NDAs, letters) with contacts                            | I can keep documents alongside records | Rejected (✗)
+Asset manager | assign follow-ups to team members                                              | I can distribute work across the team from the app | Rejected (✗)
 
 
 ### Use Cases
@@ -775,6 +806,26 @@ added.
 * **Mainstream OS**: Windows, Linux, Unix, MacOS
 * **Private contact detail**: A contact detail that is not meant to be shared with others
 
+* **Refactor**: Changing the internal structure of the code (how it's written) to make it clearer, simpler, or easier to maintain — without changing what the application does for users.
+* **Session snapshot**: A saved copy of the app’s current working state used to restore window view and settings after closing and reopening the app (for example: address book contents, and window size/position).
+* **Stop-time persistence**: The process that runs when the application is closing which saves the session snapshot and related data (for example: command history, and window size/position) to disk so the app can restore the same state when reopened.
+* **API**: Short for Application Programming Interface — a set of rules and named operations that lets different parts of the program (or other programs) ask for data or request actions from a component.
+* **GUI (Graphical User Interface)**: The visual parts of the app you interact with — windows, buttons, lists and menus — as opposed to typing commands in a text console.
+* **JavaFX**: A Java toolkit used to build the app's graphical interface (windows, controls, and layouts). The app's UI is implemented using JavaFX.
+* **PlantUML**: A text-based tool that generates diagrams (architecture, sequence, etc.) from simple textual descriptions; used to produce the diagrams in this guide.
+* **JSON**: A lightweight, human-readable text format used to store structured data (for example, the address book and user preferences are saved in JSON files).
+* **ObservableList**: A list type that notifies the user interface when items are added, removed or changed so the display updates automatically (e.g., the person list refreshes when you add a contact).
+* **Undo/redo**: The ability to revert the most recent change (undo) or reapply a reverted change (redo), usually implemented by keeping past copies of the data so you can move backward or forward through them.
+* **CLI (Command-Line Interface)**: An alternative to the GUI where you control the app by typing commands into a console or terminal.
+
+**Assembly-Related**
+
+* **Command Assembly**: The logic subsystem that manages the full process from parsing a user command to constructing the executable command object.
+* **AST**: Abstract syntax tree; this is the tree-like structure generated after parsing a string that conforms to a formal grammar defined in terms of production rules.
+* **Lexing**: The process of converting text into meaningful lexical tokens belong to specific categories. As an analogy, English sentences can be lexed into nouns, verbs, adjectives, etc. The list of lexical tokens used by the command grammar can be found [here](CommandAssembly.md).
+* **Token**: A small, meaningful piece of input produced by the lexer (for example, a single word, a number, or a quoted phrase); tokens are the basic units the parser uses to understand a command.
+* **Parser**: The component that analyses a sequence of tokens and determines their grammatical structure (often producing an AST) so the application can decide what action to perform.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Appendix: Instructions for manual testing**
@@ -792,15 +843,16 @@ testers are expected to do more *exploratory* testing.
 
 1. Initial launch
 
-   1. Download the jar file and copy into an empty folder
+   1. Download the jar file `assetsphere.jar` and copy into an empty folder `./dir/`.
 
-   1. Double-click the jar file Expected: Shows the GUI with a set of sample contacts. The window size may not be optimum.
+   1. Launch the jar file with `java -jar ./dir/assetsphere.jar`.<br>
+        Expected: Shows the GUI with a set of sample contacts. The window size may not be optimum.
 
 1. Saving window preferences
 
    1. Resize the window to an optimum size. Move the window to a different location. Close the window.
 
-   1. Re-launch the app by double-clicking the jar file.<br>
+   1. Re-launch the app with `java -jar ./dir/assetsphere.jar`.<br>
        Expected: The most recent window size and location is retained.
 
 1. _{ more test cases …​ }_
