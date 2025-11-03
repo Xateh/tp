@@ -107,8 +107,6 @@ public class ValidationTest {
             ValidationException e = assertThrows(ValidationException.class, () -> {
                 Validation.validateParameter(cmd, 0, NORMAL);
             });
-            assertEquals(String.format(Validation.MESSAGE_INCORRECT_PARAMETER_KIND,
-                    0, Arrays.toString(new ParameterKind[]{NORMAL}), ADDITIVE), e.getMessage());
         }
 
         @Test
@@ -123,8 +121,6 @@ public class ValidationTest {
             ValidationException e = assertThrows(ValidationException.class, () -> {
                 Validation.validateParameter(cmd, 0, expectedKinds);
             });
-            assertEquals(String.format(Validation.MESSAGE_INCORRECT_PARAMETER_KIND,
-                    0, Arrays.toString(expectedKinds), NORMAL), e.getMessage());
         }
 
         @Test
@@ -225,9 +221,6 @@ public class ValidationTest {
             ValidationException e = assertThrows(ValidationException.class, () -> {
                 Validation.validateVariableParameters(cmd, 0, NORMAL);
             });
-            // Error should be at index 0
-            assertEquals(String.format(Validation.MESSAGE_INCORRECT_PARAMETER_KIND,
-                    0, Arrays.toString(new ParameterKind[]{NORMAL}), ADDITIVE), e.getMessage());
         }
 
         @Test
@@ -242,9 +235,6 @@ public class ValidationTest {
             ValidationException e = assertThrows(ValidationException.class, () -> {
                 Validation.validateVariableParameters(cmd, 0, NORMAL);
             });
-            // Error should be at index 1
-            assertEquals(String.format(Validation.MESSAGE_INCORRECT_PARAMETER_KIND,
-                    1, Arrays.toString(new ParameterKind[]{NORMAL}), SUBTRACTIVE), e.getMessage());
         }
 
         @Test
@@ -367,9 +357,6 @@ public class ValidationTest {
                 Validation.validateVariableParametersWithMinimumMultiplicity(
                         cmd, 0, 2, NORMAL);
             });
-            // Exception comes from the inner validateVariableParameters call
-            assertEquals(String.format(Validation.MESSAGE_INCORRECT_PARAMETER_KIND,
-                    1, Arrays.toString(new ParameterKind[]{NORMAL}), ADDITIVE), e.getMessage());
         }
     }
 

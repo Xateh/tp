@@ -90,6 +90,19 @@ class FieldCommandExtractorTest {
     }
 
     @Test
+    void extract_disallowedLinkReservedKeys_throwsValidationException() throws Exception {
+        BareCommand toBare = BareCommand.parse("field 1 /to:value");
+        ValidationException toEx = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(toBare));
+        assertEquals(String.format(FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME, "to"), toEx.getMessage());
+
+        BareCommand fromBare = BareCommand.parse("field 1 /from:value");
+        ValidationException fromEx = assertThrows(ValidationException.class, () ->
+                FieldCommandExtractor.extract(fromBare));
+        assertEquals(String.format(FieldCommand.MESSAGE_DISALLOWED_FIELD_NAME, "from"), fromEx.getMessage());
+    }
+
+    @Test
     void extract_findKey_success() throws Exception {
         BareCommand bare = BareCommand.parse("field 1 /Find:value");
 
