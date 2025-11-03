@@ -121,7 +121,7 @@ By default:
 
 <box type="important" seamless header="Built-in and Custom Fields">
 
-The following are **built-in fields**. There are additional restrictions on each of them:
+The following are **built-in simple fields**. There are additional restrictions on each of them:
 - `name`s must only contain letters, numbers, or spaces, and it should not be blank
 - `phone`s must only contain numbers, and it should be at least 3 digits long
 - `address`s must not be blank
