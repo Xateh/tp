@@ -8,22 +8,13 @@
 
 AssetSphere is a desktop contact management application purpose-built for professional asset managers and wealth management teams. It combines a command-line, scriptable interface for high-throughput operations with a graphical UI for focused review and editing. The application supports modeling of complex client hierarchies and directional relationships, enabling teams to maintain structured, auditable records for high-net-worth individuals (HNWIs), counterparties, and institutional stakeholders.
 
-## Target user profile
+AssetSphere is designed specifically for you if you are an **asset manager of high-net-worth individuals** needing to:
+* cater to clients with numerous connections and contacts,
+* manage contact information in whatever format works best: quick notes, tags, labelled details, or links between people,
+* navigate complex relationships between all of these contacts, and
+* do all this with minimal effort.
 
-AssetSphere is intended for:
-
-- Asset managers and portfolio managers responsible for client relationship management, reporting, and operational workflows that require structured metadata and relationship modeling.
-- Client onboarding, operations, and compliance teams that require traceable change history, reproducible session snapshots, and the ability to audit and revert modifications.
-
-## Value proposition
-
-AssetSphere provides:
-
-- Improve operational throughput: CLI-first design enables batch operations and scripted workflows to reduce manual maintenance time.
-- Model real-world relationships: Custom fields and directional relationship links let teams represent roles, accounts, mandates and hierarchical links without schema migrations.
-- Improve discoverability and context: Field-aware keyword search (including custom fields and link names) enables rapid location of contacts and relationships; persistent, freeform notes attached to records preserve meeting details, onboarding context, and compliance annotations for reliable handover and auditability.
-- Support audit and recovery: Command history, session snapshots, and undo/redo provide an auditable trail and enable safe recovery from accidental changes.
-- Maintain local control and reliability: Desktop-first persistence (JSON-based) keeps data on the user's machine, facilitating local backup strategies and operational resilience.
+AssetSphere is also designed with keyboard-first control, emphasising the keyboard over the mouse, offering greater speed, precision and control. The entire application is controlled with a command-line-like interface with a syntax designed to minimise excessive typing and maximise flexibility. Within a short amount of time, you too can learn how to access all the information you need with just a few keystrokes.
 
 
 <!-- * Table of Contents -->
