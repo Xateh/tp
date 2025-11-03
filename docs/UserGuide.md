@@ -311,7 +311,7 @@ Format: `find <keyword>+ [/<field>]*`
 
 **Parameters**
 
-* `<keyword>` (string): keyword to search on. Only fields containing the full word (case insensitive) will be matched. Multi worded strings for keywords like `find "alex yeoh"` is not allowed, unquote them as such, `find alex yeoh`.
+* `<keyword>` (string): keyword to search on. Only fields containing the full word (case insensitive) will be matched. Multi worded strings for keywords like `"alex yeoh"` is not allowed, unquote them as such, `alex yeoh`.
 
 **Options**
 
@@ -334,10 +334,10 @@ You can limit the search to specific fields by adding options after your keyword
 Examples:
 * `find John /name` returns persons whose name contains `john`.
 * `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
-* `find 99999999 /phone` returns all persons whose phone number is `99999999`.
+* `find 99999999 /phone` returns all persons whose phone number contains the word `99999999`.
 * `find test /name /email` returns all persons whose name or email contains the word `test`.
-* `find lawyer /from` returns all persons who are the linkers to other persons with linkname "lawyer".
-* `find lawyer /to` returns all persons who are the linkees to other persons with linkname "lawyer".
+* `find lawyer /from` returns all persons who are the linkers to other persons with linkname containing the word `lawyer`.
+* `find lawyer /to` returns all persons who are the linkees to other persons with linkname containing the word `lawyer`.
 
 ### Creating links between persons: `link`
 
@@ -349,7 +349,7 @@ Format: `link <index-from> <link-name> <index-to>`
 * Both persons will display the link in their contact cards with the specified directions.
 * Self-links (e.g. linking a person to themselves) are not allowed.
 * If the same link already exists, the command will have no effect.
-* Editing/deleting a person with a link to someone will make the necessary changes.
+* Editing/deleting a person with a link to someone will make the necessary changes in the addressbook.
 
 **Parameters**
 
