@@ -779,6 +779,9 @@ added.
 * **Mainstream OS**: Windows, Linux, Unix, MacOS
 * **Private contact detail**: A contact detail that is not meant to be shared with others
 
+* **Refactor**: Changing the internal structure of the code (how it's written) to make it clearer, simpler, or easier to maintain — without changing what the application does for users.
+* **Session snapshot**: A saved copy of the app’s current working state used to restore window view and settings after closing and reopening the app (for example: address book contents, and window size/position).
+
 **Assembly-Related**
 
 * **Command Assembly**: The logic subsystem that manages the full process from parsing a user command to constructing the executable command object.
