@@ -208,7 +208,7 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
-* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `list 123` are treated the same as `list` and open the help window without error.
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `list 123` are treated the same as `list` and still lists contacts without error.
 
 ### Viewing command history : `history`
 
@@ -229,7 +229,7 @@ Examples:
 
 _Additional notes:_
 
-* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `history 123` are treated the same as `history` and open the help window without error.
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `history 123` are treated the same as `history` and still show history without error.
 
 ### Editing a person : `edit`
 
