@@ -8,22 +8,13 @@
 
 AssetSphere is a desktop contact management application purpose-built for professional asset managers and wealth management teams. It combines a command-line, scriptable interface for high-throughput operations with a graphical UI for focused review and editing. The application supports modeling of complex client hierarchies and directional relationships, enabling teams to maintain structured, auditable records for high-net-worth individuals (HNWIs), counterparties, and institutional stakeholders.
 
-## Target user profile
+AssetSphere is designed specifically for you if you are an **asset manager of high-net-worth individuals** needing to:
+* cater to clients with numerous connections and contacts,
+* manage contact information in whatever format works best: quick notes, tags, labelled details, or links between people,
+* navigate complex relationships between all of these contacts, and
+* do all this with minimal effort.
 
-AssetSphere is intended for:
-
-- Asset managers and portfolio managers responsible for client relationship management, reporting, and operational workflows that require structured metadata and relationship modeling.
-- Client onboarding, operations, and compliance teams that require traceable change history, reproducible session snapshots, and the ability to audit and revert modifications.
-
-## Value proposition
-
-AssetSphere provides:
-
-- Improve operational throughput: CLI-first design enables batch operations and scripted workflows to reduce manual maintenance time.
-- Model real-world relationships: Custom fields and directional relationship links let teams represent roles, accounts, mandates and hierarchical links without schema migrations.
-- Improve discoverability and context: Field-aware keyword search (including custom fields and link names) enables rapid location of contacts and relationships; persistent, freeform notes attached to records preserve meeting details, onboarding context, and compliance annotations for reliable handover and auditability.
-- Support audit and recovery: Command history, session snapshots, and undo/redo provide an auditable trail and enable safe recovery from accidental changes.
-- Maintain local control and reliability: Desktop-first persistence (JSON-based) keeps data on the user's machine, facilitating local backup strategies and operational resilience.
+AssetSphere is also designed with keyboard-first control, emphasising the keyboard over the mouse, offering greater speed, precision and control. The entire application is controlled with a command-line-like interface with a syntax designed to minimise excessive typing and maximise flexibility. Within a short amount of time, you too can learn how to access all the information you need with just a few keystrokes.
 
 
 <!-- * Table of Contents -->
@@ -208,7 +199,9 @@ Shows a list of all persons in the address book.
 
 Format: `list`
 
-* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `list 123` are treated the same as `list` and still lists contacts without error.
+_Additional notes:_
+
+* Although the documented format shows no parameters, the parser accepts any additional text after the command word. Inputs such as `list 123` are treated the same as `list` and open the help window without error.
 
 ### Viewing command history : `history`
 
@@ -216,7 +209,7 @@ Displays the list of commands previously entered.
 
 Format: `history`
 
-Examples:
+**Examples**
 * `history` — displays a numbered list of past commands in the format `N. COMMAND_TEXT` (oldest first).
 
   Example output:
@@ -311,7 +304,8 @@ Format: `info <index>`
 
 * `<index>` (<tooltip content="A positive number (like `1`, `2`, `3`) corresponding to the 1-indexed index of a person in the current filtered list displayed.">index</tooltip>): index of person to modify
 
-Examples:
+**Examples**
+
 * `list` followed by `info 2` will bring up an editable text box for the 2nd person in the address book.
 
 ### Setting and removing a custom field on a person : `field`
@@ -329,7 +323,6 @@ Format: `field <index> [/<key>[:<value>]?]+`
 * #r#At least one optional field must be provided.##
 * `<key>` (word): name of custom field (strictly alphanumeric)
 * `<value>` (string): value of custom field
-  * Each `key` accepts exactly one associated `value` in a command. A command like `field 1 /brand:nike:adidas` will be **rejected**.
   * Surrounding whitespace in both `key` and `value` is trimmed before applying the change.
   * Custom field `key` is **case-sensitive**; `key` is not equivalent to `Key`.
   * Providing a `value` **adds or updates** the custom field identified by `key`. New keys are created automatically; existing keys are overwritten.
@@ -340,7 +333,8 @@ Format: `field <index> [/<key>[:<value>]?]+`
 
 You may mix additions/updates and removals in a single command by providing multiple key-value options.
 
-Examples:
+**Examples**
+
 * `field 5 /linkedInUsername:alextan /rate:120`: Sets two fields on the 5th person in one command.
 * `field 3 /notes:"Met at FinTech conf 2025"`: Adds a note with spaces to the 3rd person.
 * `field 4 /nickname`: Removes the `nickname` custom field from the 4th person.
@@ -358,7 +352,7 @@ Format: `find <keyword>+ [/<field>]*`
 * The order of the keywords does not matter. e.g. `Hans Bo` will be treated the same as `Bo Hans`.
 * Only full words will be matched e.g. `Han` will not match `Hans`.
 * Persons matching at least one keyword on any one field will be returned (i.e. `OR` search).
-  e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`
+  e.g. `Hans Bo` will return `Hans Gruber`, `Bo Yang`.
 
 **Parameters**
 
@@ -366,23 +360,25 @@ Format: `find <keyword>+ [/<field>]*`
 
 **Options**
 
-Note that if specifying to search on built-in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For example, `/name` NOT `/NAME`.
-* `/<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`)
+Note that if specifying to search on built in fields (name, address, phone, email, tag, from, to), it should be all lowercase. For eg, `/name` NOT `/NAME`.
+* `/<field>` (word): one of any of the available simple fields on a person (one of `name`, `phone`, `address`, `email`, `tag`).
 * `/from` (word): search all links where the person matched is the linker.
 * `/to` (word): search all links where the person matched is the linkee (one being linked to).
 * `/<custom-field>` (word): specified to search on persons' custom added fields. (case-sensitive) (does not match if field provided is not existent)
 
-Examples: (no specified fields to search on, default all built in)
+**Examples** (no specified fields to search on, default all built in)
+
 * `find 99999999` returns all persons whose built-in fields contain `99999999`.
 * `find test.dummy@gmail.com` returns all persons whose built-in fields contain `test.dummy@gmail.com`.
 * `find friend` returns all persons whose built-in fields contain `"friend"`.
 
 You can limit the search to specific fields by adding options after your keywords (see above under **Options**).
 * Each field option starts with / followed by the field name.
-* The same rules for searching applies as per the case of searching all built in fields. (see above)
+* The same rules for searching applies as per the case of searching all built in fields (see above).
 * Now, only those persons matching at least one keyword on any one specified field will be returned.
 
-Examples:
+**Examples**
+
 * `find John /name` returns persons whose name contains `john`.
 * `find gold /assetclass` returns all persons with custom field called `assetclass` and value contains the word `gold`.
 * `find 99999999 /phone` returns all persons whose phone number contains the word `99999999`.
@@ -408,7 +404,7 @@ Format: `link <index-from> <link-name> <index-to>`
 * `<link-name>` (string): name of the relationship (e.g., lawyer, client)
 * `<index-to>` (index): index of the linkee (the person being linked to)
 
-Examples:
+**Examples**
 
 * `list` followed by `link 1 lawyer 2` will result in person 1 becoming the lawyer of person 2.
 * `list` followed by `link 2 "best-friend" 3` will result in person 2 becoming the best-friend of person 3 (note that quotes allow link names with special characters).
@@ -498,7 +494,7 @@ Note: This release no longer saves or restores the active `find` keywords or fil
 
 ### Editing the data file
 
-The main address book data file is saved as JSON at
+The main address book data file is saved as JSON at:
 
 ```
 [JAR file location]/data/addressbook.json
@@ -542,10 +538,6 @@ Caution:
 If your changes to the data file makes its format invalid, AssetSphere will discard all data and start with an empty data file at the next run.  Hence, it is recommended to take a backup of the file before editing it.<br>
 Furthermore, certain edits can cause the AssetSphere to behave in unexpected ways (e.g., if a value entered is outside the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
-
-### Archiving data files `[coming in v2.0]`
-
-_Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
