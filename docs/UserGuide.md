@@ -132,6 +132,20 @@ For **custom fields** (those added with the `field` command):
 
 </box>
 
+### Command Inference
+
+If you type a command keyword/imperative partially, and the partial command keyword/imperative you typed in is a unique prefix of exactly one of these commands, then that command will be run.
+
+For example:
+- `ed 1 /name:"John Doe"` resolves to the equivalent command `edit 1 /name:"John Doe"`
+- `e` results in an error: both `edit` and `exit` have this prefix, so it is ambiguous as to which command should be run.
+- `x` results in an error: there are no command imperatives that begin with the letter `x`, so there is no valid command to run.
+
+**Errors and Warnings**
+
+* #r#If more than one command or no commands are found, an error occurs and no command is run.##
+* #m#The command to run is inferred only from the keyword/imperative supplied, and not from any of the parameters or options given.##
+
 ### Viewing help : `help`
 
 Shows a message explaining how to access the help page.
